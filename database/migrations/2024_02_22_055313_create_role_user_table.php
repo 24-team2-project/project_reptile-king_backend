@@ -11,16 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('supports', function (Blueprint $table) {
+        Schema::create('role_user', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->string('title');
-            $table->string('category');
-            $table->text('content');
-            $table->json('img_urls')->nullable(true);
-            $table->text('answer')->nullable(true);
-            $table->timestampTz('answered_at')->nullable(true);
-            $table->timestampsTz();
+            $table->foreignId('role_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->timestampTz('created_at');
         });
     }
 
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('supports');
+        Schema::dropIfExists('role_user');
     }
 };

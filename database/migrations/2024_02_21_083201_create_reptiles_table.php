@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('gender');
             $table->unsignedSmallInteger('age')->nullable(true);
             $table->string('nickname');
+            $table->text('memo')->nullable(true);
             $table->timestampsTz();
         });
     }

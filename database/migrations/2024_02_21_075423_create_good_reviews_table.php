@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('good_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('summary')->nullable(true);
             $table->text('content');
             $table->decimal('stars', 2, 1)->default(0.0)->check('stars >= 0.0 AND stars <= 5.0');
+            $table->json('img_urls')->nullable(true);
             $table->timestampsTz();
         });
     }

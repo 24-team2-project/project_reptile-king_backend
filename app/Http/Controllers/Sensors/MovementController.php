@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Sensors;
 
-use App\Models\MoultingCycle;
+use App\Http\Controllers\Controller;
+use App\Models\Movement;
 use Illuminate\Http\Request;
 
-class MoultingCycleController extends Controller
+class MovementController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class MoultingCycleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(MoultingCycle $moultingCycle)
+    public function show(Movement $movement)
     {
         //
     }
@@ -42,7 +43,7 @@ class MoultingCycleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(MoultingCycle $moultingCycle)
+    public function edit(Movement $movement)
     {
         //
     }
@@ -50,7 +51,7 @@ class MoultingCycleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, MoultingCycle $moultingCycle)
+    public function update(Request $request, Movement $movement)
     {
         //
     }
@@ -58,7 +59,7 @@ class MoultingCycleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(MoultingCycle $moultingCycle)
+    public function destroy(Movement $movement)
     {
         //
     }

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Boards;
 
-use App\Models\ReptileSale;
+use App\Http\Controllers\Controller;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
-class ReptileSaleController extends Controller
+class PostController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class ReptileSaleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ReptileSale $reptileSale)
+    public function show(Post $post)
     {
         //
     }
@@ -42,7 +43,7 @@ class ReptileSaleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ReptileSale $reptileSale)
+    public function edit(Post $post)
     {
         //
     }
@@ -50,7 +51,7 @@ class ReptileSaleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ReptileSale $reptileSale)
+    public function update(Request $request, Post $post)
     {
         //
     }
@@ -58,7 +59,7 @@ class ReptileSaleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ReptileSale $reptileSale)
+    public function destroy(Post $post)
     {
         //
     }

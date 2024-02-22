@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Boards;
 
-use App\Models\Cage;
+use App\Http\Controllers\Controller;
+use App\Models\Notice;
 use Illuminate\Http\Request;
 
-class CageController extends Controller
+class NoticeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class CageController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Cage $cage)
+    public function show(Notice $notice)
     {
         //
     }
@@ -42,7 +43,7 @@ class CageController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Cage $cage)
+    public function edit(Notice $notice)
     {
         //
     }
@@ -50,7 +51,7 @@ class CageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Cage $cage)
+    public function update(Request $request, Notice $notice)
     {
         //
     }
@@ -58,7 +59,7 @@ class CageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Cage $cage)
+    public function destroy(Notice $notice)
     {
         //
     }

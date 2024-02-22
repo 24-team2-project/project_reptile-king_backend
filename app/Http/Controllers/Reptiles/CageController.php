@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reptiles;
 
-use App\Models\GoodReview;
+use App\Http\Controllers\Controller;
+use App\Models\Cage;
 use Illuminate\Http\Request;
 
-class GoodReviewController extends Controller
+class CageController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class GoodReviewController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(GoodReview $goodReview)
+    public function show(Cage $cage)
     {
         //
     }
@@ -42,7 +43,7 @@ class GoodReviewController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(GoodReview $goodReview)
+    public function edit(Cage $cage)
     {
         //
     }
@@ -50,7 +51,7 @@ class GoodReviewController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, GoodReview $goodReview)
+    public function update(Request $request, Cage $cage)
     {
         //
     }
@@ -58,7 +59,7 @@ class GoodReviewController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(GoodReview $goodReview)
+    public function destroy(Cage $cage)
     {
         //
     }

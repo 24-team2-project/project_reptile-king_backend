@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reptiles;
 
-use App\Models\TemperatureHumidity;
+use App\Http\Controllers\Controller;
+use App\Models\MoultingCycle;
 use Illuminate\Http\Request;
 
-class TemperatureHumidityController extends Controller
+class MoultingCycleController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class TemperatureHumidityController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TemperatureHumidity $temperatureHumidity)
+    public function show(MoultingCycle $moultingCycle)
     {
         //
     }
@@ -42,7 +43,7 @@ class TemperatureHumidityController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TemperatureHumidity $temperatureHumidity)
+    public function edit(MoultingCycle $moultingCycle)
     {
         //
     }
@@ -50,7 +51,7 @@ class TemperatureHumidityController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TemperatureHumidity $temperatureHumidity)
+    public function update(Request $request, MoultingCycle $moultingCycle)
     {
         //
     }
@@ -58,7 +59,7 @@ class TemperatureHumidityController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TemperatureHumidity $temperatureHumidity)
+    public function destroy(MoultingCycle $moultingCycle)
     {
         //
     }

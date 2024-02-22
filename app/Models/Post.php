@@ -8,4 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 class Post extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'title',
+        'content',
+        'category',
+        'views',
+        'likes',
+        'img_urls',
+    ];
+
+    protected $with = ['comments'];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+
+    public function comments(){
+        return $this->hasMany(Comment::class);
+    }
+
 }

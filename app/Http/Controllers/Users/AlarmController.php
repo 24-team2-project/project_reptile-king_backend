@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Users;
 
-use App\Models\Video;
+use App\Http\Controllers\Controller;
+use App\Models\Alarm;
 use Illuminate\Http\Request;
 
-class VideoController extends Controller
+class AlarmController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class VideoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Video $video)
+    public function show(Alarm $alarm)
     {
         //
     }
@@ -42,7 +43,7 @@ class VideoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Video $video)
+    public function edit(Alarm $alarm)
     {
         //
     }
@@ -50,7 +51,7 @@ class VideoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Video $video)
+    public function update(Request $request, Alarm $alarm)
     {
         //
     }
@@ -58,7 +59,7 @@ class VideoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Video $video)
+    public function destroy(Alarm $alarm)
     {
         //
     }

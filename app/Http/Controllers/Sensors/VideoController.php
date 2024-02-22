@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Sensors;
 
-use App\Models\Support;
+use App\Http\Controllers\Controller;
+use App\Models\Video;
 use Illuminate\Http\Request;
 
-class SupportController extends Controller
+class VideoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class SupportController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Support $support)
+    public function show(Video $video)
     {
         //
     }
@@ -42,7 +43,7 @@ class SupportController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Support $support)
+    public function edit(Video $video)
     {
         //
     }
@@ -50,7 +51,7 @@ class SupportController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Support $support)
+    public function update(Request $request, Video $video)
     {
         //
     }
@@ -58,7 +59,7 @@ class SupportController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Support $support)
+    public function destroy(Video $video)
     {
         //
     }

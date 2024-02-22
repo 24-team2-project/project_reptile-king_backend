@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('reptile_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->text('memo')->nullable(true);
             $table->float('c_temp');
             $table->unsignedSmallInteger('c_hum');
             $table->timestampsTz();

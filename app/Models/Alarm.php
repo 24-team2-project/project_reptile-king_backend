@@ -5,29 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Good extends Model
+class Alarm extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
 
     protected $fillable = [
-        'name',
-        'price',
+        'user_id',
         'category',
+        'title',
         'content',
+        'readed',
         'img_urls',
         'created_at',
     ];
 
-    protected $with = ['goodReviews'];
-
-    public function goodReviews(){
-        return $this->hasMany(GoodReview::class);
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 
-    public function purchases(){
-        return $this->hasMany(Purchase::class);
-    }
-    
+
 }

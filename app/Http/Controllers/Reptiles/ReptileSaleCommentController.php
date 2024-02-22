@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reptiles;
 
+use App\Http\Controllers\Controller;
 use App\Models\ReptileSaleComment;
 use Illuminate\Http\Request;
 

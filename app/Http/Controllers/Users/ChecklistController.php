@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Users;
 
-use App\Models\Reptile;
+use App\Http\Controllers\Controller;
+use App\Models\Checklist;
 use Illuminate\Http\Request;
 
-class ReptileController extends Controller
+class ChecklistController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class ReptileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Reptile $reptile)
+    public function show(Checklist $checklist)
     {
         //
     }
@@ -42,7 +43,7 @@ class ReptileController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Reptile $reptile)
+    public function edit(Checklist $checklist)
     {
         //
     }
@@ -50,7 +51,7 @@ class ReptileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Reptile $reptile)
+    public function update(Request $request, Checklist $checklist)
     {
         //
     }
@@ -58,7 +59,7 @@ class ReptileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Reptile $reptile)
+    public function destroy(Checklist $checklist)
     {
         //
     }

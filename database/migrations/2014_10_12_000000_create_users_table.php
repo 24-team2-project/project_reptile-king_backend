@@ -18,8 +18,9 @@ return new class extends Migration
             // $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('nickname')->unique();
-            $table->string('address')->nullable(true);
             $table->string('phone')->nullable(true);
+            $table->json('address')->nullable(true);
+            $table->json('payment_selection')->nullable(true);
             $table->json('img_urls')->nullable(true);
             $table->rememberToken();
             $table->timestampsTz();
