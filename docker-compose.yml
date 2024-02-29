@@ -1,5 +1,5 @@
 services:
-    laravel.server:
+    laravel.test:
         build:
             context: ./vendor/laravel/sail/runtimes/8.3
             dockerfile: Dockerfile
@@ -56,7 +56,7 @@ services:
     #     ports:
     #     - 8080:80
     #     depends_on:
-    #     - laravel.server
+    #     - laravel.test
     #     networks:
     #     - sail
 networks:

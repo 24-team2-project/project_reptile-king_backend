@@ -5,13 +5,12 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -49,7 +48,21 @@ class User extends Authenticatable
     protected $casts = [
         // 'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'address' => 'json',
+        'payment_selection' => 'json',
     ];
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims() // payload에 추가로 저장시킬 사항들
+    {
+        return [
+            'email' => $this->email,
+        ];
+    }
 
     public function posts(){
         return $this->hasMany(Post::class);
@@ -75,7 +88,7 @@ class User extends Authenticatable
         return $this->hasMany(ReptileSale::class);
     }
 
-    public function ReptileSaleComments(){
+    public function reptileSaleComments(){
         return $this->hasMany(ReptileSaleComment::class);
     }
 
@@ -87,11 +100,11 @@ class User extends Authenticatable
         return $this->hasMany(Cage::class);
     }
 
-    public function tmeperatureHumiditys(){
+    public function temperatureHumiditys(){
         return $this->hasMany(TemperatureHumidity::class);
     }
 
-    public function Movements(){
+    public function movements(){
         return $this->hasMany(Movement::class);
     }
 
@@ -108,7 +121,7 @@ class User extends Authenticatable
     }
 
     public function roles(){
-        return $this->BelongsToMany(Role::class)->withTimestamps();
+        return $this->belongsToMany(Role::class)->withPivot('created_at');
     }
 
 }
