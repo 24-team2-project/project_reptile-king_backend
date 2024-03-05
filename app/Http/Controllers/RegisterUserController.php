@@ -6,26 +6,26 @@ use App\Http\Requests\RegisterUserRequest;
 use App\Models\Role;
 use App\Models\User;
 use Exception;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class RegisterUserController extends Controller
 {
     
     public function register(RegisterUserRequest $request){
+
         $validated = $request->validated();
         $validated = $request->safe();
 
         try {
             $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                // 'password' => $validated['password'],
-                'nickname' => $validated['nickname'],
-                'address' => $validated['address'],
-                'phone' => $validated['phone'],
+                'name'      => $validated['name'],
+                'email'     => $validated['email'],
+                'password'  => Hash::make($validated['password']),
+                'nickname'  => $validated['nickname'],
+                'address'   => $validated['address'],
+                'phone'     => $validated['phone'],
             ]);
 
             $role = Role::where('role', 'post_create')->first();
@@ -40,10 +40,39 @@ class RegisterUserController extends Controller
                 'msg' => '실패'
             ]);
         }
-
-        // $ability = (Role::all())->filter(fn ($role) => $role->name !== 'admin')->pluck('name')->toArray();
-
-        // $token_name = 'user-'.$user->id.'-api-token';
-        // $user->createToken($token_name, $ability);
     }
+
+    public function checkedEmail(Request $request){
+        $validator = Validator::make( $request->all(), [
+            'email' => 'unique:users,email',
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                'msg' => '중복입니다'
+            ]);
+        }
+
+        return response()->json([
+            'msg' => '사용 가능'
+        ]);
+
+    }
+
+    public function checkedNickname(Request $request){
+        $validator = Validator::make( $request->all(), [
+            'nickname' => 'unique:users,nickname',
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                'msg' => '중복입니다'
+            ]);
+        }
+
+        return response()->json([
+            'msg' => '사용 가능'
+        ]);
+    }
+
 }

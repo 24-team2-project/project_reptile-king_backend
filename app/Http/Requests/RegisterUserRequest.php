@@ -42,33 +42,5 @@ class RegisterUserRequest extends FormRequest
         ];
     }
 
-    public function messages()
-    {
-        return [
-            'name.required' => '이름을 입력해주세요.',
-            'name.string' => '이름은 문자열이어야 합니다.',
-            'name.max' => '이름은 최대 255자여야 합니다.',
-            
-            'email.required' => '이메일을 입력해주세요.',
-            'email.string' => '이메일은 문자열이어야 합니다.',
-            'email.max' => '이메일은 최대 255자여야 합니다.',
-            'email.unique' => '이미 등록된 이메일입니다.',
-            'email.email' => '유효한 이메일 형식이어야 합니다.',
-            
-            'password.required' => '비밀번호를 입력해주세요.',
-            'password.string' => '비밀번호는 문자열이어야 합니다.',
-            'password.min' => '비밀번호는 최소 8자여야 합니다.',
-            'password.regex' => '비밀번호는 대소문자와 특수문자를 포함해야 합니다.',
-            'password.confirmed' => '비밀번호 확인이 일치하지 않습니다.',
-            
-            'nickname.required' => '닉네임을 입력해주세요.',
-            'nickname.string' => '닉네임은 문자열이어야 합니다.',
-            'nickname.max' => '닉네임은 최대 255자여야 합니다.',
-            'nickname.unique' => '이미 사용 중인 닉네임입니다.',
-            
-            'address.string' => '주소는 문자열이어야 합니다.',
-            
-            'phone.string' => '전화번호는 문자열이어야 합니다.'
-        ];
-    }
+
 }
