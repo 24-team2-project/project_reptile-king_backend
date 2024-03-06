@@ -1,6 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\JWTAuthController;
+use App\Http\Controllers\RegisterUserController;
+use App\Http\Controllers\Users\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +16,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+// 회원가입
+Route::post('/register',[ RegisterUserController::class, 'register' ]);
+Route::post('/register/check-email',[ RegisterUserController::class, 'checkedEmail' ]);
+Route::post('/register/check-nickname',[ RegisterUserController::class, 'checkedNickname' ]);
+
+// 로그인
+Route::post('/login', [ JWTAuthController::class, 'login' ]);
+
+// jwt토큰 인증이 필요한 라우터들
+Route::group([ 'middleware' => 'jwt.auth'], function(){ 
+    Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
+    Route::post('/logout', [ JWTAuthController::class, 'logout' ]);
+}); 
+
+
