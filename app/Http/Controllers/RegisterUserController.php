@@ -9,14 +9,24 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class RegisterUserController extends Controller
 {
     
     public function register(RegisterUserRequest $request){
 
-        $validated = $request->validated();
-        $validated = $request->safe();
+        try {
+            $request->validated(); // 유효성 검사
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'msg'              => '유효성 검사를 통과하지 못했습니다',
+                'validation error' => $e->getMessage()
+            ], 400);
+        }
+
+        $validated = $request->safe(); // 잠재적 위험요소 제거 및 방지(XSS)
 
         try {
             $user = User::create([
@@ -33,12 +43,12 @@ class RegisterUserController extends Controller
 
             return response()->json([
                 'msg' => '성공'
-            ]);
+            ], 201);
 
         } catch (Exception $e) {
             return response()->json([
                 'msg' => '실패'
-            ]);
+            ], 401);
         }
     }
 
@@ -66,7 +76,7 @@ class RegisterUserController extends Controller
 
         if($validator->fails()){
             return response()->json([
-                'msg' => '중복입니다'
+                'msg' => '중복'
             ]);
         }
 

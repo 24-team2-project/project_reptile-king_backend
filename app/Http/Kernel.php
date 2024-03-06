@@ -21,6 +21,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\CorsMiddleware::class,  
     ];
 
     /**
@@ -43,11 +44,14 @@ class Kernel extends HttpKernel
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            
+            // \App\Http\Middleware\VerifyCsrfToken::class, // jwt 사용 시, 필수사항 X
+            \App\Http\Middleware\CorsMiddleware::class,          
         ],
 
         'jwt.auth' => [
             \App\Http\Middleware\JWTMiddleware::class,
+            // \App\Http\Middleware\VerifyCsrfToken::class, // jwt 사용 시, 필수사항 X
+            \App\Http\Middleware\CorsMiddleware::class,  
         ]
     ];
 
