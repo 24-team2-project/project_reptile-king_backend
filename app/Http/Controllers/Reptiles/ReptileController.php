@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reptiles;
 use App\Http\Controllers\Controller;
 use App\Models\Reptile;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ReptileController extends Controller
 {
@@ -13,7 +14,10 @@ class ReptileController extends Controller
      */
     public function index()
     {
-        //
+        $user = JWTAuth::user();
+        return response()->json([
+            'msg' => '확인용'
+        ]);
     }
 
     /**

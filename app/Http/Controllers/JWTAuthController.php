@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginUserRequest;
 use Exception;
+use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class JWTAuthController extends Controller
@@ -16,21 +17,31 @@ class JWTAuthController extends Controller
 
     // 로그인
     public function login(LoginUserRequest $request){
-        $request->validated(); // 유효성 검사
-        $request->safe();      // 잠재적 위험요소 제거
-        $credentials = $request->only('email', 'password');
+
+        try {
+            $request->validated(); // 유효성 검사 
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'msg'              => '유효성 검사를 통과하지 못했습니다',
+                'validation error' => $e->getMessage()
+            ], 400);
+        }
+        
+        $credentials = $request->safe()->only('email', 'password'); // 잠재적 위험요소 제거 및 방지(XSS) -> email, password만 추출
 
         try {
             if(!$access_token = JWTAuth::attempt($credentials) ){
                 return response()->json([
-                    'error' => 'Unauthorized : 로그인 정보 불일치', 401
-                ]);
+                    'error' => 'Unauthorized : 로그인 정보 불일치'
+                ] , 401);
             }
 
             return $this->respondWithToken($access_token);
 
         } catch (Exception $e) {
             return response()->json([
+                'msg'         => '로그인 실패',
                 'login_error' => $e->getMessage()
             ]);
         }
@@ -45,6 +56,7 @@ class JWTAuthController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
+                'msg'         => '로그아웃 실패',
                 'logout_error' => $e->getMessage()
             ]);
         }

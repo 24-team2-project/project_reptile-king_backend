@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 
@@ -42,5 +43,28 @@ class RegisterUserRequest extends FormRequest
         ];
     }
 
+    public function messages(){
+        return [
+            'name.required' => '이름은 필수 항목입니다.',
+            'name.string' => '이름은 문자열이어야 합니다.',
+            'name.max' => '이름은 최대 255자까지 입력 가능합니다.',
+            'email.required' => '이메일은 필수 항목입니다.',
+            'email.string' => '이메일은 문자열이어야 합니다.',
+            'email.max' => '이메일은 최대 255자까지 입력 가능합니다.',
+            'email.unique' => '이미 사용 중인 이메일입니다.',
+            'email.email' => '유효한 이메일 주소를 입력해주세요.',
+            'password.required' => '비밀번호는 필수 항목입니다.',
+            'password.password' => '비밀번호는 최소 8자, 알파벳, 숫자, 특수문자, 대소문자를 포함해야 합니다.',
+            'nickname.required' => '닉네임은 필수 항목입니다.',
+            'nickname.string' => '닉네임은 문자열이어야 합니다.',
+            'nickname.max' => '닉네임은 최대 255자까지 입력 가능합니다.',
+            'nickname.unique' => '이미 사용 중인 닉네임입니다.',
+            'address.string' => '주소는 문자열이어야 합니다.',
+            'phone.string' => '전화번호는 문자열이어야 합니다.',
+        ];
+    }
+
+    // Controller에서 catch문을 사용하기 위해서
+    protected function failedValidation(Validator $validator) {}
 
 }
