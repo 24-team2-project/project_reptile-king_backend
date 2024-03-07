@@ -58,7 +58,7 @@ class ForgetPasswordController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
-                'msg'   => '오류',
+                'msg'   => '이메일 인증오류',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -106,7 +106,7 @@ class ForgetPasswordController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
-                'msg' => '오류',
+                'msg' => '인증코드 인증오류',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -137,6 +137,7 @@ class ForgetPasswordController extends Controller
 
             $user->password = Hash::make($reqData['password']);
             $user->save();
+            EmailAuthCode::where('email', $user->email)->delete();
 
             return response()->json([
                 'msg' => '비밀번호 변경완료'
@@ -144,7 +145,7 @@ class ForgetPasswordController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
-                'msg' => '오류',
+                'msg' => '비밀번호 변경오류',
                 'error' => $e->getMessage()
             ], 500);
         }
