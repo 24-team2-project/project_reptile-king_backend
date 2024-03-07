@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ForgetPasswordController;
 use App\Http\Controllers\Goods\GoodController;
 use App\Http\Controllers\JWTAuthController;
 use App\Http\Controllers\RegisterUserController;
@@ -26,6 +27,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register',[ RegisterUserController::class, 'register' ]);
 Route::post('/register/check-email',[ RegisterUserController::class, 'checkedEmail' ]);
 Route::post('/register/check-nickname',[ RegisterUserController::class, 'checkedNickname' ]);
+
+// 비밀번호 재설정
+Route::post('/forget-password',[ ForgetPasswordController::class, 'sendMailAuth' ]);
+Route::post('/forget-password/verify-auth',[ ForgetPasswordController::class, 'verifyAuthentication' ]);
+Route::patch('/forget-password/change-password',[ ForgetPasswordController::class, 'changePassword' ]);
 
 // 로그인
 Route::post('/login', [ JWTAuthController::class, 'login' ]);
