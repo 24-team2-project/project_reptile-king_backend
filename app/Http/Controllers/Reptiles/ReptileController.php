@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Reptiles;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reptile;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ReptileController extends Controller
@@ -15,9 +17,23 @@ class ReptileController extends Controller
     public function index()
     {
         $user = JWTAuth::user();
-        return response()->json([
-            'msg' => '확인용'
-        ]);
+
+        try {
+            $reptiles = $user->reptiles();
+
+            return response()->json([
+                'msg' => '확인용',
+                'reptiles' => $reptiles
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '불러오기 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+        
     }
 
     /**
@@ -28,12 +44,49 @@ class ReptileController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // 파충류 등록
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'nickname' => ['required'],
+            'species' => ['required'],
+            'gender' => ['required', 'max:1', 'in:M,F'],
+            'age'   => ['integer', 'min:0'],
+            'memo' => ['string']
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                'msg' => '유효성 검사 오류',
+                'error' => $validator->errors()->all()
+            ], 401);
+        }
+
+        $user = JWTAuth::user();
+        $validator = $validator->safe();
+
+        try {
+            Reptile::create([
+                'user_id' => $user->id,
+                'nickname' => $validator['nickname'],
+                'species' => $validator['species'],
+                'gender' => $validator['gender'],
+                'age' => $validator['age'],
+                'memo' => $validator['memo'],
+            ]);
+
+            return response()->json([
+                'msg' => '등록 완료',
+            ], 201);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '오류 발생',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+
     }
 
     /**
