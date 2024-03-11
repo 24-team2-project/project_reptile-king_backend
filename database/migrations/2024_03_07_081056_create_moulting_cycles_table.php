@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('moulting_cycle', function (Blueprint $table) {
+        Schema::create('moulting_cycles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('reptile_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('moulting_cycle');
+        Schema::dropIfExists('moulting_cycles');
     }
 };

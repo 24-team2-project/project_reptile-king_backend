@@ -35,7 +35,7 @@ class RegisterUserRequest extends FormRequest
             'email' => ['required', 'string', 'max:255', 'unique:users,email','email:rfc, strict'],
             
             // 최소 8자, 알파벳, 숫자 포함 + 특수문자, 대소문자
-            'password' => ['required', Rules\Password::defaults()->mixedCase()->symbols() ],
+            'password' => ['required', 'confirmed',Rules\Password::defaults()->mixedCase()->symbols() ],
             
             'nickname' => ['required', 'string', 'max:255', 'unique:users,nickname'],
             'address' => ['string'],
