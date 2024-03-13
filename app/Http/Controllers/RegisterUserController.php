@@ -21,7 +21,7 @@ class RegisterUserController extends Controller
 
         } catch (ValidationException $e) {
             return response()->json([
-                'msg'              => '유효성 검사를 통과하지 못했습니다',
+                'msg'              => '유효성 검사 오류',
                 'validation error' => $e->getMessage()
             ], 400);
         }
@@ -47,8 +47,8 @@ class RegisterUserController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
-                'msg' => '실패'
-            ], 401);
+                'msg' => '서버 오류'
+            ], 500);
         }
     }
 
@@ -57,16 +57,9 @@ class RegisterUserController extends Controller
             'email' => 'unique:users,email',
         ]);
 
-        if($validator->fails()){
-            return response()->json([
-                'msg' => '중복입니다'
-            ]);
-        }
-
         return response()->json([
-            'msg' => '사용 가능'
-        ]);
-
+            'msg' => $validator->fails() ? '중복' : '가능'
+        ], 200);
     }
 
     public function checkedNickname(Request $request){
@@ -74,15 +67,9 @@ class RegisterUserController extends Controller
             'nickname' => 'unique:users,nickname',
         ]);
 
-        if($validator->fails()){
-            return response()->json([
-                'msg' => '중복'
-            ]);
-        }
-
         return response()->json([
-            'msg' => '사용 가능'
-        ]);
+            'msg' => $validator->fails() ? '중복' : '가능'
+        ], 200);
     }
 
 }

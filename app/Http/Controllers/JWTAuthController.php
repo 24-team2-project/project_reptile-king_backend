@@ -23,7 +23,7 @@ class JWTAuthController extends Controller
 
         } catch (ValidationException $e) {
             return response()->json([
-                'msg'              => '유효성 검사를 통과하지 못했습니다',
+                'msg'              => '유효성 검사 오류',
                 'validation error' => $e->getMessage()
             ], 400);
         }
@@ -33,7 +33,7 @@ class JWTAuthController extends Controller
         try {
             if(!$access_token = JWTAuth::attempt($credentials) ){
                 return response()->json([
-                    'error' => 'Unauthorized : 로그인 정보 불일치'
+                    'error' => '로그인 정보 불일치'
                 ] , 401);
             }
 
@@ -43,7 +43,7 @@ class JWTAuthController extends Controller
             return response()->json([
                 'msg'         => '로그인 실패',
                 'login_error' => $e->getMessage()
-            ]);
+            ], 500);
         }
         
     }
@@ -58,7 +58,7 @@ class JWTAuthController extends Controller
             return response()->json([
                 'msg'         => '로그아웃 실패',
                 'logout_error' => $e->getMessage()
-            ]);
+            ], 500);
         }
 
         return response()->json([
@@ -78,7 +78,7 @@ class JWTAuthController extends Controller
             'access_token' => $access_token,
             'token_type' => 'bearer',
             'msg' => '로그인 성공',
-        ]);
+        ], 200);
     }
 
 
