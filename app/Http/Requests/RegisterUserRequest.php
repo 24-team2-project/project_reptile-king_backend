@@ -38,8 +38,8 @@ class RegisterUserRequest extends FormRequest
             'password' => ['required', 'confirmed',Rules\Password::defaults()->mixedCase()->symbols() ],
             
             'nickname' => ['required', 'string', 'max:255', 'unique:users,nickname'],
-            'address' => ['string'],
-            'phone' => ['string'],
+            'address' => ['string', 'nullable'],
+            'phone' => ['string', 'nullable'],
         ];
     }
 

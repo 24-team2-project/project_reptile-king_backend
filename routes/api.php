@@ -42,14 +42,13 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::post('/logout', [ JWTAuthController::class, 'logout' ]);
 
     // 펫
-    Route::apiResource('reptiles', ReptileController::class);
+    Route::apiResource('reptiles', ReptileController::class)->except('create', 'edit');
 
 
     
-    
+    // 사용자
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
 }); 
 
-// 마켓
-Route::apiResource('goods', GoodController::class);
+
 
