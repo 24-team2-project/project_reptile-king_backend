@@ -13,8 +13,9 @@ class Cage extends Model
         'user_id',
         'reptile_id',
         'memo',
-        'c_temp',
-        'c_hum',
+        'set_temp',
+        'set_hum',
+        'serial_code',
     ];
 
     public function user(){

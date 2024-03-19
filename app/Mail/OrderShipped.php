@@ -13,14 +13,14 @@ class OrderShipped extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $auth_code;
+    public $authCode;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($auth_code)
+    public function __construct($authCode)
     {
-        $this->auth_code = $auth_code;
+        $this->authCode = $authCode;
     }
 
     /**

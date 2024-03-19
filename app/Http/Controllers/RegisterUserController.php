@@ -22,7 +22,7 @@ class RegisterUserController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'msg'              => '유효성 검사 오류',
-                'validation error' => $e->getMessage()
+                'error' => $e->getMessage()
             ], 400);
         }
 
@@ -47,7 +47,8 @@ class RegisterUserController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
-                'msg' => '서버 오류'
+                'msg'   => '서버 오류',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

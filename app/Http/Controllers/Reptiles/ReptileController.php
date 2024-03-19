@@ -38,7 +38,7 @@ class ReptileController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
-                'msg'   => '불러오기 오류',
+                'msg'   => '서버 오류',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -30,8 +30,8 @@ class JWTMiddleware
         }catch (TokenExpiredException $e) {
             try {
                 // 만료된 토큰 갱신 시도
-                $refresh_token = JWTAuth::refresh();
-                JWTAuth::setToken($refresh_token);
+                $refreshToken = JWTAuth::refresh();
+                JWTAuth::setToken($refreshToken);
 
                 // 갱신된 토큰으로 다음 요청 진행
                 $response = $next($request);
@@ -39,7 +39,7 @@ class JWTMiddleware
                 // 응답에 갱신된 토큰 포함
                 $content = json_decode($response->getContent(), true);
                 if (json_last_error() === JSON_ERROR_NONE) { // json_decode()가 에러가 아니면(null이 아니면)
-                    $content['refresh_token'] = $refresh_token;
+                    $content['refreshToken'] = $refreshToken;
                     $content = json_encode($content);
                     $response->setContent($content);
                 }
@@ -50,7 +50,6 @@ class JWTMiddleware
                 // 갱신 실패 
                 return response()->json([
                     'msg' => '토큰을 재발급 불가. 재발급 기간 만료, 다시 로그인해 보세요.',
-                    'exception' => $e->getMessage(),
                 ], 401);
             }
         }  catch(Exception $e) {

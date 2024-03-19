@@ -28,10 +28,10 @@ class ForgetPasswordController extends Controller
             ], 400);
         }
 
-        $user_email = $validator->safe()->only('email');
+        $userEmail = $validator->safe()->only('email');
 
         try {
-            $user = User::where('email', $user_email)->first();
+            $user = User::where('email', $userEmail)->first();
 
             if(empty($user)){
                 return response()->json([ 'msg' => '등록되지 않은 이메일' ], 400);
@@ -43,12 +43,12 @@ class ForgetPasswordController extends Controller
                 EmailAuthCode::destroy($search->id);
             }
 
-            $auth_code = Str::random(7);
-            Mail::to($user->email)->send( new OrderShipped($auth_code));
+            $authCode = Str::random(7);
+            Mail::to($user->email)->send(new OrderShipped($authCode));
             
             EmailAuthCode::create([
                     'email'      => $user->email,
-                    'auth_code'  => $auth_code,
+                    'auth_code'  => $authCode,
                     'created_at' => now(),
                     'expired_at' => now()->addMinutes(3)
                     ]);
@@ -69,7 +69,7 @@ class ForgetPasswordController extends Controller
     public function verifyAuthentication(Request $request){
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'string', 'max:255', 'email:rfc, strict'],
-            'auth_code' => ['required', 'string', 'max:7'],
+            'authCode' => ['required', 'string', 'max:7'],
         ]);
         
         if ($validator->fails()) {
@@ -141,7 +141,7 @@ class ForgetPasswordController extends Controller
             EmailAuthCode::where('email', $user->email)->delete();
 
             return response()->json([
-                'msg' => '비밀번호 변경완료'
+                'msg' => '변경 완료'
             ], 200);
 
         } catch (Exception $e) {
