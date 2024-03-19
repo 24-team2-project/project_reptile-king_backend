@@ -44,7 +44,8 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     // 펫
     Route::apiResource('reptiles', ReptileController::class)->except('create', 'edit');
 
-
+    // 사육장
+    Route::apiResource('cages', ReptileController::class)->except('create', 'edit');
     
     // 사용자
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
