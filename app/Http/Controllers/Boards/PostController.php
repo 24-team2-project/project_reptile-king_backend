@@ -13,7 +13,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        $posts = Post::all();
+        return response()->json($posts);
     }
 
     /**
@@ -29,7 +30,17 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => 'required',
+            'title' => 'required',
+            'content' => 'required',
+            'category' => 'required',
+            'img_urls' => 'sometimes|array'
+        ]);
+
+        $post = Post::create($request->all());
+
+        return response()->json($post, 201);
     }
 
     /**
@@ -37,7 +48,11 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        $post = Post::with('comments')->find($id);
+        if (!$post) {
+            return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
+        }
+        return response()->json($post);
     }
 
     /**
@@ -53,7 +68,23 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        $post = Post::find($id);
+        if (!$post) {
+            return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
+        }
+
+        $request->validate([
+            'user_id' => 'required',
+            'title' => 'required',
+            'content' => 'required',
+            'category' => 'required',
+            'img_urls' => 'sometimes|array',
+            'img_urls.*' => 'string',
+        ]);
+
+        $post->update($request->all());
+
+        return response()->json($post);
     }
 
     /**
@@ -61,6 +92,13 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        $post = Post::find($id);
+        if (!$post) {
+            return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
+        }
+
+        $post->delete();
+
+        return response()->json(['message' => '게시글이 삭제되었습니다.']);
     }
 }
