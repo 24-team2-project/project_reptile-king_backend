@@ -7,7 +7,6 @@ use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -32,7 +31,7 @@ class RegisterUserController extends Controller
             $user = User::create([
                 'name'      => $validated['name'],
                 'email'     => $validated['email'],
-                'password'  => Hash::make($validated['password']),
+                'password'  => bcrypt($validated['password']),
                 'nickname'  => $validated['nickname'],
                 'address'   => $validated['address'],
                 'phone'     => $validated['phone'],

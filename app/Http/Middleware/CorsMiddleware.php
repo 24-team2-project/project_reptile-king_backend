@@ -4,20 +4,40 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class CorsMiddleware
 {
+
+    protected $trustedOrigins = [
+        'http://localhost:5174',
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://localhost:8080',
+        'http://localhost:8000',
+    ];
+
     /**
      * Handle an incoming request.
+     * 
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
-        header('Access-Control-Allow-Origin: *'); // 어떤 url을 허용할 것인지에 대한 헤더
-        header('Access-Control-Allow-Methods: HEAD, GET, PUT, PATCH, POST, DELETE, OPTIONS'); // 어떤 요청 메서드를 허용할 것인지
-        header('Access-Control-Allow-Credentials: false'); //인증정보를 포함한 요청(쿠키), 쿠키를 사용하지 않는다면 false, 사용하면 true
-        return $next($request);
+        $response = $next($request);
+
+        $origin = $request->headers->get('Origin');
+
+        if(in_array($origin, $this->trustedOrigins)){
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+            $response->headers->set('Access-Control-Allow-Methods', 'HEAD, GET, PUT, PATCH, POST, DELETE, OPTIONS');
+            $response->headers->set('Access-Control-Allow-Credentials', 'false');
+        } else {
+            $response->headers->set('Access-Control-Allow-Origin', '*');
+            $response->headers->set('Access-Control-Allow-Methods', 'HEAD, GET, PUT, PATCH, POST, DELETE, OPTIONS');
+            $response->headers->set('Access-Control-Allow-Credentials', 'false');
+        }
+
+        return $response;
     }
 }

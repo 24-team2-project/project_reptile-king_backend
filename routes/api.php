@@ -4,6 +4,7 @@ use App\Http\Controllers\ForgetPasswordController;
 use App\Http\Controllers\Goods\GoodController;
 use App\Http\Controllers\JWTAuthController;
 use App\Http\Controllers\RegisterUserController;
+use App\Http\Controllers\Reptiles\CageController;
 use App\Http\Controllers\Reptiles\ReptileController;
 use App\Http\Controllers\Users\UserController;
 use Illuminate\Support\Facades\Route;
@@ -45,7 +46,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::apiResource('reptiles', ReptileController::class)->except('create', 'edit');
 
     // 사육장
-    Route::apiResource('cages', ReptileController::class)->except('create', 'edit');
+    Route::apiResource('cages', CageController::class)->except('create', 'edit');
     
     // 사용자
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
