@@ -33,7 +33,7 @@ class RegisterUserController extends Controller
                 'email'     => $validated['email'],
                 'password'  => bcrypt($validated['password']),
                 'nickname'  => $validated['nickname'],
-                'address'   => $validated['address'],
+                // 'address'   => $validated['address'],
                 'phone'     => $validated['phone'],
             ]);
 
