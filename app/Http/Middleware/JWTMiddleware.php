@@ -43,9 +43,7 @@ class JWTMiddleware
                     $content = json_encode($content);
                     $response->setContent($content);
                 }
-
                 return $response;
-
             } catch (JWTException $e) {
                 // 갱신 실패 
                 return response()->json([
@@ -56,7 +54,6 @@ class JWTMiddleware
                 // 인증 토큰 없음
                 return response()->json(['msg' => '인증 토큰을 찾을 수 없음'], 401);
         }
-
         // 토큰 유효성 검사 통과 시 다음 요청 진행
         return $next($request);
     }
