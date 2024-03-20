@@ -7,7 +7,6 @@ use App\Models\EmailAuthCode;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -136,7 +135,7 @@ class ForgetPasswordController extends Controller
                 return response()->json([ 'msg' => '등록되지 않은 이메일' ], 400);
             }
 
-            $user->password = Hash::make($reqData['password']);
+            $user->password = bcrypt($reqData['password']);
             $user->save();
             EmailAuthCode::where('email', $user->email)->delete();
 

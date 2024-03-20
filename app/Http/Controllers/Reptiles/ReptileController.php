@@ -23,6 +23,12 @@ class ReptileController extends Controller
         try {
             $reptiles = $user->reptiles;
 
+            if($reptiles->isEmpty()){
+                return response()->json([
+                    'msg' => '데이터 없음'
+                ], 200);
+            }
+
             foreach($reptiles as $reptile){
                 if($reptile->created_at->diffInYears(Carbon::now()) >= 1) {// 1년 이상 지났을 때의 처리
                     $reptile->update([
@@ -33,7 +39,7 @@ class ReptileController extends Controller
 
             return response()->json([
                 'msg'      => '성공',
-                'reptiles' => empty($reptiles) ? '데이터 없음' : $reptiles
+                'reptiles' => $reptiles
             ], 200);
 
         } catch (Exception $e) {

@@ -21,7 +21,7 @@ class CageController extends Controller
 
             return response()->json([
                 'msg'   => '성공',
-                'cages' => empty($cages) ? '데이터 없음' : $cages,
+                'cages' => $cages->isEmpty() ? '데이터 없음' : $cages,
             ], 200);
 
         } catch (Exception $e) {
@@ -87,7 +87,7 @@ class CageController extends Controller
             return response()->json([
                 'msg' => '권한 없음'
             ], 403);
-        }
+        } 
 
         return response()->json([
             'msg' => '성공',
