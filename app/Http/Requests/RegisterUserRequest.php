@@ -38,7 +38,7 @@ class RegisterUserRequest extends FormRequest
             'password' => ['required', 'confirmed',Rules\Password::defaults()->mixedCase()->symbols() ],
             
             'nickname' => ['required', 'string', 'max:255', 'unique:users,nickname'],
-            'address' => ['string', 'nullable'],
+            // 'address' => ['string', 'nullable'],
             'phone' => ['string', 'nullable'],
         ];
     }
@@ -59,7 +59,7 @@ class RegisterUserRequest extends FormRequest
             'nickname.string' => '닉네임은 문자열이어야 합니다.',
             'nickname.max' => '닉네임은 최대 255자까지 입력 가능합니다.',
             'nickname.unique' => '이미 사용 중인 닉네임입니다.',
-            'address.string' => '주소는 문자열이어야 합니다.',
+            // 'address.string' => '주소는 문자열이어야 합니다.',
             'phone.string' => '전화번호는 문자열이어야 합니다.',
         ];
     }
