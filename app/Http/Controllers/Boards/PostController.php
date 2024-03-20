@@ -101,4 +101,19 @@ class PostController extends Controller
 
         return response()->json(['message' => '게시글이 삭제되었습니다.']);
     }
+
+    public function search(Request $request)
+    {
+        $search = $request->query('search');
+
+        if (empty($search)) {
+            return response()->json(['message' => '검색어를 입력해주세요.'], 400);
+        }
+
+        $posts = Post::where('title', 'LIKE', "%{$search}%")
+                    ->orWhere('content', 'LIKE', "%{$search}%")
+                    ->get();
+
+        return response()->json($posts);
+    }
 }

@@ -37,7 +37,7 @@ Route::patch('/forget-password/change-password',[ ForgetPasswordController::clas
 Route::post('/login', [ JWTAuthController::class, 'login' ]);
 
 // jwt토큰 인증이 필요한 라우터들
-Route::group([ 'middleware' => 'jwt.auth'], function(){ 
+Route::group([ 'middleware' => 'jwt.auth'], function(){
     // 로그아웃
     Route::post('/logout', [ JWTAuthController::class, 'logout' ]);
 
@@ -45,11 +45,16 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::apiResource('reptiles', ReptileController::class);
 
 
-    
-    
+
+
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
-}); 
+});
 
 // 마켓
 Route::apiResource('goods', GoodController::class);
+
+// 커뮤니티
+Route::apiResource('boards', BoardController::class);
+Route::get('/posts/search', 'PostController@search');
+
 
