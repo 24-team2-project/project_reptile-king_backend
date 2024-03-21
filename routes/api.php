@@ -56,10 +56,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::apiResource('comments', CommentController::class)->except('index', 'show', 'create', 'edit');
 
     // 마켓
-    Route::apiResource('boards', BoardController::class)->except('index', 'show', 'create', 'edit');
-
-    // 상품
-    Route::apiResource('goods', GoodController::class)->except('create', 'edit');
+    Route::apiResource('goods', GoodController::class)->except('index', 'show', 'create', 'edit');
     
     // 사용자
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
