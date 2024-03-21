@@ -3,7 +3,7 @@
 
 Authentication code
 
-인증코드 : {{ $auth_code }}
+인증코드 : {{ $authCode }}
 
 <x-mail::button :url="''">
 Button Text
