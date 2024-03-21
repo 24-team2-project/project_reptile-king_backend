@@ -55,7 +55,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
 
 // 커뮤니티
-Route::apiResource('boards', BoardController::class);
+Route::apiResource('posts', PostController::class);
 Route::get('/posts/search', 'PostController@search');
 
 
