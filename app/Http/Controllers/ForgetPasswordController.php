@@ -93,7 +93,7 @@ class ForgetPasswordController extends Controller
                     'msg' => '인증 실패 : 인증시간 초과',
                 ], 401);
 
-            } else if($dbData->auth_code !== $reqData['auth_code']){
+            } else if($dbData->auth_code !== $reqData['authCode']){
                 return response()->json([
                     'msg' => '인증 실패 : 인증코드 불일치',
                 ], 401);
