@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Goods;
 use App\Http\Controllers\Controller;
 use App\Models\Good;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class GoodController extends Controller
 {
@@ -13,7 +14,8 @@ class GoodController extends Controller
      */
     public function index()
     {
-        //
+        $goods = Good::all();
+        return response()->json($goods);
     }
 
     /**
@@ -29,7 +31,26 @@ class GoodController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'category' => 'required|string|max:255',
+            'content' => 'required|string',
+            'img_urls' => 'nullable|array',
+            'img_urls.*' => 'string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $requestData = $request->all();
+        if(isset($requestData['img_urls'])) {
+            $requestData['img_urls'] = json_encode($requestData['img_urls']);
+        }
+
+        $good = Good::create($requestData);
+        return response()->json($good, 201);
     }
 
     /**
@@ -37,7 +58,12 @@ class GoodController extends Controller
      */
     public function show(Good $good)
     {
-        //
+        $good = Good::with('reviews')->find($id);
+        $post = Post::with('comments')->find($id);
+        if (!$good) {
+            return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
+        }
+        return response()->json($good);
     }
 
     /**
@@ -53,7 +79,31 @@ class GoodController extends Controller
      */
     public function update(Request $request, Good $good)
     {
-        //
+        $good = Good::find($id);
+    if (!$good) {
+        return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
+    }
+
+    $validator = Validator::make($request->all(), [
+        'name' => 'sometimes|required|string|max:255',
+        'price' => 'sometimes|required|numeric',
+        'category' => 'sometimes|required|string|max:255',
+        'content' => 'sometimes|required|string',
+        'img_urls' => 'nullable|array',
+        'img_urls.*' => 'string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 400);
+    }
+
+    $requestData = $request->all();
+    if(isset($requestData['img_urls'])) {
+        $requestData['img_urls'] = json_encode($requestData['img_urls']);
+    }
+
+    $good->update($requestData);
+    return response()->json($good);
     }
 
     /**
@@ -61,6 +111,13 @@ class GoodController extends Controller
      */
     public function destroy(Good $good)
     {
-        //
+        $good = Good::find($id);
+        if (!$good) {
+            return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
+        }
+
+        $good->delete();
+        return response()->json(['message' => '상품 등록이 취소되었습니다.']);
+
     }
 }

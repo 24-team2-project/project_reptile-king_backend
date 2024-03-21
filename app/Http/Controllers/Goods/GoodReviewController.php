@@ -13,7 +13,8 @@ class GoodReviewController extends Controller
      */
     public function index()
     {
-        //
+        $reviews = GoodReview::all();
+        return response()->json($reviews);
     }
 
     /**
@@ -29,7 +30,27 @@ class GoodReviewController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'good_id' => 'required|integer',
+            'summary' => 'required|string|max:255',
+            'content' => 'required|string',
+            'stars' => 'required|integer|min:1|max:5',
+            'img_urls' => 'nullable|array',
+            'img_urls.*' => 'string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $requestData = $request->all();
+        if(isset($requestData['img_urls'])) {
+            $requestData['img_urls'] = json_encode($requestData['img_urls']);
+        }
+
+        $review = GoodReview::create($requestData);
+        return response()->json($review, 201);
     }
 
     /**
@@ -37,7 +58,11 @@ class GoodReviewController extends Controller
      */
     public function show(GoodReview $goodReview)
     {
-        //
+        $review = GoodReview::find($id);
+        if (!$review) {
+            return response()->json(['message' => '해당 리뷰를 찾을 수 없습니다.'], 404);
+        }
+        return response()->json($review);
     }
 
     /**
@@ -53,7 +78,30 @@ class GoodReviewController extends Controller
      */
     public function update(Request $request, GoodReview $goodReview)
     {
-        //
+        $review = GoodReview::find($id);
+        if (!$review) {
+            return response()->json(['message' => '해당 리뷰를 찾을 수 없습니다.'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'summary' => 'sometimes|required|string|max:255',
+            'content' => 'sometimes|required|string',
+            'stars' => 'sometimes|required|integer|min:1|max:5',
+            'img_urls' => 'nullable|array',
+            'img_urls.*' => 'string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $requestData = $request->all();
+        if(isset($requestData['img_urls'])) {
+            $requestData['img_urls'] = json_encode($requestData['img_urls']);
+        }
+
+        $review->update($requestData);
+        return response()->json($review);
     }
 
     /**
@@ -61,6 +109,12 @@ class GoodReviewController extends Controller
      */
     public function destroy(GoodReview $goodReview)
     {
-        //
+        $review = GoodReview::find($id);
+        if (!$review) {
+            return response()->json(['message' => '해당 리뷰를 찾을 수 없습니다.'], 404);
+        }
+
+        $review->delete();
+        return response()->json(['message' => '리뷰가 삭제되었습니다.']);
     }
 }
