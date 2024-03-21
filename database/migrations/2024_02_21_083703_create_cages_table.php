@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('cages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('reptile_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('reptile_id')->nullable()->constrained()->cascadeOnUpdate();
             $table->text('memo')->nullable(true);
-            $table->float('c_temp');
-            $table->unsignedSmallInteger('c_hum');
+            $table->float('set_temp')->nullable(true);
+            $table->unsignedSmallInteger('set_hum')->nullable(true);
+            $table->string('serial_code', 20)->unique();
             $table->timestampsTz();
         });
     }

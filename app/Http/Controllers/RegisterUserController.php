@@ -7,7 +7,6 @@ use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -21,8 +20,8 @@ class RegisterUserController extends Controller
 
         } catch (ValidationException $e) {
             return response()->json([
-                'msg'              => '유효성 검사를 통과하지 못했습니다',
-                'validation error' => $e->getMessage()
+                'msg'              => '유효성 검사 오류',
+                'error' => $e->getMessage()
             ], 400);
         }
 
@@ -32,9 +31,9 @@ class RegisterUserController extends Controller
             $user = User::create([
                 'name'      => $validated['name'],
                 'email'     => $validated['email'],
-                'password'  => Hash::make($validated['password']),
+                'password'  => bcrypt($validated['password']),
                 'nickname'  => $validated['nickname'],
-                'address'   => $validated['address'],
+                // 'address'   => $validated['address'],
                 'phone'     => $validated['phone'],
             ]);
 
@@ -47,8 +46,9 @@ class RegisterUserController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
-                'msg' => '실패'
-            ], 401);
+                'msg'   => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -57,16 +57,9 @@ class RegisterUserController extends Controller
             'email' => 'unique:users,email',
         ]);
 
-        if($validator->fails()){
-            return response()->json([
-                'msg' => '중복입니다'
-            ]);
-        }
-
         return response()->json([
-            'msg' => '사용 가능'
-        ]);
-
+            'msg' => $validator->fails() ? '중복' : '가능'
+        ], 200);
     }
 
     public function checkedNickname(Request $request){
@@ -74,15 +67,9 @@ class RegisterUserController extends Controller
             'nickname' => 'unique:users,nickname',
         ]);
 
-        if($validator->fails()){
-            return response()->json([
-                'msg' => '중복'
-            ]);
-        }
-
         return response()->json([
-            'msg' => '사용 가능'
-        ]);
+            'msg' => $validator->fails() ? '중복' : '가능'
+        ], 200);
     }
 
 }

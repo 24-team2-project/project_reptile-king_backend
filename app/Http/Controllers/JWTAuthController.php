@@ -23,27 +23,27 @@ class JWTAuthController extends Controller
 
         } catch (ValidationException $e) {
             return response()->json([
-                'msg'              => '유효성 검사를 통과하지 못했습니다',
-                'validation error' => $e->getMessage()
+                'msg'              => '유효성 검사 오류',
+                'error' => $e->getMessage()
             ], 400);
         }
         
         $credentials = $request->safe()->only('email', 'password'); // 잠재적 위험요소 제거 및 방지(XSS) -> email, password만 추출
 
         try {
-            if(!$access_token = JWTAuth::attempt($credentials) ){
+            if(!$accessToken = JWTAuth::attempt($credentials) ){
                 return response()->json([
-                    'error' => 'Unauthorized : 로그인 정보 불일치'
+                    'msg' => '로그인 정보 불일치'
                 ] , 401);
             }
 
-            return $this->respondWithToken($access_token);
+            return $this->respondWithToken($accessToken);
 
         } catch (Exception $e) {
             return response()->json([
-                'msg'         => '로그인 실패',
-                'login_error' => $e->getMessage()
-            ]);
+                'msg'         => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
         }
         
     }
@@ -56,14 +56,13 @@ class JWTAuthController extends Controller
 
         } catch (Exception $e) {
             return response()->json([
-                'msg'         => '로그아웃 실패',
-                'logout_error' => $e->getMessage()
-            ]);
+                'msg'         => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
         }
 
         return response()->json([
-            'status' => 'success',
-            'msg' => 'logout'
+            'msg' => '로그아웃 성공'
         ], 200);
     }
 
@@ -73,12 +72,12 @@ class JWTAuthController extends Controller
     }
 
     // 토큰 및 결과 전달
-    protected function respondWithToken($access_token){
+    protected function respondWithToken($accessToken){
         return response()->json([
-            'access_token' => $access_token,
-            'token_type' => 'bearer',
+            'accessToken' => $accessToken,
+            'tokenType' => 'bearer',
             'msg' => '로그인 성공',
-        ]);
+        ], 200);
     }
 
 
