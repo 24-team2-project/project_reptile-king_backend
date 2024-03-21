@@ -35,7 +35,8 @@ class PostController extends Controller
             'title' => 'required',
             'content' => 'required',
             'category' => 'required',
-            'img_urls' => 'sometimes|array'
+            'img_urls' => 'sometimes|array',
+            'img_urls.*' => 'string',
         ]);
 
         $post = Post::create($request->all());

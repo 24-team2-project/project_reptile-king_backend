@@ -7,6 +7,7 @@ use App\Http\Controllers\RegisterUserController;
 use App\Http\Controllers\Reptiles\CageController;
 use App\Http\Controllers\Reptiles\ReptileController;
 use App\Http\Controllers\Users\UserController;
+use App\Http\Controllers\Board\BoardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,15 +48,30 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
     // 사육장
     Route::apiResource('cages', CageController::class)->except('create', 'edit');
+
+    // 커뮤니티
+    Route::apiResource('boards', BoardController::class)->except('index', 'show', 'create', 'edit', );
+
+    // 댓글
+    Route::apiResource('comments', CommentController::class)->except('index', 'show', 'create', 'edit');
+
+    // 마켓
+    Route::apiResource('boards', BoardController::class)->except('index', 'show', 'create', 'edit');
+
+    // 상품
+    Route::apiResource('goods', GoodController::class)->except('create', 'edit');
     
     // 사용자
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
 });
 
-
-
 // 커뮤니티
-Route::apiResource('posts', PostController::class);
+Route::get('/posts', PostController::class);
+Route::get('/posts/{id}', PostController::class);
 Route::get('/posts/search', 'PostController@search');
+
+// 마켓
+Route::get('/goods', GoodController::class);
+Route::get('/goods/{id}', GoodController::class);
 
 

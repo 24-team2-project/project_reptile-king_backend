@@ -32,10 +32,10 @@ class GoodController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:50',
             'price' => 'required|numeric',
-            'category' => 'required|string|max:255',
-            'content' => 'required|string',
+            'category' => 'required',
+            'content' => 'required|string|max:255',
             'img_urls' => 'nullable|array',
             'img_urls.*' => 'string',
         ]);
@@ -85,10 +85,10 @@ class GoodController extends Controller
     }
 
     $validator = Validator::make($request->all(), [
-        'name' => 'sometimes|required|string|max:255',
-        'price' => 'sometimes|required|numeric',
-        'category' => 'sometimes|required|string|max:255',
-        'content' => 'sometimes|required|string',
+        'name' => 'required|string|max:50',
+        'price' => 'required|numeric',
+        'category' => 'required',
+        'content' => 'required|string|max:255',
         'img_urls' => 'nullable|array',
         'img_urls.*' => 'string',
     ]);
