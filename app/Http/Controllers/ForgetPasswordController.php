@@ -90,6 +90,8 @@ class ForgetPasswordController extends Controller
             }
 
             if(now() > $dbData->expired_at){
+                EmailAuthCode::destroy($dbData->id); // 만료된 인증코드 삭제
+
                 return response()->json([
                     'msg' => '인증 실패 : 인증시간 초과',
                 ], 401);
