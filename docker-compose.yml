@@ -49,16 +49,16 @@ services:
                 - '${DB_USERNAME}'
             retries: 3
             timeout: 5s
-    # nginx:
-    #     image: nginx:latest
-    #     volumes:
-    #         - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    #     ports:
-    #     - 8080:80
-    #     depends_on:
-    #     - laravel.test
-    #     networks:
-    #     - sail
+    nginx:
+        image: nginx:latest
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        ports:
+        - 8080:80
+        depends_on:
+        - laravel.test
+        networks:
+        - sail
 networks:
     sail:
         driver: bridge
