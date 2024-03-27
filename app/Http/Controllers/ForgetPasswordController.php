@@ -43,15 +43,16 @@ class ForgetPasswordController extends Controller
             }
 
             $authCode = Str::random(7);
+
+            EmailAuthCode::create([
+                'email'      => $user->email,
+                'auth_code'  => $authCode,
+                'created_at' => now(),
+                'expired_at' => now()->addMinutes(3)
+            ]);
+
             Mail::to($user->email)->send(new OrderShipped($authCode));
             
-            EmailAuthCode::create([
-                    'email'      => $user->email,
-                    'auth_code'  => $authCode,
-                    'created_at' => now(),
-                    'expired_at' => now()->addMinutes(3)
-                    ]);
-
             return response()->json([
                 'msg' => '메일 발송'
             ], 200);
