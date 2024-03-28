@@ -8,6 +8,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -36,21 +37,10 @@ class ForgetPasswordController extends Controller
                 return response()->json([ 'msg' => '등록되지 않은 이메일' ], 400);
             }
 
-            $search = EmailAuthCode::where('email', $user->email)->first();
-            
-            if(!empty($search)){
-                EmailAuthCode::destroy($search->id);
-            }
-
             $authCode = Str::random(7);
+            $ttl = 180; // 3분
 
-            EmailAuthCode::create([
-                'email'      => $user->email,
-                'auth_code'  => $authCode,
-                'created_at' => now(),
-                'expired_at' => now()->addMinutes(3)
-            ]);
-
+            Redis::setex('email_verification:'.$user->email, $ttl, $authCode);
             Mail::to($user->email)->send(new OrderShipped($authCode));
             
             return response()->json([
@@ -82,31 +72,26 @@ class ForgetPasswordController extends Controller
         $reqData = $validator->safe();
 
         try {
-            $dbData = EmailAuthCode::where('email', $reqData['email'])->first();
-            if(empty($dbData)){
-                return response()->json([
-                    'msg' => '인증번호를 발급하지 않은 이메일',
-                ], 400);
+
+            $dbData = Redis::get('email_verification:'.$reqData['email']);
+
+            $msg = '';
+            $status = 200;
+
+            if($dbData === null){
+                $msg = '인증 실패 : 인증시간 초과';
+                $status = 401;
+            } else if($dbData !== $reqData['authCode']){
+                $msg = '인증 실패 : 인증코드 불일치';
+                $status = 401;
+            } else{
+                $msg = '인증 완료';
+                Redis::del('email_verification:'.$reqData['email']);
             }
 
-            if(now() > $dbData->expired_at){
-                EmailAuthCode::destroy($dbData->id); // 만료된 인증코드 삭제
-
-                return response()->json([
-                    'msg' => '인증 실패 : 인증시간 초과',
-                ], 401);
-
-            } else if($dbData->auth_code !== $reqData['authCode']){
-                return response()->json([
-                    'msg' => '인증 실패 : 인증코드 불일치',
-                ], 401);
-
-            } else{    
-                return response()->json([
-                    'msg' => '인증 완료',
-                ], 200);
-
-            }
+            return response()->json([
+                'msg' => $msg
+            ], $status);
 
         } catch (Exception $e) {
             return response()->json([
@@ -140,7 +125,6 @@ class ForgetPasswordController extends Controller
 
             $user->password = bcrypt($reqData['password']);
             $user->save();
-            EmailAuthCode::where('email', $user->email)->delete();
 
             return response()->json([
                 'msg' => '변경 완료'
