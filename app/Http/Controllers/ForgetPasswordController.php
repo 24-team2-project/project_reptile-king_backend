@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendEmailJob;
 use App\Mail\OrderShipped;
 use App\Models\EmailAuthCode;
 use App\Models\User;
@@ -20,7 +21,7 @@ class ForgetPasswordController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'string', 'max:255', 'email:rfc, strict'],
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'msg'   => '유효성 검사 오류',
@@ -41,7 +42,7 @@ class ForgetPasswordController extends Controller
             $ttl = 180; // 3분
 
             Redis::setex('email_verification:'.$user->email, $ttl, $authCode);
-            Mail::to($user->email)->send(new OrderShipped($authCode));
+            SendEmailJob::dispatch($user->email, $authCode);
             
             return response()->json([
                 'msg' => '메일 발송'
