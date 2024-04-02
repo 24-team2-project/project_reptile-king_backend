@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendEmailJob;
-use App\Mail\OrderShipped;
-use App\Models\EmailAuthCode;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -19,7 +16,7 @@ class ForgetPasswordController extends Controller
     // 이메일 인증
     public function sendMailAuth(Request $request){
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'max:255', 'email:rfc, strict'],
+            'email' => ['required', 'string', 'max:255', 'email:rfc,strict'],
         ]);
 
         if ($validator->fails()) {
@@ -29,7 +26,7 @@ class ForgetPasswordController extends Controller
             ], 400);
         }
 
-        $userEmail = $validator->safe()->only('email');
+        $userEmail = $validator->validated()['email'];
 
         try {
             $user = User::where('email', $userEmail)->first();
@@ -59,7 +56,7 @@ class ForgetPasswordController extends Controller
     // 인증코드 검사
     public function verifyAuthentication(Request $request){
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'max:255', 'email:rfc, strict'],
+            'email' => ['required', 'string', 'max:255', 'email:rfc,strict'],
             'authCode' => ['required', 'string', 'max:7'],
         ]);
         
@@ -70,7 +67,7 @@ class ForgetPasswordController extends Controller
             ], 400);
         }
         
-        $reqData = $validator->safe();
+        $reqData = $validator->validated();
 
         try {
 
@@ -105,7 +102,7 @@ class ForgetPasswordController extends Controller
     // 비밀번호 수정
     public function changePassword(Request $request){
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'max:255', 'email:rfc, strict'], // 'email' => 'required|email:rfc,dns
+            'email' => ['required', 'string', 'max:255', 'email:rfc,strict'], // 'email' => 'required|email:rfc,dns
             'password' => ['required', 'confirmed', Rules\Password::defaults()->mixedCase()->symbols()],
         ]);
 
@@ -116,7 +113,7 @@ class ForgetPasswordController extends Controller
             ], 400);
         }
 
-        $reqData = $validator->safe()->only('email', 'password');
+        $reqData = $validator->validated();
         try {
             $user = User::where('email', $reqData['email'])->first();
 

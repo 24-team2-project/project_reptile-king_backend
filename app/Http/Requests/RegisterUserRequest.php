@@ -32,7 +32,7 @@ class RegisterUserRequest extends FormRequest
 
             // 테스트용 : rfc, strict 사용
             // 'email' => ['required', 'string', 'max:255', 'unique:users,email', 'email:rfc,dns,strict,spoof'],
-            'email' => ['required', 'string', 'max:255', 'unique:users,email','email:rfc, strict'],
+            'email' => ['required', 'string', 'max:255', 'unique:users,email','email:rfc,strict'],
             
             // 최소 8자, 알파벳, 숫자 포함 + 특수문자, 대소문자
             'password' => ['required', 'confirmed',Rules\Password::defaults()->mixedCase()->symbols() ],

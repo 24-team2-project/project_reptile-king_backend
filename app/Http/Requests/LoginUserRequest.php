@@ -24,7 +24,7 @@ class LoginUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'max:255','email:rfc, strict'],
+            'email' => ['required', 'string', 'max:255','email:rfc,strict'],
             // 기본(최소 8자, 알파벳, 숫자 포함) + 대소문자, 특수문자
             'password' => ['required', Rules\Password::defaults()->mixedCase()->symbols() ],
         ];
