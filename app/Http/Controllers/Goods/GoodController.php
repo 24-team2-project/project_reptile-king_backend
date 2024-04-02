@@ -120,4 +120,18 @@ class GoodController extends Controller
         return response()->json(['message' => '상품 등록이 취소되었습니다.']);
 
     }
+
+    public function search(Request $request) {
+        $search = $request->query('search');
+
+        if (empty($search)) {
+            return response()->json(['message' => '검색어를 입력해주세요.'], 400);
+        }
+
+        $goods = Good::where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('content', 'LIKE', "%{$search}%")
+                    ->get();
+
+        return response()->json($posts);
+    }
 }
