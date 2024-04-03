@@ -45,8 +45,8 @@ class PostController extends Controller
      * Display the specified resource.
      */
     public function show(Post $post)
-    {
-        $post = Post::with('comments')->find($id);
+    {   
+        $post = Post::with('comments')->findOrFail($post->id);
         if (!$post) {
             return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
         }
@@ -66,7 +66,7 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        $post = Post::find($id);
+        $post = Post::find($post->id);
         if (!$post) {
             return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
         }
@@ -90,7 +90,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        $post = Post::find($id);
+        $post = Post::find($post->id);
         if (!$post) {
             return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
         }

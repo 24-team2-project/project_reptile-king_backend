@@ -63,12 +63,12 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 });
 
 // // 커뮤니티
-Route::get('/posts/search', PostController::class, 'search');
+Route::get('/posts/search', [PostController::class, 'search']);
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
 
 // // 마켓
-Route::get('/goods/search', GoodController::class, 'search');
+Route::get('/goods/search', [GoodController::class, 'search']);
 Route::get('/goods', [GoodController::class, 'index']);
 Route::get('/goods/{id}', [GoodController::class, 'show']);
 
