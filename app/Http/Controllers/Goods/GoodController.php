@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Goods;
 
 use App\Http\Controllers\Controller;
 use App\Models\Good;
+use App\Models\GoodReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
