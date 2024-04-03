@@ -10,6 +10,8 @@ use App\Http\Controllers\Users\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Boards\PostController;
 use App\Http\Controllers\Boards\CommentController;
+use App\Http\Controllers\Sensors\TemperatureHumidityController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -72,4 +74,5 @@ Route::get('/goods/search', [GoodController::class, 'search']);
 Route::get('/goods', [GoodController::class, 'index']);
 Route::get('/goods/{id}', [GoodController::class, 'show']);
 
-
+// 온습도 데이터 저장
+Route::post('/tnhs', [TemperatureHumidityController::class, 'store']);

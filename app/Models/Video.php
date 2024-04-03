@@ -13,14 +13,10 @@ class Video extends Model
 
     protected $fillable = [
         'user_id',
-        'cage_id',
+        'serial_code',
         'video_url',
         'created_at',
     ];
-
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
 
     public function cage(){
         return $this->belongsTo(Cage::class);

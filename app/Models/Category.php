@@ -5,21 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TemperatureHumidity extends Model
+class Category extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
 
     protected $fillable = [
-        'serial_code',
-        'temperature',
-        'humidity',
-        'created_at',
+        'name',
+        'division',
+        'parent_id',
     ];
 
-    public function cage(){
-        return $this->belongsTo(Cage::class);
-    }
 
 }

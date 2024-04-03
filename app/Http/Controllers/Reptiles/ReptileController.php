@@ -10,9 +10,6 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
-
-use function PHPUnit\Framework\isEmpty;
-
 class ReptileController extends Controller
 {
     // 파충류 목록

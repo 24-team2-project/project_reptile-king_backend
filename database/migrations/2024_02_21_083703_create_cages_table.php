@@ -18,8 +18,10 @@ return new class extends Migration
             $table->text('memo')->nullable(true);
             $table->float('set_temp')->nullable(true);
             $table->unsignedSmallInteger('set_hum')->nullable(true);
-            $table->string('serial_code', 20)->unique();
+            $table->string('serial_code', 20);
+            $table->foreign('serial_code')->references('serial_code')->on('cage_serial_codes')->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestampsTz();
+            $table->timestampTz('expired_at')->nullable(true);
         });
     }
 

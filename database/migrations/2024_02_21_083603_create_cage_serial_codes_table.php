@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('movements', function (Blueprint $table) {
+        Schema::create('cage_serial_codes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cage_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->unsignedSmallInteger('sensor_id');
-            $table->boolean('motion_detected');
-            $table->timestampTz('created_at');
+            $table->string('size');
+            $table->string('serial_code', 20)->unique();
+            $table->timestampsTz();
         });
     }
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('movements');
+        Schema::dropIfExists('cage_serial_codes');
     }
 };

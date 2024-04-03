@@ -6,6 +6,7 @@ use App\Jobs\SendEmailJob;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -56,7 +57,7 @@ class ForgetPasswordController extends Controller
     // 인증코드 검사
     public function verifyAuthentication(Request $request){
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'max:255', 'email:rfc,strict'],
+            'email' => ['required', 'string', 'max:255'],
             'authCode' => ['required', 'string', 'max:7'],
         ]);
         
@@ -102,7 +103,7 @@ class ForgetPasswordController extends Controller
     // 비밀번호 수정
     public function changePassword(Request $request){
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'max:255', 'email:rfc,strict'], // 'email' => 'required|email:rfc,dns
+            'email' => ['required', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()->mixedCase()->symbols()],
         ]);
 
@@ -116,17 +117,25 @@ class ForgetPasswordController extends Controller
         $reqData = $validator->validated();
         try {
             $user = User::where('email', $reqData['email'])->first();
+            
+            $msg = '';
+            $status = 200;
 
             if(empty($user)){
-                return response()->json([ 'msg' => '등록되지 않은 이메일' ], 400);
+                $msg = '등록되지 않은 이메일';
+                $status = 404;
+            } else if(Hash::check($reqData['password'], $user->password)){
+                $msg = '기존 비밀번호와 동일';
+                $status = 400;
+            } else{
+                $user->password = bcrypt($reqData['password']);
+                $msg = '변경 완료';
+                $user->save();
             }
 
-            $user->password = bcrypt($reqData['password']);
-            $user->save();
-
             return response()->json([
-                'msg' => '변경 완료'
-            ], 200);
+                'msg' => $msg,
+            ], $status);
 
         } catch (Exception $e) {
             return response()->json([
@@ -137,4 +146,5 @@ class ForgetPasswordController extends Controller
 
     }
 
+    
 }

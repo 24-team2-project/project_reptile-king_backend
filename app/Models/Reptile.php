@@ -16,6 +16,7 @@ class Reptile extends Model
         'age',
         'nickname',
         'memo',
+        'expired_at'
     ];
 
     public function user(){
