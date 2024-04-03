@@ -4,16 +4,18 @@ namespace App\Http\Controllers\Goods;
 
 use App\Http\Controllers\Controller;
 use App\Models\GoodReview;
+use App\Models\Good;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class GoodReviewController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Good $good)
     {
-        $reviews = GoodReview::all();
+        $reviews = $good->goodReviews;
         return response()->json($reviews);
     }
 
@@ -44,12 +46,12 @@ class GoodReviewController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        $requestData = $request->all();
+        $reviewData = $request->all();
         if(isset($requestData['img_urls'])) {
-            $requestData['img_urls'] = json_encode($requestData['img_urls']);
+            $requestData['img_urls'] = json_encode($reviewData['img_urls']);
         }
 
-        $review = GoodReview::create($requestData);
+        $review = GoodReview::create($reviewData);
         return response()->json($review, 201);
     }
 
@@ -58,7 +60,7 @@ class GoodReviewController extends Controller
      */
     public function show(GoodReview $goodReview)
     {
-        $review = GoodReview::find($id);
+        $review = GoodReview::find($goodReview->id);
         if (!$review) {
             return response()->json(['message' => '해당 리뷰를 찾을 수 없습니다.'], 404);
         }
@@ -78,7 +80,7 @@ class GoodReviewController extends Controller
      */
     public function update(Request $request, GoodReview $goodReview)
     {
-        $review = GoodReview::find($id);
+        $review = GoodReview::find($request->id);
         if (!$review) {
             return response()->json(['message' => '해당 리뷰를 찾을 수 없습니다.'], 404);
         }
@@ -109,12 +111,8 @@ class GoodReviewController extends Controller
      */
     public function destroy(GoodReview $goodReview)
     {
-        $review = GoodReview::find($id);
-        if (!$review) {
-            return response()->json(['message' => '해당 리뷰를 찾을 수 없습니다.'], 404);
-        }
+        $goodReview->delete();
 
-        $review->delete();
         return response()->json(['message' => '리뷰가 삭제되었습니다.']);
     }
 }

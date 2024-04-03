@@ -59,11 +59,7 @@ class GoodController extends Controller
      */
     public function show(Good $good)
     {
-        $good = Good::with('reviews')->find($id);
-        $post = Post::with('comments')->find($id);
-        if (!$good) {
-            return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
-        }
+        $good->load('reviews');
         return response()->json($good);
     }
 
@@ -80,7 +76,7 @@ class GoodController extends Controller
      */
     public function update(Request $request, Good $good)
     {
-        $good = Good::find($id);
+        $good = Good::find($request->id);
     if (!$good) {
         return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
     }
@@ -112,7 +108,7 @@ class GoodController extends Controller
      */
     public function destroy(Good $good)
     {
-        $good = Good::find($id);
+        $good = Good::find($good->id);
         if (!$good) {
             return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
         }
@@ -133,6 +129,6 @@ class GoodController extends Controller
                     ->orWhere('content', 'LIKE', "%{$search}%")
                     ->get();
 
-        return response()->json($posts);
+        return response()->json($goods);
     }
 }

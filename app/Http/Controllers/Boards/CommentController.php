@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Boards;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
@@ -11,9 +12,9 @@ class CommentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $comments = Comment::where('post_id', $postId)->get();
+    public function index(Post $post)
+    {   
+        $comments = $post->comments;
 
         return response()->json($comments);
     }
@@ -75,9 +76,7 @@ class CommentController extends Controller
      */
     public function show(Comment $comment)
     {
-        $comments = Comment::where('post_id', $postId)->get();
-
-        return response()->json($comments);
+        //
     }
 
     /**
@@ -93,7 +92,7 @@ class CommentController extends Controller
      */
     public function update(Request $request, Comment $comment)
     {
-        $comment = Comment::find($id);
+        $comment = Comment::find($request->id);
         if (!$comment) {
             return response()->json(['message' => '해당 댓글을 찾을 수 없습니다.'], 404);
         }
@@ -112,11 +111,6 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        $comment = Comment::find($id);
-        if (!$comment) {
-            return response()->json(['message' => '해당 댓글을 찾을 수 없습니다.'], 404);
-        }
-
         $comment->delete();
 
         return response()->json(['message' => '댓글이 삭제되었습니다.']);

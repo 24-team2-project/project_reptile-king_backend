@@ -18,6 +18,10 @@ class GoodReview extends Model
         'img_urls',
     ];
 
+    protected $casts = [
+        'img_urls' => 'array',
+    ];
+
     public function user(){
         return $this->belongsTo(User::class);
     }
