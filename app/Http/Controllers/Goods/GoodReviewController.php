@@ -31,7 +31,7 @@ class GoodReviewController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|integer',
+            'user_id' => 'required',
             'good_id' => 'required|integer',
             'summary' => 'required|string|max:255',
             'content' => 'required|string',
