@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Reptiles;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cage;
+use App\Models\CageSerialCode;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -41,7 +42,7 @@ class CageController extends Controller
             'memo'       => ['nullable', 'string'],
             'set_temp'   => ['required'],
             'set_hum'   => ['required'],
-            'serial_code'   => ['required', 'string', 'unique:cages,serial_code'],
+            'serial_code'   => ['required', 'string'],
         ]);
 
         if($validator->fails()){
@@ -54,20 +55,42 @@ class CageController extends Controller
         $reqData = $validator->safe();
 
         try {
-            $user = JWTAuth::user();
+            $msg = '';
+            $state = 201;
 
-            Cage::create([
-                'user_id'       => $user->id,
-                'reptile_id'    => $reqData['reptile_id'],
-                'memo'          => $reqData['memo'],
-                'set_temp'      => $reqData['set_temp'],
-                'set_hum'       => $reqData['set_hum'],
-                'serial_code'   => $reqData['serial_code']
-            ]);
+            // 파충류 등록 유무 확인
+            if($reqData['reptile_id'] !== null){
+                $cageConfirm = Cage::where('reptile_id', $reqData['reptile_id'])->first();
+                if(!empty($cageConfirm)){ 
+                    $msg = '이미 등록된 파충류';
+                    $state = 400;
+                }
+            }
+
+            $serialCodeConfirm = CageSerialCode::where('serial_code', $reqData['serial_code'])->first();
+            // 일련번호 확인
+            if(empty($serialCodeConfirm)){
+                $msg = '일련번호를 찾을 수 없음';
+                $state = 400;
+
+            } else{
+                $user = JWTAuth::user();
+
+                Cage::create([
+                    'user_id'       => $user->id,
+                    'reptile_id'    => $reqData['reptile_id'],
+                    'memo'          => $reqData['memo'],
+                    'set_temp'      => $reqData['set_temp'],
+                    'set_hum'       => $reqData['set_hum'],
+                    'serial_code'   => $reqData['serial_code']
+                ]);
+
+                $msg = '등록 완료';
+            }
 
             return response()->json([
-                'msg' => '등록 완료',
-            ], 201);
+                'msg' => $msg,
+            ], $state);
 
         } catch (Exception $e) {
             return response()->json([
@@ -121,9 +144,7 @@ class CageController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // 사육장 정보 삭제
     public function destroy(Cage $cage)
     {
         $user = JWTAuth::user();

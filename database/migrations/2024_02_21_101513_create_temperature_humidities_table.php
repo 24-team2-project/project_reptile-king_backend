@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('temperature_humidiy', function (Blueprint $table) {
+        Schema::create('temperature_humidities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('cage_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('serial_code', 20);
+            $table->foreign('serial_code')->references('serial_code')->on('cage_serial_codes')->cascadeOnUpdate()->cascadeOnDelete();
             $table->float('temperature');
             $table->unsignedSmallInteger('humidity');
             $table->timestampTz('created_at');
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('temperature_humidiy');
+        Schema::dropIfExists('temperature_humidities');
     }
 };

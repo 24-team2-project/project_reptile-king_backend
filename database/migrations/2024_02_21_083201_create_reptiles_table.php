@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('nickname');
             $table->text('memo')->nullable(true);
             $table->timestampsTz();
+            $table->timestampTz('expired_at')->nullable(true);
         });
     }
 

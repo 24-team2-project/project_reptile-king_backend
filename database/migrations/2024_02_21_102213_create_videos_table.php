@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('cage_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('serial_code', 20);
+            $table->foreign('serial_code')->references('serial_code')->on('cage_serial_codes')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('video_url')->nullable(true);
             $table->timestampTz('created_at');
         });

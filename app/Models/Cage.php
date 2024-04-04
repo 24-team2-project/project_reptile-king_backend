@@ -16,6 +16,7 @@ class Cage extends Model
         'set_temp',
         'set_hum',
         'serial_code',
+        'expired_at',
     ];
 
     public function user(){

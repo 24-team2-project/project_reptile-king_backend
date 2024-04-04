@@ -100,10 +100,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Cage::class);
     }
 
-    public function temperatureHumiditys(){
-        return $this->hasMany(TemperatureHumidity::class);
-    }
-
     public function movements(){
         return $this->hasMany(Movement::class);
     }
