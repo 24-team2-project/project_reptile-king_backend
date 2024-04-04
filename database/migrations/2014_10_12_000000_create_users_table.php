@@ -22,7 +22,7 @@ return new class extends Migration
             $table->json('address')->nullable(true);
             $table->json('payment_selection')->nullable(true);
             $table->json('img_urls')->nullable(true);
-            $table->rememberToken();
+            // $table->rememberToken();
             $table->timestampsTz();
         });
     }
