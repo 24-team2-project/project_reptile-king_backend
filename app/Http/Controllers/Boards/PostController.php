@@ -16,7 +16,8 @@ class PostController extends Controller
 
     public function selectPost(Request $request)
     {   
-        //
+        $selectPost = Post::where('category', $request)->orderBy('created_at', 'desc')->get();
+        return response()->json($selectPost);
     }
 
     
@@ -71,8 +72,8 @@ class PostController extends Controller
             'user_id' => 'required',
             'title' => 'required',
             'content' => 'required',
+            'category' => 'required',
             // 미구현
-            // 'category' => 'required',
             // 'img_urls' => 'sometimes|array',
             // 'img_urls.*' => 'string',
         ]);
