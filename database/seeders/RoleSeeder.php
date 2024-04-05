@@ -6,15 +6,15 @@ use App\Models\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class RolesTableSeeder extends Seeder
+class RoleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
+        Role::create([ 'role' => 'super_admin' ]);
         Role::create([ 'role' => 'admin' ]);
         Role::create([ 'role' => 'post_create' ]);
-
     }
 }

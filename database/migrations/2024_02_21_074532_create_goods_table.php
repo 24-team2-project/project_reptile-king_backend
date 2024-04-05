@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->unsignedBigInteger('price');
-            $table->string('category');
-            $table->text('content');
+            $table->foreignId('category_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->text('content')->nullable(true);
             $table->json('img_urls')->nullable(true);
             $table->timestampTz('created_at');
         });

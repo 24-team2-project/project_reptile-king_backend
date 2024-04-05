@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Boards\PostController;
 use App\Http\Controllers\Boards\CommentController;
 use App\Http\Controllers\Sensors\TemperatureHumidityController;
+use App\Http\Controllers\Upload\ImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,3 +77,7 @@ Route::get('/goods/{id}', [GoodController::class, 'show']);
 
 // 온습도 데이터 저장
 Route::post('/tnhs', [TemperatureHumidityController::class, 'store']);
+
+// 이미지 업로드
+Route::post('/upload-image', [ImageController::class, 'uploadImageForEditor']);
+Route::post('/delete-images', [ImageController::class, 'deleteImagesForEditor']);
