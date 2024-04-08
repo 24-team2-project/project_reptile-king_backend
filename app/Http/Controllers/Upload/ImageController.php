@@ -55,7 +55,7 @@ class ImageController extends Controller
 
     public function deleteImagesForEditor(Request $request){
         $validated = Validator::make($request->all(), [
-            'urls' => ['required', 'array'],
+            'urls' => ['required', 'string'],
         ]);
 
         if ($validated->fails()) {
@@ -65,7 +65,15 @@ class ImageController extends Controller
             ], 400);
         }
 
-        $urls = $validated->validated()['urls'];
+        $urls = json_decode($validated->validated()['urls'], true);
+        
+        if(gettype($urls) != 'array'){
+            return response()->json([
+                'msg' => 'urls는 배열이어야 함',
+                'error' => json_last_error_msg()
+            ], 400);
+        }
+
         $result = $this->deleteImages($urls);
         if($result != true){
             return $result;
