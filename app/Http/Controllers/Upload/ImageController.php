@@ -55,7 +55,7 @@ class ImageController extends Controller
 
     public function deleteImagesForEditor(Request $request){
         $validated = Validator::make($request->all(), [
-            'urls' => ['required', 'array'],
+            'urls' => ['required', 'string'],
         ]);
 
         if ($validated->fails()) {
@@ -65,7 +65,15 @@ class ImageController extends Controller
             ], 400);
         }
 
-        $urls = $validated->validated()['urls'];
+        $urls = json_decode($validated->validated()['urls'], true);
+        
+        if(gettype($urls) != 'array'){
+            return response()->json([
+                'msg' => 'urls는 배열이어야 함',
+                'error' => json_last_error_msg()
+            ], 400);
+        }
+
         $result = $this->deleteImages($urls);
         if($result != true){
             return $result;
@@ -81,7 +89,7 @@ class ImageController extends Controller
             foreach($urls as $url){
                 $key = ltrim(parse_url($url, PHP_URL_PATH), '/');   // url에서 key(이미지 이름) 추출, ltrim(문자열 왼쪽의 공백 제거), parse_url(주소를 구성 요소로 분석)
                 $s3->deleteObject([
-                    'Bucket' => env('AWS_BUCKET'),
+                    'Bucket' => config('filesystems.disks.s3.bucket'),
                     'Key' => $key,
                 ]);
             }
@@ -110,7 +118,7 @@ class ImageController extends Controller
             $uploadPath = 'images/'.$division.'/'.$imageName;
     
             $result = $s3->putObject([
-                'Bucket' => env('AWS_BUCKET'),                  // 버킷 이름
+                'Bucket' => config('filesystems.disks.s3.bucket'),                  // 버킷 이름
                 'Key' => $uploadPath,                           // 저장할 파일 이름
                 'Body' => fopen($image, 'r'),                   //  파일
                 'ContentType' => $image->getClientMimeType(),   // 파일 타입
