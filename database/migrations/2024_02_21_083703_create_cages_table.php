@@ -19,9 +19,11 @@ return new class extends Migration
             $table->float('set_temp')->nullable(true);
             $table->unsignedSmallInteger('set_hum')->nullable(true);
             $table->string('serial_code', 20);
-            $table->foreign('serial_code')->references('serial_code')->on('cage_serial_codes')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->json('img_urls')->nullable(true);
             $table->timestampsTz();
             $table->timestampTz('expired_at')->nullable(true);
+
+            $table->foreign('serial_code')->references('serial_code')->on('cage_serial_codes')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 

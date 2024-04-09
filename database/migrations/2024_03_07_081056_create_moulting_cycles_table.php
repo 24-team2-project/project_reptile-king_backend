@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('moulting_cycles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('reptile_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->date('date');
             $table->timestampsTz();

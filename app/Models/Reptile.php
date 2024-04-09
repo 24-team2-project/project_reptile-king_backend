@@ -11,12 +11,19 @@ class Reptile extends Model
 
     protected $fillable = [
         'user_id',
+        'serial_code', 
         'species',
         'gender',
-        'age',
+        'birth',
         'nickname',
         'memo',
+        'img_urls',
         'expired_at'
+    ];
+
+    protected $casts = [
+        'img_urls' => 'array',
+        'birth' => 'date'
     ];
 
     public function user(){

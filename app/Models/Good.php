@@ -20,6 +20,10 @@ class Good extends Model
         'created_at',
     ];
 
+    protected $casts = [
+        'img_urls' => 'json',
+    ];
+
     protected $with = ['goodReviews'];
 
     public function goodReviews(){

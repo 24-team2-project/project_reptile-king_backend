@@ -37,7 +37,9 @@ class JWTAuthController extends Controller
                 ] , 401);
             }
 
-            return $this->respondWithToken($accessToken);
+            $response = response()->json([ 'msg' => '로그인 성공' ], 200);
+            $response->headers->set('Authorization', 'Bearer '.$accessToken);
+            return $response;
 
         } catch (Exception $e) {
             return response()->json([
@@ -70,15 +72,5 @@ class JWTAuthController extends Controller
     public function refresh(){
         return JWTAuth::refresh();
     }
-
-    // 토큰 및 결과 전달
-    protected function respondWithToken($accessToken){
-        return response()->json([
-            'accessToken' => $accessToken,
-            'tokenType' => 'bearer',
-            'msg' => '로그인 성공',
-        ], 200);
-    }
-
 
 }
