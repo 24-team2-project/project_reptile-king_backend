@@ -26,7 +26,7 @@ class CageSerialCodeFactory extends Factory
         }
         
         return [
-            'size' => fake()->randomElement(['small', 'medium', 'large']),
+            'size' => $this->faker->randomElement(['small', 'medium', 'large']),
             'serial_code' => $serialCode,
         ];
     }
