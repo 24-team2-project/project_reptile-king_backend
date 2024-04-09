@@ -7,21 +7,20 @@ use App\Models\Good;
 use App\Models\GoodReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class GoodController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $goods = Good::all();
+        $goods = Good::leftJoin('good_reviews', 'goods.id', '=', 'good_reviews.good_id')
+                    ->selectRaw('goods.*, AVG(good_reviews.stars) as starAvg')
+                    ->groupBy('goods.id')
+                    ->get();
+
         return response()->json($goods);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //

@@ -16,7 +16,8 @@ class PostController extends Controller
 
     public function selectPost(Request $request)
     {   
-        $selectPost = Post::where('category', $request)->orderBy('created_at', 'desc')->get();
+        $category = $request->category;
+        $selectPost = Post::where('category', $category)->orderBy('created_at', 'desc')->get();
         return response()->json($selectPost);
     }
 
@@ -47,10 +48,11 @@ class PostController extends Controller
     
     public function show(Post $post)
     {   
-        $post = Post::with('comments')->findOrFail($post->id);
+        $post = Post::with('comments')->find($post->id);
         if (!$post) {
             return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
         }
+        $post->increment('views');
         return response()->json($post);
     }
 
@@ -111,5 +113,8 @@ class PostController extends Controller
         return response()->json($posts);
     }
 
-
+    public function onClickLikesButton(Post $post)
+    {
+        $post->increment('likes');
+    }
 }
