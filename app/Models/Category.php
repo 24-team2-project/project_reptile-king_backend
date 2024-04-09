@@ -16,6 +16,4 @@ class Category extends Model
         'division',
         'parent_id',
     ];
-
-
 }

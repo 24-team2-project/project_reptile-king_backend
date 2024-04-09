@@ -13,7 +13,8 @@ class NoticeController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Category::get(['name']);
+        return response()->json($categories);
     }
 
     /**
@@ -29,7 +30,15 @@ class NoticeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'division' => 'required',
+            'parent_id' => 'nullable',
+        ]);
+
+        $category = Category::create($request->all());
+
+        return response()->json($category, 201);
     }
 
     /**
@@ -61,6 +70,13 @@ class NoticeController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category = Category::find($category->id);
+        if (!$category) {
+            return response()->json(['message' => '해당 카테고리를 찾을 수 없습니다.'], 404);
+        }
+
+        $category->delete();
+
+        return response()->json(['message' => '카테고리가 삭제되었습니다.']);
     }
 }
