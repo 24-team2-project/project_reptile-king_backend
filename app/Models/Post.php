@@ -21,6 +21,10 @@ class Post extends Model
 
     protected $with = ['comments'];
 
+    protected $casts = [
+        'img_urls' => 'array',
+    ];
+
     public function user(){
         return $this->belongsTo(User::class);
     }

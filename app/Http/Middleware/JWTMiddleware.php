@@ -36,14 +36,10 @@ class JWTMiddleware
                 // 갱신된 토큰으로 다음 요청 진행
                 $response = $next($request);
 
-                // 응답에 갱신된 토큰 포함
-                $content = json_decode($response->getContent(), true);
-                if (json_last_error() === JSON_ERROR_NONE) { // json_decode()가 에러가 아니면(null이 아니면)
-                    $content['refreshToken'] = $refreshToken;
-                    $content = json_encode($content);
-                    $response->setContent($content);
-                }
+                // 응답헤더에 갱신된 토큰 포함
+                $response->headers->set('Authorization', 'Bearer '.$refreshToken);
                 return $response;
+                
             } catch (JWTException $e) {
                 // 갱신 실패 
                 return response()->json([

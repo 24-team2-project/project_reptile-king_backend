@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('reptiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('serial_code', 20)->unique();
             $table->string('species');
             $table->string('gender');
-            $table->unsignedSmallInteger('age')->nullable(true);
+            $table->date('birth')->nullable(true);
             $table->string('nickname');
             $table->text('memo')->nullable(true);
+            $table->json('img_urls')->nullable(true);
             $table->timestampsTz();
             $table->timestampTz('expired_at')->nullable(true);
         });

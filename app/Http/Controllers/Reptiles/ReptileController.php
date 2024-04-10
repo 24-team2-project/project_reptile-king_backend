@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Reptiles;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Upload\ImageController;
 use App\Http\Requests\ReptileRequest;
 use App\Models\Reptile;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Str;
 class ReptileController extends Controller
 {
     // 파충류 목록
@@ -24,14 +25,6 @@ class ReptileController extends Controller
                 return response()->json([
                     'msg' => '데이터 없음'
                 ], 200);
-            }
-
-            foreach($reptiles as $reptile){
-                if($reptile->created_at->diffInYears(Carbon::now()) >= 1) {// 1년 이상 지났을 때의 처리
-                    $reptile->update([
-                        'age' => $reptile->age + 1
-                    ]);
-                }
             }
 
             return response()->json([
@@ -64,15 +57,25 @@ class ReptileController extends Controller
 
         $user = JWTAuth::user();
         $validator = $request->safe();
-
+        
         try {
+            $serialCode = 'REPTILE-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(2));
+            while(Reptile::where('serial_code', $serialCode)->exists()){
+                $serialCode = 'REPTILE-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(2));
+            }
+
+            $images = new ImageController();
+            $imageUrls = $images->uploadImageForController($validator['images'], 'reptiles');
+
             Reptile::create([
-                'user_id'   => $user->id,
-                'nickname'  => $validator['nickname'],
-                'species'   => $validator['species'],
-                'gender'    => $validator['gender'],
-                'age'       => $validator['age'],
-                'memo'      => $validator['memo'],
+                'user_id'       => $user->id,
+                'serial_code'   => $serialCode,
+                'nickname'      => $validator['nickname'],
+                'species'       => $validator['species'],
+                'gender'        => $validator['gender'],
+                'birth'         => $validator['birth'],
+                'memo'          => $validator['memo'],
+                'img_urls'      => $imageUrls,
             ]);
 
             return response()->json([
@@ -98,12 +101,6 @@ class ReptileController extends Controller
             return response()->json([
                 'msg' => '권한 없음'
             ], 403);
-        }
-
-        if($reptile->created_at->diffInYears(Carbon::now()) >= 1) {// 1년 이상 지났을 때의 처리
-            $reptile->update([
-                'age' => $reptile->age + 1
-            ]);
         }
 
         return response()->json([

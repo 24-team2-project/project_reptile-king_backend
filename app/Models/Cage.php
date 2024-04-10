@@ -16,7 +16,12 @@ class Cage extends Model
         'set_temp',
         'set_hum',
         'serial_code',
+        'img_urls',
         'expired_at',
+    ];
+
+    protected $casts = [
+        'img_urls' => 'array',
     ];
 
     public function user(){

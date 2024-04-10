@@ -26,8 +26,9 @@ class ReptileRequest extends FormRequest
             'nickname'  => ['required', 'string', 'max:255'],
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
-            'age'       => [ 'nullable', 'integer', 'min:0'],
-            'memo'      => [ 'string', 'nullable']
+            'birth'       => [ 'nullable'],
+            'memo'      => [ 'string', 'nullable'],
+            'images'    => [ 'array', 'nullable'],
         ];
     }
 
@@ -40,8 +41,6 @@ class ReptileRequest extends FormRequest
             'gender.required'   => '성별은 필수 항목입니다.',
             'gender.max'   => '성별은 최대 1자까지 입력 가능합니다.',
             'gender.in'   => '성별은 M or F 중 하나이어야 합니다.',
-            'age.integer'   => '나이는 숫자이어야 합니다.',
-            'age.min'   => '나이는 최소 0까지 입력 가능합니다.',
             'memo.string'   => '메모는 문자열이어야 합니다.'
         ];
     }

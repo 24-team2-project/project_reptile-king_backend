@@ -118,13 +118,13 @@ class ImageController extends Controller
             $uploadPath = 'images/'.$division.'/'.$imageName;
     
             $result = $s3->putObject([
-                'Bucket' => config('filesystems.disks.s3.bucket'),                  // 버킷 이름
-                'Key' => $uploadPath,                           // 저장할 파일 이름
-                'Body' => fopen($image, 'r'),                   //  파일
-                'ContentType' => $image->getClientMimeType(),   // 파일 타입
-                // 'ACL' => 'public-read',                         // 파일 접근 권한(public-read: 모든 사용자가 읽을 수 있음), 현재 버킷 설정과 중복되어 주석처리
+                'Bucket' => config('filesystems.disks.s3.bucket'),  // 버킷 이름, config() 함수로 config 파일의 값을 가져옴, 이유: .env 파일에 직접 접근하지 않기 위함
+                'Key' => $uploadPath,                               // 저장할 파일 이름
+                'Body' => fopen($image, 'r'),                       //  파일
+                'ContentType' => $image->getClientMimeType(),       // 파일 타입
+                // 'ACL' => 'public-read',                          // 파일 접근 권한(public-read: 모든 사용자가 읽을 수 있음), 현재 버킷 설정과 중복되어 주석처리
             ]);
-    
+            
             return $result['ObjectURL'];
 
         } catch (AwsException $e) {
