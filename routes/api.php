@@ -12,6 +12,9 @@ use App\Http\Controllers\Boards\PostController;
 use App\Http\Controllers\Boards\CommentController;
 use App\Http\Controllers\Sensors\TemperatureHumidityController;
 use App\Http\Controllers\Upload\ImageController;
+use App\Http\Controllers\Goods\GoodReviewController;
+use App\Http\Controllers\Goods\PurchaseController;
+use App\Http\Controllers\Categories\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +63,12 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
     // 마켓
     Route::apiResource('goods', GoodController::class)->except('index', 'show', 'create', 'edit');
+
+    // 상품 리뷰
+    Route::apiResource('good_reviews', GoodReviewController::class)->except('create', 'edit');
+
+    // 카테고리
+    Route::apiResource('categories', CategoryController::class)->except('create', 'show', 'edit', 'update');
     
     // 사용자
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
