@@ -36,10 +36,11 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required',
             'content' => 'required',
-            'category' => 'required',
+            'category_id' => 'required',
             // 미구현
             // 'img_urls' => 'sometimes|array',
             // 'img_urls.*' => 'string',
+            // images => 'sometimes|array',
         ]);
         $data = $request->only(['title', 'content', 'category']);
         $data['user_id'] = $user->id;
@@ -73,7 +74,7 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required',
             'content' => 'required',
-            'category' => 'required',
+            'category_id' => 'required',
             // 미구현
             // 'img_urls' => 'sometimes|array',
             // 'img_urls.*' => 'string',

@@ -34,7 +34,7 @@ class GoodController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:50',
             'price' => 'required|numeric',
-            'category' => 'required',
+            'category_id' => 'required',
             'content' => 'required|string|max:255',
             'img_urls' => 'nullable|array',
             'img_urls.*' => 'string',
@@ -83,7 +83,7 @@ class GoodController extends Controller
     $validator = Validator::make($request->all(), [
         'name' => 'required|string|max:50',
         'price' => 'required|numeric',
-        'category' => 'required',
+        'category_id' => 'required',
         'content' => 'required|string|max:255',
         'img_urls' => 'nullable|array',
         'img_urls.*' => 'string',
