@@ -68,13 +68,9 @@ class PostController extends Controller
     
     public function update(Request $request, Post $post)
     {
-        $post = Post::find($post->id);
-        if (!$post) {
-            return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
-        }
+        $user = JWTAuth::user();
 
         $request->validate([
-            'user_id' => 'required',
             'title' => 'required',
             'content' => 'required',
             'category' => 'required',
@@ -83,9 +79,15 @@ class PostController extends Controller
             // 'img_urls.*' => 'string',
         ]);
 
-        $post->update($request->all());
+        if ($post->user_id !== $user->id) {
+            return response()->json(['message' => '이 글을 수정할 권한이 없습니다.'], 403);
+        }
 
-        return response()->json($post);
+        $data = $request->only(['title', 'content', 'category']);
+        $data['user_id'] = $user->id;
+        $post->update($data);
+
+        return response()->json($post->fresh());
     }
 
     
