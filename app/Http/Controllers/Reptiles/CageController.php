@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reptiles;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Upload\ImageController;
 use App\Models\Cage;
 use App\Models\CageSerialCode;
 use Exception;
@@ -38,11 +39,13 @@ class CageController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'reptile_id' => ['nullable'],
-            'memo'       => ['nullable', 'string'],
-            'set_temp'   => ['required'],
-            'set_hum'   => ['required'],
-            'serial_code'   => ['required', 'string'],
+            'reptileSerialCode' => ['nullable', 'string'],
+            'memo'              => ['nullable', 'string'],
+            'setTemp'           => ['required'],
+            'setHum'            => ['required'],
+            'serialCode'        => ['required', 'string'],
+            'images'            => ['nullable', 'array'],
+            'images.*'          => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
         ]);
 
         if($validator->fails()){
@@ -59,15 +62,15 @@ class CageController extends Controller
             $state = 201;
 
             // 파충류 등록 유무 확인
-            if($reqData['reptile_id'] !== null){
-                $cageConfirm = Cage::where('reptile_id', $reqData['reptile_id'])->first();
-                if(!empty($cageConfirm)){ 
+            if($reqData['reptileSerialCode'] !== null){
+                $cageConfirm = Cage::where('reptile_serial_code', $reqData['reptileSerialCode'])->first();
+                if(!empty($cageConfirm) && $cageConfirm->expired_at === null){ 
                     $msg = '이미 등록된 파충류';
                     $state = 400;
                 }
             }
 
-            $serialCodeConfirm = CageSerialCode::where('serial_code', $reqData['serial_code'])->first();
+            $serialCodeConfirm = CageSerialCode::where('serial_code', $reqData['serialCode'])->first();
             // 일련번호 확인
             if(empty($serialCodeConfirm)){
                 $msg = '일련번호를 찾을 수 없음';
@@ -76,13 +79,17 @@ class CageController extends Controller
             } else{
                 $user = JWTAuth::user();
 
+                $images = new ImageController();
+                $imgUrls = $images->uploadImageForController($reqData['images'], 'cages');
+
                 Cage::create([
-                    'user_id'       => $user->id,
-                    'reptile_id'    => $reqData['reptile_id'],
-                    'memo'          => $reqData['memo'],
-                    'set_temp'      => $reqData['set_temp'],
-                    'set_hum'       => $reqData['set_hum'],
-                    'serial_code'   => $reqData['serial_code']
+                    'user_id'             => $user->id,
+                    'reptile_serial_code' => $reqData['reptileSerialCode'],
+                    'memo'                => $reqData['memo'],
+                    'set_temp'            => $reqData['setTemp'],
+                    'set_hum'             => $reqData['setHum'],
+                    'serial_code'         => $reqData['serialCode'],
+                    'img_urls'            => $imgUrls,
                 ]);
 
                 $msg = '등록 완료';
@@ -121,15 +128,37 @@ class CageController extends Controller
     // 사육장 정보 수정
     public function update(Request $request, Cage $cage)
     {
+        $validator = Validator::make($request->all(), [
+            'reptileSerialCode' => ['nullable', 'string'],
+            'memo'              => ['nullable', 'string'],
+            'setTemp'           => ['required'],
+            'setHum'            => ['required'],
+            'images'            => ['nullable', 'array'],
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                'msg'   => '유효성 검사 오류',
+                'error' => $validator->errors()->all(),
+            ], 400);
+        }
+        
+        $reqData = $validator->safe();
+
+        
+
         $user = JWTAuth::user();
 
         if($cage->user_id !== $user->id){
             return response()->json([
-                'msg' => '권한 없음'
+                'msg' => '수정 권한 없음'
             ], 403);
         }
 
         try {
+
+            if($reqData['images'])
+            
             $cage->update($request->all());
 
             return response()->json([

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('reptile_id')->nullable()->constrained()->cascadeOnUpdate();
+            $table->string('reptile_serial_code', 20)->nullable(true);
             $table->text('memo')->nullable(true);
             $table->float('set_temp')->nullable(true);
             $table->unsignedSmallInteger('set_hum')->nullable(true);
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->timestampsTz();
             $table->timestampTz('expired_at')->nullable(true);
 
+            $table->foreign('reptile_serial_code')->references('serial_code')->on('reptiles')->cascadeOnUpdate()->onDelete('set null');
             $table->foreign('serial_code')->references('serial_code')->on('cage_serial_codes')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }

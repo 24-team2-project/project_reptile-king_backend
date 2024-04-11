@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('division');
             $table->string('parent_id')->nullable(true);
+            $table->string('img_url')->nullable(true);
         });
     }
 

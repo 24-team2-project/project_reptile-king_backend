@@ -15,5 +15,6 @@ class Category extends Model
         'name',
         'division',
         'parent_id',
+        'img_url',
     ];
 }
