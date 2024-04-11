@@ -59,7 +59,8 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::apiResource('posts', PostController::class)->except('index', 'show', 'create', 'edit', );
 
     // // 댓글
-    Route::apiResource('comments', CommentController::class)->except('index', 'show', 'create', 'edit');
+    Route::apiResource('comments', CommentController::class)->only('update', 'destroy');
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store']);
 
     // 마켓
     Route::apiResource('goods', GoodController::class)->except('index', 'show', 'create', 'edit');

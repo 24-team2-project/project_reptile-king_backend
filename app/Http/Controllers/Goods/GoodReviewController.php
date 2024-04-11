@@ -7,6 +7,7 @@ use App\Models\GoodReview;
 use App\Models\Good;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class GoodReviewController extends Controller
 {
@@ -32,24 +33,29 @@ class GoodReviewController extends Controller
      */
     public function store(Request $request)
     {
+        $user = JWTAuth::user();
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
             'good_id' => 'required|integer',
             'summary' => 'required|string|max:255',
             'content' => 'required|string',
             'stars' => 'required|integer|min:1|max:5',
-            'img_urls' => 'nullable|array',
-            'img_urls.*' => 'string',
+            // 'img_urls' => 'nullable|array',
+            // 'img_urls.*' => 'string',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        $reviewData = $request->all();
-        if(isset($requestData['img_urls'])) {
-            $requestData['img_urls'] = json_encode($reviewData['img_urls']);
-        }
+        // $data = $request->only(['title', 'content', 'category']);
+        // $data['user_id'] = $user->id;
+        // $post = Post::create($data);
+
+        $reviewData = $request->only(['good_id', 'summary', 'content', 'stars']);
+        $reviewData['user_id'] = $user->id;
+        // if(isset($requestData['img_urls'])) {
+        //     $requestData['img_urls'] = json_encode($reviewData['img_urls']);
+        // }
 
         $review = GoodReview::create($reviewData);
         return response()->json($review, 201);
@@ -89,8 +95,8 @@ class GoodReviewController extends Controller
             'summary' => 'sometimes|required|string|max:255',
             'content' => 'sometimes|required|string',
             'stars' => 'sometimes|required|integer|min:1|max:5',
-            'img_urls' => 'nullable|array',
-            'img_urls.*' => 'string',
+            // 'img_urls' => 'nullable|array',
+            // 'img_urls.*' => 'string',
         ]);
 
         if ($validator->fails()) {
@@ -98,9 +104,9 @@ class GoodReviewController extends Controller
         }
 
         $requestData = $request->all();
-        if(isset($requestData['img_urls'])) {
-            $requestData['img_urls'] = json_encode($requestData['img_urls']);
-        }
+        // if(isset($requestData['img_urls'])) {
+        //     $requestData['img_urls'] = json_encode($requestData['img_urls']);
+        // }
 
         $review->update($requestData);
         return response()->json($review);
