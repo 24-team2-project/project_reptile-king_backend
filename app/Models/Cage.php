@@ -11,7 +11,7 @@ class Cage extends Model
 
     protected $fillable = [
         'user_id',
-        'reptile_id',
+        'reptile_serial_code',
         'memo',
         'set_temp',
         'set_hum',
