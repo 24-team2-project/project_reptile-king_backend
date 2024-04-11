@@ -30,7 +30,7 @@ class GoodController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {   
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:50',
             'price' => 'required|numeric',

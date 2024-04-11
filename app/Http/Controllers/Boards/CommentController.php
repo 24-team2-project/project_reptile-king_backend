@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\DB;
 
 class CommentController extends Controller
 {
@@ -30,10 +32,11 @@ class CommentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request, Post $post)
+    {   
+        $user = JWTAuth::user();
+
         $request->validate([
-            'user_id' => 'required',
             'post_id' => 'required',
             'content' => 'required',
             'parent_comment_id' => 'nullable|exists:comments,id',
@@ -57,8 +60,8 @@ class CommentController extends Controller
         }
 
         $comment = Comment::create([
-            'user_id' => $request->user_id,
-            'post_id' => $request->post_id,
+            'user_id' => $user->id,
+            'post_id' => $post->id,
             'content' => $request->content,
             'parent_comment_id' => $request->parent_comment_id,
             'group_comment_id' => $group_comment_id,
@@ -67,6 +70,20 @@ class CommentController extends Controller
         ]);
 
         return response()->json($comment, 201);
+
+        //     DB::beginTransaction();
+        // try {
+        //     // 댓글 저장
+        //     // ...
+
+        //     DB::commit();
+        //     return response()->json($comment, 201);
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     // 에러 처리
+        //     // ...
+        //     return response()->json(['error' => '댓글 저장 중 오류가 발생했습니다.'], 500);
+        // }
     }
 
 

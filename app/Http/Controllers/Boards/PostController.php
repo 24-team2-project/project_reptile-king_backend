@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Comment;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PostController extends Controller
 {
@@ -29,9 +30,10 @@ class PostController extends Controller
 
     
     public function store(Request $request)
-    {
+    {   
+        $user = JWTAuth::user();
+
         $request->validate([
-            'user_id' => 'required',
             'title' => 'required',
             'content' => 'required',
             'category' => 'required',
@@ -39,8 +41,9 @@ class PostController extends Controller
             // 'img_urls' => 'sometimes|array',
             // 'img_urls.*' => 'string',
         ]);
-
-        $post = Post::create($request->all());
+        $data = $request->only(['title', 'content', 'category']);
+        $data['user_id'] = $user->id;
+        $post = Post::create($data);
 
         return response()->json($post, 201);
     }
