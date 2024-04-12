@@ -76,7 +76,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 });
 
 //카테고리
-Route::get('/posts', [CategoryController::class, 'index']);
+Route::get('/categories', [CategoryController::class, 'index']);
 
 // // 커뮤니티
 Route::get('/posts/search', [PostController::class, 'search']);
