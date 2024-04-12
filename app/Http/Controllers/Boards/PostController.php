@@ -42,7 +42,7 @@ class PostController extends Controller
             // 'img_urls.*' => 'string',
             // images => 'sometimes|array',
         ]);
-        $data = $request->only(['title', 'content', 'category']);
+        $data = $request->only(['title', 'content', 'category_id']);
         $data['user_id'] = $user->id;
         $post = Post::create($data);
 
@@ -84,7 +84,7 @@ class PostController extends Controller
             return response()->json(['message' => '이 글을 수정할 권한이 없습니다.'], 403);
         }
 
-        $data = $request->only(['title', 'content', 'category']);
+        $data = $request->only(['title', 'content', 'category_id']);
         $data['user_id'] = $user->id;
         $post->update($data);
 
