@@ -59,4 +59,6 @@ class TemperatureHumidityController extends Controller
 
     }
 
+    
+
 }

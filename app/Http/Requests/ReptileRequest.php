@@ -26,9 +26,10 @@ class ReptileRequest extends FormRequest
             'nickname'  => ['required', 'string', 'max:255'],
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
-            'birth'       => [ 'nullable'],
+            'birth'     => [ 'nullable'],
             'memo'      => [ 'string', 'nullable'],
             'images'    => [ 'array', 'nullable'],
+            'images.*'  => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
         ];
     }
 
