@@ -70,7 +70,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
     // 카테고리
     Route::apiResource('categories', CategoryController::class)->only('store', 'destroy');
-    
+
     // 사용자
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
 });
@@ -79,6 +79,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 Route::get('/categories', [CategoryController::class, 'index']);
 
 // // 커뮤니티
+Route::get('/posts/{category_id}', [CategoryController::class, 'selectCategory']);
 Route::get('/posts/search', [PostController::class, 'search']);
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
