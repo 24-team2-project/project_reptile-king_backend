@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Boards;
 use App\Http\Controllers\Controller;
 use App\Models\Support;
 use Illuminate\Http\Request;
+use App\Models\Category;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SupportController extends Controller
 {
@@ -13,7 +15,9 @@ class SupportController extends Controller
      */
     public function index()
     {
-        //
+        $user = JWTAuth::user();
+        $supports = Support::where('user_id', $user->id)->get();
+        return response()->json([$supports]);
     }
 
     /**
@@ -29,7 +33,7 @@ class SupportController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**

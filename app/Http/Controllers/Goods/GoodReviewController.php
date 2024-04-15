@@ -51,11 +51,8 @@ class GoodReviewController extends Controller
         // $data['user_id'] = $user->id;
         // $post = Post::create($data);
 
-        $reviewData = $request->only(['good_id', 'summary', 'content', 'stars']);
+        $reviewData = $request->safe();
         $reviewData['user_id'] = $user->id;
-        // if(isset($requestData['img_urls'])) {
-        //     $requestData['img_urls'] = json_encode($reviewData['img_urls']);
-        // }
 
         $review = GoodReview::create($reviewData);
         return response()->json($review, 201);
