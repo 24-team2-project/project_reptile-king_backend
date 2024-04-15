@@ -37,7 +37,7 @@ class GoodController extends Controller
             'category_id' => 'required',
             'content' => 'required|string|max:255',
             'img_urls' => 'nullable|array',
-            'img_urls.*' => 'string',
+            'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
