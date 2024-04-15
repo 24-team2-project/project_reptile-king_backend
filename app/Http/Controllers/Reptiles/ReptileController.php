@@ -46,15 +46,19 @@ class ReptileController extends Controller
     // 파충류 등록
     public function store(ReptileRequest $request)
     {
-        try {
-            $request->validated();
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'msg'              => '유효성 검사 오류',
-                'validation error' => $e->getMessage()
-            ], 400);
+        $validatedList = [
+            'nickname'  => ['required', 'string', 'max:255'],
+            'species'   => ['required'],
+            'gender'    => ['required', 'max:1', 'in:M,F'],
+            'birth'     => [ 'nullable'],
+            'memo'      => [ 'string', 'nullable'],
+        ];
+        if($request->hasFile('images')){
+            $validatedList['images'] = ['nullable', 'array'];
+            $validatedList['images.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
         }
+
+        $validator = Validator::make($request->all(), $validatedList);
 
         $user = JWTAuth::user();
         $validator = $request->safe();
@@ -65,10 +69,7 @@ class ReptileController extends Controller
                 $serialCode = 'REPTILE-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(2));
             }
 
-            $images = new ImageController();
-            $imageUrls = $images->uploadImageForController($validator['images'], 'reptiles');
-
-            Reptile::create([
+            $createList = [
                 'user_id'       => $user->id,
                 'serial_code'   => $serialCode,
                 'nickname'      => $validator['nickname'],
@@ -76,8 +77,16 @@ class ReptileController extends Controller
                 'gender'        => $validator['gender'],
                 'birth'         => $validator['birth'],
                 'memo'          => $validator['memo'],
-                'img_urls'      => $imageUrls,
-            ]);
+                'img_urls'      => null,
+            ];
+
+            if($validator->has('images')){
+                $images = new ImageController();
+                $imageUrls = $images->uploadImageForController($validator['images'], 'reptiles');
+                $createList['img_urls'] = $imageUrls;
+            }
+
+            Reptile::create($createList);
 
             return response()->json([
                 'msg' => '등록 완료',
@@ -115,16 +124,20 @@ class ReptileController extends Controller
     // 파충류 정보 수정
     public function update(Request $request, Reptile $reptile)
     {
-        $validator = Validator::make($request->all(), [
+        $validatedList = [
             'nickname'  => ['required', 'string', 'max:255'],
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
             'memo'      => [ 'string', 'nullable'],
             'imgUrls'           => ['nullable', 'array'],
-            'newImages'         => ['nullable', 'array'],
-            'newImages.*'       => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
-        ]);
+        ];
+        if($request->hasFile('images')){
+            $validatedList['images'] = ['nullable', 'array'];
+            $validatedList['images.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
+        }
+
+        $validator = Validator::make($request->all(), $validatedList);
 
         if($validator->fails()){
             return response()->json([
@@ -149,8 +162,13 @@ class ReptileController extends Controller
             ], 500);
         }
 
-        $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
-        $uploadImgList = array_merge($updateImgList, $imgUrls);
+        if($reqData->has('newImages')){
+            $imgUrls = $images->uploadImageForController($reqData['newImages'], 'reptiles');
+            $uploadImgList = array_merge($updateImgList, $imgUrls);
+        } else{
+            $uploadImgList = $updateImgList;
+        }
+
 
         $user = JWTAuth::user();
 
