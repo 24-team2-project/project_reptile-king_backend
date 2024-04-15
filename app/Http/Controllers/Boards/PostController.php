@@ -76,7 +76,7 @@ class PostController extends Controller
             'img_urls' => 'nullable|array',
             'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        $reqData = $request->safe()->all();
+        $reqData = $request->all();
         $reqData['user_id'] = $user->id;
 
         // 이미지 업로드 처리
@@ -125,7 +125,7 @@ class PostController extends Controller
             return response()->json(['message' => '이 글을 수정할 권한이 없습니다.'], 403);
         }
 
-        $reqData = $request->safe()->all();
+        $reqData = $request->all();
         $reqData['user_id'] = $user->id;
 
         $dbImgList = $post->img_urls;
