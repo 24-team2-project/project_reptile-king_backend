@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Purchase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 
 class PurchaseController extends Controller
 {
     public function index()
     {
-        //
+        $user = JWTAuth::user();
+        $purchases = Purchase::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+
+        return response()->json($purchases);
     }
 
     public function create()

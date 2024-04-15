@@ -80,9 +80,11 @@ class PostController extends Controller
         $reqData['user_id'] = $user->id;
 
         // 이미지 업로드 처리
-        $images = new ImageController();
-        $imageUrls = $images->uploadImageForController($reqData['images'], 'posts');
-        $reqData['img_urls'] = $imageUrls;
+        if ($request->has('img_urls')) {
+            $images = new ImageController();
+            $imageUrls = $images->uploadImageForController($reqData['images'], 'posts');
+            $reqData['img_urls'] = $imageUrls;
+        };
 
         $post = Post::create($reqData);
 
@@ -198,5 +200,12 @@ class PostController extends Controller
     public function onClickLikesButton(Post $post)
     {
         $post->increment('likes');
+    }
+
+    public function myPost()
+    {
+        $user = JWTAuth::user();
+        $posts = Post::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        return response()->json($posts);
     }
 }
