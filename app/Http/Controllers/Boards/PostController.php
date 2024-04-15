@@ -20,6 +20,7 @@ class PostController extends Controller
                 'content' => $post->content,
                 'user_id' => $post->user_id,
                 'category_id' => $post->category_id,
+                'parent_id' => $post->parent_id,
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
                 'created_at' => $post->created_at,
                 'updated_at' => $post->updated_at,
