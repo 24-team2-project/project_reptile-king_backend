@@ -54,6 +54,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
     // 사육장
     Route::apiResource('cages', CageController::class)->except('create', 'edit');
+    Route::post('/cages/{cage}/temperature-humidity', [CageController::class, 'getTempHumData']);
 
     // // 커뮤니티
     Route::apiResource('posts', PostController::class)->except('index', 'show', 'create', 'edit', );

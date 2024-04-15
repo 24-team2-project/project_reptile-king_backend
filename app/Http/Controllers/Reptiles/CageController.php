@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Upload\ImageController;
 use App\Models\Cage;
 use App\Models\CageSerialCode;
+use App\Models\TemperatureHumidity;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -133,7 +134,9 @@ class CageController extends Controller
             'memo'              => ['nullable', 'string'],
             'setTemp'           => ['required'],
             'setHum'            => ['required'],
-            'images'            => ['nullable', 'array'],
+            'imgUrls'           => ['nullable', 'array'],
+            'newImages'         => ['nullable', 'array'],
+            'newImages.*'       => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
         ]);
 
         if($validator->fails()){
@@ -145,7 +148,22 @@ class CageController extends Controller
         
         $reqData = $validator->safe();
 
-        
+        $dbImgList = $cage->img_urls;
+        $updateImgList = $reqData['imgUrls'];
+        $deleteImgList = array_diff($dbImgList, $updateImgList);
+
+        $images = new ImageController();
+        $deleteResult = $images->deleteImages($deleteImgList);
+
+        if(gettype($deleteResult) !== 'boolean'){
+            return response()->json([
+                'msg' => '이미지 삭제 실패',
+                'error' => $deleteResult
+            ], 500);
+        }
+
+        $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
+        $uploadImgList = array_merge($updateImgList, $imgUrls);
 
         $user = JWTAuth::user();
 
@@ -159,7 +177,13 @@ class CageController extends Controller
 
             if($reqData['images'])
             
-            $cage->update($request->all());
+            $cage->update([
+                'reptile_serial_code' => $reqData['reptileSerialCode'],
+                'memo'                => $reqData['memo'],
+                'set_temp'            => $reqData['setTemp'],
+                'set_hum'             => $reqData['setHum'],
+                'img_urls'            => $uploadImgList,
+            ]);
 
             return response()->json([
                 'msg' => '수정 완료'
@@ -197,5 +221,36 @@ class CageController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    // 온습도 데이터 전달(프론트에서 사용)
+    public function getTempHumData(Cage $cage)
+    {
+        $user = JWTAuth::user();
+
+        if($cage->user_id !== $user->id){
+            return response()->json([
+                'msg' => '권한 없음'
+            ], 403);
+        }
+
+        $serialCode = $cage->serial_code;
+
+        try {
+            $tempHumData = TemperatureHumidity::where('serial_code', $serialCode)->get();
+
+            return response()->json([
+                'msg' => '성공',
+                'data' => $tempHumData
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Requests\ReptileRequest;
 use App\Models\Reptile;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
@@ -114,6 +115,43 @@ class ReptileController extends Controller
     // 파충류 정보 수정
     public function update(Request $request, Reptile $reptile)
     {
+        $validator = Validator::make($request->all(), [
+            'nickname'  => ['required', 'string', 'max:255'],
+            'species'   => ['required'],
+            'gender'    => ['required', 'max:1', 'in:M,F'],
+            'birth'     => [ 'nullable'],
+            'memo'      => [ 'string', 'nullable'],
+            'imgUrls'           => ['nullable', 'array'],
+            'newImages'         => ['nullable', 'array'],
+            'newImages.*'       => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                'msg'   => '유효성 검사 오류',
+                'error' => $validator->errors()
+            ], 400);
+        }
+
+        $reqData = $validator->safe();
+
+        $dbImgList = $reptile->img_urls;
+        $updateImgList = $reqData['imgUrls'];
+        $deleteImgList = array_diff($dbImgList, $updateImgList);
+
+        $images = new ImageController();
+        $deleteResult = $images->deleteImages($deleteImgList);
+
+        if(gettype($deleteResult) !== 'boolean'){
+            return response()->json([
+                'msg' => '이미지 삭제 실패',
+                'error' => $deleteResult
+            ], 500);
+        }
+
+        $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
+        $uploadImgList = array_merge($updateImgList, $imgUrls);
+
         $user = JWTAuth::user();
 
         if($reptile->user_id !== $user->id){
@@ -123,7 +161,14 @@ class ReptileController extends Controller
         }
 
         try {
-            $reptile->update($request->all());
+            $reptile->update([
+                'nickname'  => $reqData['nickname'],
+                'species'   => $reqData['species'],
+                'gender'    => $reqData['gender'],
+                'birth'     => $reqData['birth'],
+                'memo'      => $reqData['memo'],
+                'img_urls'  => $uploadImgList,
+            ]);
 
             return response()->json([
                 'msg' => '수정 완료'
