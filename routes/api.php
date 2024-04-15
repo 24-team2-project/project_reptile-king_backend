@@ -80,7 +80,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 Route::get('/categories', [CategoryController::class, 'index']);
 
 // // 커뮤니티
-Route::get('/posts/{category_id}', [CategoryController::class, 'selectCategory']);
+Route::get('/posts/{category_id}', [PostController::class, 'selectCategory']);
 Route::get('/posts/search', [PostController::class, 'search']);
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
