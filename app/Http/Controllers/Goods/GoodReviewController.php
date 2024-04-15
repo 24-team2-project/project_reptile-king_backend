@@ -51,7 +51,7 @@ class GoodReviewController extends Controller
         // $data['user_id'] = $user->id;
         // $post = Post::create($data);
 
-        $reviewData = $request->safe();
+        $reviewData = $request->all();
         $reviewData['user_id'] = $user->id;
 
         $review = GoodReview::create($reviewData);

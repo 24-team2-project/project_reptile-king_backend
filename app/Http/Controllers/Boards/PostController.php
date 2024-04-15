@@ -37,8 +37,13 @@ class PostController extends Controller
 
     public function selectCategory(Request $request)
     {
-        $category = $request->category_id;
-        $posts = Post::where('category_id', $category)->orderBy('created_at', 'desc')->get();
+        $category = Category::findOrFail($request->category_id);
+        if ($category['division'] == 'posts') {
+            $subPostList = Category::where('parent_id', $request->category_id)->pluck('id');
+            $posts = Post::whereIn('category_id', $subPostList)->get();
+        } else {
+            $posts = Post::where('category_id', $id)->orderBy('created_at', 'desc')->get();
+        }
         $posts = $posts->map(function ($post) {
             return [
                 'id' => $post->id,
