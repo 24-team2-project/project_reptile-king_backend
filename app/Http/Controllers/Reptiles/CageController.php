@@ -39,15 +39,21 @@ class CageController extends Controller
     // 사육장 등록
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validatedList = [
             'reptileSerialCode' => ['nullable', 'string'],
             'memo'              => ['nullable', 'string'],
             'setTemp'           => ['required'],
             'setHum'            => ['required'],
             'serialCode'        => ['required', 'string'],
-            'images'            => ['nullable', 'array'],
-            'images.*'          => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
-        ]);
+        ];
+        if($request->hasFile('images')){
+            $validatedList['images'] = ['nullable', 'array'];
+            $validatedList['images.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
+        }
+
+        // dd($request->all());
+
+        $validator = Validator::make($request->all(), $validatedList);
 
         if($validator->fails()){
             return response()->json([
@@ -79,19 +85,23 @@ class CageController extends Controller
 
             } else{
                 $user = JWTAuth::user();
-
-                $images = new ImageController();
-                $imgUrls = $images->uploadImageForController($reqData['images'], 'cages');
-
-                Cage::create([
+                $createList = [
                     'user_id'             => $user->id,
                     'reptile_serial_code' => $reqData['reptileSerialCode'],
                     'memo'                => $reqData['memo'],
                     'set_temp'            => $reqData['setTemp'],
                     'set_hum'             => $reqData['setHum'],
                     'serial_code'         => $reqData['serialCode'],
-                    'img_urls'            => $imgUrls,
-                ]);
+                    'img_urls'            => null,
+                ];
+
+                if($reqData->has('images')){
+                    $images = new ImageController();
+                    $imgUrls = $images->uploadImageForController($reqData['images'], 'cages');
+                    $createList['img_urls'] = $imgUrls;
+                }
+
+                Cage::create($createList);
 
                 $msg = '등록 완료';
             }
@@ -129,15 +139,29 @@ class CageController extends Controller
     // 사육장 정보 수정
     public function update(Request $request, Cage $cage)
     {
-        $validator = Validator::make($request->all(), [
+        $validatedList = [
             'reptileSerialCode' => ['nullable', 'string'],
             'memo'              => ['nullable', 'string'],
             'setTemp'           => ['required'],
             'setHum'            => ['required'],
+            'serialCode'        => ['required', 'string'],
             'imgUrls'           => ['nullable', 'array'],
-            'newImages'         => ['nullable', 'array'],
-            'newImages.*'       => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
-        ]);
+        ];
+        if($request->hasFile('images')){
+            $validatedList['newImages'] = ['nullable', 'array'];
+            $validatedList['newImages.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
+        }
+
+        $validator = Validator::make($request->all(), $validatedList);
+
+        if($validator->fails()){
+            return response()->json([
+                'msg'   => '유효성 검사 오류',
+                'error' => $validator->errors()->all(),
+            ], 400);
+        }
+
+        $validator = Validator::make($request->all(), $validatedList);
 
         if($validator->fails()){
             return response()->json([
@@ -147,6 +171,8 @@ class CageController extends Controller
         }
         
         $reqData = $validator->safe();
+
+        $user = JWTAuth::user();
 
         $dbImgList = $cage->img_urls;
         $updateImgList = $reqData['imgUrls'];
@@ -162,10 +188,12 @@ class CageController extends Controller
             ], 500);
         }
 
-        $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
-        $uploadImgList = array_merge($updateImgList, $imgUrls);
-
-        $user = JWTAuth::user();
+        if($reqData->has('newImages')){
+            $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
+            $uploadImgList = array_merge($updateImgList, $imgUrls);
+        } else{
+            $uploadImgList = $updateImgList;
+        }
 
         if($cage->user_id !== $user->id){
             return response()->json([
