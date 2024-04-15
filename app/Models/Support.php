@@ -12,7 +12,7 @@ class Support extends Model
     protected $fillable = [
         'user_id',
         'title',
-        'category',
+        'category_id',
         'content',
         'img_urls',
         'answer',
@@ -21,6 +21,10 @@ class Support extends Model
 
     public function user(){
         return $this->belongsTo(User::class);
+    }
+
+    public function category(){
+        return $this->belongsTo(Category::class);
     }
 
 }
