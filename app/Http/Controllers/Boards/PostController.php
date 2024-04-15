@@ -42,9 +42,9 @@ class PostController extends Controller
             $subPostList = Category::where('parent_id', $request->category_id)->pluck('id');
             $posts = Post::whereIn('category_id', $subPostList)->get();
         } else {
-            $posts = Post::where('category_id', $id)->orderBy('created_at', 'desc')->get();
+            $posts = Post::where('category_id', $request->category_id)->orderBy('created_at', 'desc')->get();
         }
-        $posts = $posts->map(function ($post) {
+        $posts = $posts->with('category')->get()->map(function ($post) {
             return [
                 'id' => $post->id,
                 'title' => $post->title,
