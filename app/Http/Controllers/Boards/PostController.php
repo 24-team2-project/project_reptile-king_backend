@@ -5,32 +5,57 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Comment;
+use App\Models\Category;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::all();
+        $posts = Post::with('category')->get();
+        $posts = $posts->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'content' => $post->content,
+                'user_id' => $post->user_id,
+                'category_id' => $post->category_id,
+                'category_name' => $post->category ? $post->category->name : '카테고리 없음',
+                'created_at' => $post->created_at,
+                'updated_at' => $post->updated_at,
+            ];
+        });
         return response()->json($posts);
     }
 
-    public function selectPost(Request $request)
-    {   
-        $category = $request->category;
-        $selectPost = Post::where('category', $category)->orderBy('created_at', 'desc')->get();
-        return response()->json($selectPost);
+    public function selectCategory(Request $request)
+    {
+        $category = $request->category_id;
+        $posts = Post::where('category', $category)->orderBy('created_at', 'desc')->get();
+        $posts = $posts->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'content' => $post->content,
+                'user_id' => $post->user_id,
+                'category_id' => $post->category_id,
+                'category_name' => $post->category ? $post->category->name : '카테고리 없음',
+                'created_at' => $post->created_at,
+                'updated_at' => $post->updated_at,
+            ];
+        });
+        return response()->json($posts);
     }
 
-    
+
     public function create()
     {
         //
     }
 
-    
+
     public function store(Request $request)
-    {   
+    {
         $user = JWTAuth::user();
 
         $request->validate([
@@ -49,9 +74,9 @@ class PostController extends Controller
         return response()->json($post, 201);
     }
 
-    
+
     public function show(Post $post)
-    {   
+    {
         $post = Post::with('comments')->find($post->id);
         if (!$post) {
             return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
@@ -60,13 +85,13 @@ class PostController extends Controller
         return response()->json($post);
     }
 
-    
+
     public function edit(Post $post)
     {
         //
     }
 
-    
+
     public function update(Request $request, Post $post)
     {
         $user = JWTAuth::user();
@@ -91,7 +116,7 @@ class PostController extends Controller
         return response()->json($post->fresh());
     }
 
-    
+
     public function destroy(Post $post)
     {
         $post = Post::find($post->id);
@@ -115,6 +140,23 @@ class PostController extends Controller
         $posts = Post::where('title', 'LIKE', "%{$search}%")
                     ->orWhere('content', 'LIKE', "%{$search}%")
                     ->get();
+
+        if ($posts->isEmpty()) {
+            return response()->json(['message' => '검색 결과가 없습니다.'], 404);
+        }
+
+        $posts = $posts->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'content' => $post->content,
+                'user_id' => $post->user_id,
+                'category_id' => $post->category_id,
+                'category_name' => $post->category ? $post->category->name : '카테고리 없음',
+                'created_at' => $post->created_at,
+                'updated_at' => $post->updated_at,
+            ];
+        });
 
         return response()->json($posts);
     }

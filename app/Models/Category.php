@@ -17,4 +17,9 @@ class Category extends Model
         'parent_id',
         'img_url',
     ];
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
 }
