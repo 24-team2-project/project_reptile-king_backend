@@ -31,7 +31,7 @@ class PostController extends Controller
     public function selectCategory(Request $request)
     {
         $category = $request->category_id;
-        $posts = Post::where('category', $category)->orderBy('created_at', 'desc')->get();
+        $posts = Post::where('category_id', $category)->orderBy('created_at', 'desc')->get();
         $posts = $posts->map(function ($post) {
             return [
                 'id' => $post->id,
