@@ -70,7 +70,7 @@ class PostController extends Controller
             // 'img_urls.*' => 'string',
             // images => 'sometimes|array',
         ]);
-        $data = $request->only(['title', 'content', 'category_id']);
+        $data = $request->only(['title', 'content', 'category_id', 'parent_id']);
         $data['user_id'] = $user->id;
         $post = Post::create($data);
 
