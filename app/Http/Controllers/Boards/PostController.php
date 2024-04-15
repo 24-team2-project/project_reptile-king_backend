@@ -40,6 +40,7 @@ class PostController extends Controller
                 'content' => $post->content,
                 'user_id' => $post->user_id,
                 'category_id' => $post->category_id,
+                'parent_id' => $post->parent_id,
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
                 'created_at' => $post->created_at,
                 'updated_at' => $post->updated_at,
@@ -63,6 +64,7 @@ class PostController extends Controller
             'title' => 'required',
             'content' => 'required',
             'category_id' => 'required',
+            'parent_id' => 'required'
             // 미구현
             // 'img_urls' => 'sometimes|array',
             // 'img_urls.*' => 'string',
