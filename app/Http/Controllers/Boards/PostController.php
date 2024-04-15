@@ -23,6 +23,7 @@ class PostController extends Controller
                 'content' => $post->content,
                 'user_id' => $post->user_id,
                 'category_id' => $post->category_id,
+                'parent_id' => $post->parent_id,
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
                 'created_at' => $post->created_at,
                 'updated_at' => $post->updated_at,
@@ -45,6 +46,7 @@ class PostController extends Controller
                 'content' => $post->content,
                 'user_id' => $post->user_id,
                 'category_id' => $post->category_id,
+                'parent_id' => $post->parent_id,
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
                 'created_at' => $post->created_at,
                 'updated_at' => $post->updated_at,
@@ -83,7 +85,16 @@ class PostController extends Controller
         $reqData['img_urls'] = $imageUrls;
 
         $post = Post::create($reqData);
-
+            'parent_id' => 'required'
+            // 미구현
+            // 'img_urls' => 'sometimes|array',
+            // 'img_urls.*' => 'string',
+            // images => 'sometimes|array',
+        ]);
+        $data = $request->only(['title', 'content', 'category_id', 'parent_id']);
+        $data['user_id'] = $user->id;
+        $post = Post::create($data);
+      
         return response()->json($post, 201);
     }
 
