@@ -7,6 +7,9 @@ use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Category;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Upload\ImageController;
+
 
 class PostController extends Controller
 {
@@ -24,6 +27,9 @@ class PostController extends Controller
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
                 'created_at' => $post->created_at,
                 'updated_at' => $post->updated_at,
+                'likes' => $post->likes,
+                'views' => $post->views,
+                'img_urls' => $post->img_urls,
             ];
         });
         return response()->json($posts);
@@ -44,6 +50,9 @@ class PostController extends Controller
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
                 'created_at' => $post->created_at,
                 'updated_at' => $post->updated_at,
+                'likes' => $post->likes,
+                'views' => $post->views,
+                'img_urls' => $post->img_urls,
             ];
         });
         return response()->json($posts);
@@ -64,6 +73,18 @@ class PostController extends Controller
             'title' => 'required',
             'content' => 'required',
             'category_id' => 'required',
+            'img_urls' => 'nullable|array',
+            'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+        $reqData = $request->safe();
+        $reqData['user_id'] = $user->id;
+
+        // 이미지 업로드 처리
+        $images = new ImageController();
+        $imageUrls = $images->uploadImageForController($reqData['images'], 'posts');
+        $reqData['img_urls'] = $imageUrls;
+
+        $post = Post::create($reqData);
             'parent_id' => 'required'
             // 미구현
             // 'img_urls' => 'sometimes|array',
@@ -73,7 +94,7 @@ class PostController extends Controller
         $data = $request->only(['title', 'content', 'category_id', 'parent_id']);
         $data['user_id'] = $user->id;
         $post = Post::create($data);
-
+      
         return response()->json($post, 201);
     }
 
@@ -103,18 +124,34 @@ class PostController extends Controller
             'title' => 'required',
             'content' => 'required',
             'category_id' => 'required',
-            // 미구현
-            // 'img_urls' => 'sometimes|array',
-            // 'img_urls.*' => 'string',
+            'img_urls' => 'nullable|array',
+            'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($post->user_id !== $user->id) {
             return response()->json(['message' => '이 글을 수정할 권한이 없습니다.'], 403);
         }
 
-        $data = $request->only(['title', 'content', 'category_id']);
-        $data['user_id'] = $user->id;
-        $post->update($data);
+        $reqData = $request->safe();
+        $reqData['user_id'] = $user->id;
+
+        $dbImgList = $post->img_urls;
+        $updateImgList = $reqData['img_urls'];
+        $deleteImgList = array_diff($dbImgList, $updateImgList);
+
+        $images = new ImageController();
+        $deleteResult = $images->deleteImages($deleteImgList);
+
+        if(gettype($deleteResult) !== 'boolean'){
+            return response()->json([
+                'msg' => '이미지 삭제 실패',
+                'error' => $deleteResult
+            ], 500);
+        }
+
+        $imgUrls = $images->uploadImageForController($reqData['img_urls'], 'posts');
+        $uploadImgList = array_merge($updateImgList, $imgUrls);
+        $post->update($reqData);
 
         return response()->json($post->fresh());
     }
@@ -158,6 +195,9 @@ class PostController extends Controller
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
                 'created_at' => $post->created_at,
                 'updated_at' => $post->updated_at,
+                'likes' => $post->likes,
+                'views' => $post->views,
+                'img_urls' => $post->img_urls,
             ];
         });
 

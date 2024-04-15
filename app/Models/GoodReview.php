@@ -27,7 +27,7 @@ class GoodReview extends Model
     }
 
     public function good(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Good::class);
     }
 
 

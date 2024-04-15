@@ -14,7 +14,7 @@ class GoodController extends Controller
     public function index()
     {
         $goods = Good::leftJoin('good_reviews', 'goods.id', '=', 'good_reviews.good_id')
-                    ->selectRaw('goods.*, AVG(good_reviews.stars) as starAvg')
+                    ->selectRaw('goods.*, AVG(good_reviews.stars) as starAvg, COUNT(good_reviews.id) as reviewCount')
                     ->groupBy('goods.id')
                     ->get();
 
