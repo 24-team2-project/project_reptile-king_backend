@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('temperature_humidities', function (Blueprint $table) {
             $table->id();
             $table->string('serial_code', 20);
-            $table->foreign('serial_code')->references('serial_code')->on('cage_serial_codes')->cascadeOnUpdate()->cascadeOnDelete();
             $table->float('temperature');
             $table->unsignedSmallInteger('humidity');
             $table->timestampTz('created_at');
+            
+            $table->foreign('serial_code')->references('serial_code')->on('cage_serial_codes')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 

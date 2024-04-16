@@ -60,6 +60,13 @@ class ReptileController extends Controller
 
         $validator = Validator::make($request->all(), $validatedList);
 
+        if($validator->fails()){
+            return response()->json([
+                'msg'   => '유효성 검사 오류',
+                'error' => $validator->errors()
+            ], 400);
+        }
+
         $user = JWTAuth::user();
         $validator = $request->safe();
         
@@ -107,19 +114,33 @@ class ReptileController extends Controller
     {
         $user = JWTAuth::user();
 
-        if($reptile->user_id !== $user->id){
+        try {
+            $msg = "성공";
+            $state = 200;
+
+            if(empty($reptile)){
+                $msg = '데이터 없음';
+                $state = 404;
+            } else if($reptile->user_id !== $user->id){
+                $msg = '권한 없음';
+                $state = 403;
+            } else if($reptile->expired_at !== null){
+                $msg = '만료된 파충류';
+                $state = 400;
+            }
+
             return response()->json([
-                'msg' => '권한 없음'
-            ], 403);
+                'msg' => $msg,
+                'reptile' => $reptile
+            ], $state);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'msg' => '성공',
-            'reptile' => $reptile
-        ], 200);
-        
     }
-
 
     // 파충류 정보 수정
     public function update(Request $request, Reptile $reptile)
@@ -156,10 +177,7 @@ class ReptileController extends Controller
         $deleteResult = $images->deleteImages($deleteImgList);
 
         if(gettype($deleteResult) !== 'boolean'){
-            return response()->json([
-                'msg' => '이미지 삭제 실패',
-                'error' => $deleteResult
-            ], 500);
+            return $deleteResult;
         }
 
         if($reqData->has('newImages')){
@@ -168,7 +186,6 @@ class ReptileController extends Controller
         } else{
             $uploadImgList = $updateImgList;
         }
-
 
         $user = JWTAuth::user();
 
@@ -212,6 +229,13 @@ class ReptileController extends Controller
         }
 
         try {
+
+            $images = new ImageController();
+            $deleteResult = $images->deleteImages($reptile->img_urls);
+            if(gettype($deleteResult) !== 'boolean'){
+                return $deleteResult;
+            }
+
             $reptile->delete();
 
             return response()->json([
