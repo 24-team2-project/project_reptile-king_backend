@@ -43,10 +43,10 @@ class ReptileController extends Controller
     }
 
     // 파충류 등록
-    public function store(ReptileRequest $request)
+    public function store(Request $request)
     {
         $validatedList = [
-            'name'  => ['required', 'string', 'max:255'],
+            'name'      => ['required', 'string', 'max:255'],
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
@@ -67,7 +67,7 @@ class ReptileController extends Controller
         }
 
         $user = JWTAuth::user();
-        $validator = $request->safe();
+        $reqData = $validator->safe();
         
         try {
             $serialCode = 'REPTILE-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(2));
@@ -78,17 +78,17 @@ class ReptileController extends Controller
             $createList = [
                 'user_id'       => $user->id,
                 'serial_code'   => $serialCode,
-                'name'      => $validator['name'],
-                'species'       => $validator['species'],
-                'gender'        => $validator['gender'],
-                'birth'         => $validator['birth'],
-                'memo'          => $validator['memo'],
+                'name'          => $reqData['name'],
+                'species'       => $reqData['species'],
+                'gender'        => $reqData['gender'],
+                'birth'         => $reqData['birth'],
+                'memo'          => $reqData['memo'],
                 'img_urls'      => null,
             ];
 
-            if($validator->has('images')){
+            if($reqData->has('images')){
                 $images = new ImageController();
-                $imageUrls = $images->uploadImageForController($validator['images'], 'reptiles');
+                $imageUrls = $images->uploadImageForController($reqData['images'], 'reptiles');
                 $createList['img_urls'] = $imageUrls;
             }
 
@@ -145,7 +145,7 @@ class ReptileController extends Controller
     public function update(Request $request, Reptile $reptile)
     {
         $validatedList = [
-            'name'  => ['required', 'string', 'max:255'],
+            'name'      => ['required', 'string', 'max:255'],
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
@@ -196,7 +196,7 @@ class ReptileController extends Controller
 
         try {
             $reptile->update([
-                'name'  => $reqData['name'],
+                'name'      => $reqData['name'],
                 'species'   => $reqData['species'],
                 'gender'    => $reqData['gender'],
                 'birth'     => $reqData['birth'],
