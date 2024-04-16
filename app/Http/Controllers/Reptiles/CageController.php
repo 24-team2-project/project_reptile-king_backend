@@ -50,9 +50,7 @@ class CageController extends Controller
             $validatedList['images'] = ['nullable', 'array'];
             $validatedList['images.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
         }
-
-        // dd($request->all());
-
+        
         $validator = Validator::make($request->all(), $validatedList);
 
         if($validator->fails()){
@@ -124,16 +122,33 @@ class CageController extends Controller
     {
         $user = JWTAuth::user();
 
-        if($cage->user_id !== $user->id){
-            return response()->json([
-                'msg' => '권한 없음'
-            ], 403);
-        } 
+        try {
+            $msg = '성공';
+            $state = 200;
 
-        return response()->json([
-            'msg' => '성공',
-            'reptile' => $cage
-        ], 200);
+            if(empty($cage)){
+                $msg = '데이터 없음';
+                $state = 404;
+            } else if($cage->user_id !== $user->id){
+                $msg = '권한 없음';
+                $state = 403;
+            } else if($cage->expired_at !== null){
+                $msg = '만료된 사육장';
+                $state = 400;
+            } 
+
+            return response()->json([
+                'msg' => $msg,
+                'cage' => $cage
+            ], $state);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+        
     }
 
     // 사육장 정보 수정
@@ -160,15 +175,6 @@ class CageController extends Controller
                 'error' => $validator->errors()->all(),
             ], 400);
         }
-
-        $validator = Validator::make($request->all(), $validatedList);
-
-        if($validator->fails()){
-            return response()->json([
-                'msg'   => '유효성 검사 오류',
-                'error' => $validator->errors()->all(),
-            ], 400);
-        }
         
         $reqData = $validator->safe();
 
@@ -182,10 +188,7 @@ class CageController extends Controller
         $deleteResult = $images->deleteImages($deleteImgList);
 
         if(gettype($deleteResult) !== 'boolean'){
-            return response()->json([
-                'msg' => '이미지 삭제 실패',
-                'error' => $deleteResult
-            ], 500);
+            return $deleteResult;
         }
 
         if($reqData->has('newImages')){
@@ -197,13 +200,11 @@ class CageController extends Controller
 
         if($cage->user_id !== $user->id){
             return response()->json([
-                'msg' => '수정 권한 없음'
+                'msg' => '권한 없음'
             ], 403);
         }
 
         try {
-
-            if($reqData['images'])
             
             $cage->update([
                 'reptile_serial_code' => $reqData['reptileSerialCode'],
@@ -237,6 +238,17 @@ class CageController extends Controller
         }
 
         try {
+
+            $images = new ImageController();
+            $deleteResult = $images->deleteImages($cage->img_urls);
+            if(gettype($deleteResult) !== 'boolean'){
+                return $deleteResult;
+            }
+
+            // $cage->update([
+            //     'expired_at' => now()
+            // ]);
+
             $cage->delete();
 
             return response()->json([
