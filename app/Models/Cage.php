@@ -10,6 +10,7 @@ class Cage extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'user_id',
         'reptile_serial_code',
         'memo',
