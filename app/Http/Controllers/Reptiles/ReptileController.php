@@ -21,7 +21,6 @@ class ReptileController extends Controller
 
         try {
             $reptiles = $user->reptiles;
-
             if($reptiles->isEmpty()){
                 return response()->json([
                     'msg' => '데이터 없음'
@@ -79,7 +78,7 @@ class ReptileController extends Controller
             $createList = [
                 'user_id'       => $user->id,
                 'serial_code'   => $serialCode,
-                'name'      => $validator['nickname'],
+                'name'      => $validator['name'],
                 'species'       => $validator['species'],
                 'gender'        => $validator['gender'],
                 'birth'         => $validator['birth'],
@@ -197,7 +196,7 @@ class ReptileController extends Controller
 
         try {
             $reptile->update([
-                'name'  => $reqData['nickname'],
+                'name'  => $reqData['name'],
                 'species'   => $reqData['species'],
                 'gender'    => $reqData['gender'],
                 'birth'     => $reqData['birth'],
