@@ -70,7 +70,12 @@ class JWTAuthController extends Controller
 
     // 토큰 재발급
     public function refresh(){
-        return JWTAuth::refresh();
+        $refreshToken = JWTAuth::refresh();
+
+        $response = response()->json([ 'msg' => '토큰 갱신 성공' ], 200);
+        $response->headers->set('Refresh-Token', 'Bearer '.$refreshToken);
+
+        return $response;
     }
 
 }
