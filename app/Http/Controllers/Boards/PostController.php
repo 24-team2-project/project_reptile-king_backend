@@ -40,11 +40,11 @@ class PostController extends Controller
         $category = Category::findOrFail($request->category_id);
         if ($category['division'] == 'posts') {
             $subPostList = Category::where('parent_id', $request->category_id)->pluck('id');
-            $posts = Post::whereIn('category_id', $subPostList)->get();
+            $posts = Post::whereIn('category_id', $subPostList)->with('category')->get();
         } else {
-            $posts = Post::where('category_id', $request->category_id)->orderBy('created_at', 'desc')->get();
+            $posts = Post::where('category_id', $request->category_id)->with('category')->orderBy('created_at', 'desc')->get();
         }
-        $posts = $posts->with('category')->get()->map(function ($post) {
+        $posts = $posts->map(function ($post) {
             return [
                 'id' => $post->id,
                 'title' => $post->title,
@@ -53,8 +53,8 @@ class PostController extends Controller
                 'category_id' => $post->category_id,
                 'parent_id' => $post->parent_id,
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
-                'created_at' => $post->created_at,
-                'updated_at' => $post->updated_at,
+                'created_at' => $post->created_at->toDateTimeString(),
+                'updated_at' => $post->updated_at->toDateTimeString(),
                 'likes' => $post->likes,
                 'views' => $post->views,
                 'img_urls' => $post->img_urls,
@@ -62,6 +62,8 @@ class PostController extends Controller
         });
         return response()->json($posts);
     }
+    
+    
 
 
     public function create()
