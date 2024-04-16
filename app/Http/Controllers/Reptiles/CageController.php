@@ -40,12 +40,12 @@ class CageController extends Controller
     public function store(Request $request)
     {
         $validatedList = [
-            'name'              => ['required', 'string', 'max:255'],
+            'name'              => ['required', 'string'],
             'reptileSerialCode' => ['nullable', 'string'],
             'memo'              => ['nullable', 'string'],
             'setTemp'           => ['required', 'numeric', 'min:10', 'max:40'],
-            'setHum'            => ['required'],
-            'serialCode'        => ['required', 'integer', 'min:0', 'max:90'],
+            'setHum'            => ['required', 'integer', 'min:0', 'max:90'],
+            'serialCode'        => ['required', 'string'],
         ];
         if($request->hasFile('images')){
             $validatedList['images'] = ['nullable', 'array'];
@@ -160,8 +160,8 @@ class CageController extends Controller
             'name'              => ['required', 'string', 'max:255'],
             'reptileSerialCode' => ['nullable', 'string'],
             'memo'              => ['nullable', 'string'],
-            'setTemp'           => ['required'],
-            'setHum'            => ['required'],
+            'setTemp'           => ['required', 'numeric', 'min:10', 'max:40'],
+            'setHum'            => ['required', 'integer', 'min:0', 'max:90'],
             'serialCode'        => ['required', 'string'],
             'imgUrls'           => ['nullable', 'array'],
         ];
