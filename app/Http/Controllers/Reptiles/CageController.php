@@ -43,8 +43,8 @@ class CageController extends Controller
             'name'              => ['required', 'string'],
             'reptileSerialCode' => ['nullable', 'string'],
             'memo'              => ['nullable', 'string'],
-            'setTemp'           => ['required', 'numeric', 'min:10', 'max:40'],
-            'setHum'            => ['required', 'integer', 'min:0', 'max:90'],
+            'setTemp'           => ['required'],
+            'setHum'            => ['required'],
             'serialCode'        => ['required', 'string'],
         ];
         if($request->hasFile('images')){
@@ -160,8 +160,8 @@ class CageController extends Controller
             'name'              => ['required', 'string', 'max:255'],
             'reptileSerialCode' => ['nullable', 'string'],
             'memo'              => ['nullable', 'string'],
-            'setTemp'           => ['required', 'numeric', 'min:10', 'max:40'],
-            'setHum'            => ['required', 'integer', 'min:0', 'max:90'],
+            'setTemp'           => ['required'],
+            'setHum'            => ['required'],
             'serialCode'        => ['required', 'string'],
             'imgUrls'           => ['nullable', 'array'],
         ];
