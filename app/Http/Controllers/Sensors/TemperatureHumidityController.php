@@ -17,7 +17,7 @@ class TemperatureHumidityController extends Controller
     // 온습도 데이터 저장
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->json()->all(),[
             'serialCode' => ['required', 'string'],
             'temperature' => ['required', 'numeric'],
             'humidity'    => ['required', 'integer', 'min:0', 'max:100'],
