@@ -68,12 +68,14 @@ class CageController extends Controller
             $state = 201;
 
             // 파충류 등록 유무 확인
-            if($reqData['reptileSerialCode'] !== null){
+            if(!empty($reqData['reptileSerialCode'])){
                 $cageConfirm = Cage::where('reptile_serial_code', $reqData['reptileSerialCode'])->first();
                 if(!empty($cageConfirm) && $cageConfirm->expired_at === null){ 
                     $msg = '이미 등록된 파충류';
                     $state = 400;
                 }
+            } else{
+                $reqData['reptileSerialCode'] = null;
             }
 
             $serialCodeConfirm = CageSerialCode::where('serial_code', $reqData['serialCode'])->first();
@@ -114,7 +116,7 @@ class CageController extends Controller
             return response()->json([
                 'msg'   => '서버 오류',
                 'error' => $e->getMessage()
-            ]);
+            ], 500);
         }
 
     }
