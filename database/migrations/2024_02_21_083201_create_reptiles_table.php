@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('species');
             $table->string('gender');
             $table->date('birth')->nullable(true);
-            $table->string('nickname');
+            $table->string('name');
             $table->text('memo')->nullable(true);
             $table->json('img_urls')->nullable(true);
             $table->timestampsTz();

@@ -47,7 +47,7 @@ class ReptileController extends Controller
     public function store(ReptileRequest $request)
     {
         $validatedList = [
-            'nickname'  => ['required', 'string', 'max:255'],
+            'name'  => ['required', 'string', 'max:255'],
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
@@ -79,7 +79,7 @@ class ReptileController extends Controller
             $createList = [
                 'user_id'       => $user->id,
                 'serial_code'   => $serialCode,
-                'nickname'      => $validator['nickname'],
+                'name'      => $validator['nickname'],
                 'species'       => $validator['species'],
                 'gender'        => $validator['gender'],
                 'birth'         => $validator['birth'],
@@ -146,7 +146,7 @@ class ReptileController extends Controller
     public function update(Request $request, Reptile $reptile)
     {
         $validatedList = [
-            'nickname'  => ['required', 'string', 'max:255'],
+            'name'  => ['required', 'string', 'max:255'],
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
@@ -197,7 +197,7 @@ class ReptileController extends Controller
 
         try {
             $reptile->update([
-                'nickname'  => $reqData['nickname'],
+                'name'  => $reqData['nickname'],
                 'species'   => $reqData['species'],
                 'gender'    => $reqData['gender'],
                 'birth'     => $reqData['birth'],

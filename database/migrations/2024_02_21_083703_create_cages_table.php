@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('cages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('name')->nullable(true);
             $table->string('reptile_serial_code', 20)->nullable(true);
             $table->text('memo')->nullable(true);
             $table->float('set_temp')->nullable(true);

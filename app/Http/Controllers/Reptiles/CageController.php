@@ -40,11 +40,12 @@ class CageController extends Controller
     public function store(Request $request)
     {
         $validatedList = [
+            'name'              => ['required', 'string', 'max:255'],
             'reptileSerialCode' => ['nullable', 'string'],
             'memo'              => ['nullable', 'string'],
-            'setTemp'           => ['required'],
+            'setTemp'           => ['required', 'numeric', 'min:10', 'max:40'],
             'setHum'            => ['required'],
-            'serialCode'        => ['required', 'string'],
+            'serialCode'        => ['required', 'integer', 'min:0', 'max:90'],
         ];
         if($request->hasFile('images')){
             $validatedList['images'] = ['nullable', 'array'];
@@ -85,6 +86,7 @@ class CageController extends Controller
                 $user = JWTAuth::user();
                 $createList = [
                     'user_id'             => $user->id,
+                    'name'                => $reqData['name'],
                     'reptile_serial_code' => $reqData['reptileSerialCode'],
                     'memo'                => $reqData['memo'],
                     'set_temp'            => $reqData['setTemp'],
@@ -155,6 +157,7 @@ class CageController extends Controller
     public function update(Request $request, Cage $cage)
     {
         $validatedList = [
+            'name'              => ['required', 'string', 'max:255'],
             'reptileSerialCode' => ['nullable', 'string'],
             'memo'              => ['nullable', 'string'],
             'setTemp'           => ['required'],
@@ -207,6 +210,7 @@ class CageController extends Controller
         try {
             
             $cage->update([
+                'name'                => $reqData['name'],
                 'reptile_serial_code' => $reqData['reptileSerialCode'],
                 'memo'                => $reqData['memo'],
                 'set_temp'            => $reqData['setTemp'],
