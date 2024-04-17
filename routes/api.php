@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ForgetPasswordController;
 use App\Http\Controllers\Goods\GoodController;
+use App\Http\Controllers\Goods\GoodReviewController;
+use App\Http\Controllers\Goods\PurchaseController;
 use App\Http\Controllers\JWTAuthController;
 use App\Http\Controllers\RegisterUserController;
 use App\Http\Controllers\Reptiles\CageController;
@@ -10,11 +12,11 @@ use App\Http\Controllers\Users\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Boards\PostController;
 use App\Http\Controllers\Boards\CommentController;
+use App\Http\Controllers\Boards\SupportController;
 use App\Http\Controllers\Sensors\TemperatureHumidityController;
 use App\Http\Controllers\Upload\ImageController;
-use App\Http\Controllers\Goods\GoodReviewController;
-use App\Http\Controllers\Goods\PurchaseController;
 use App\Http\Controllers\Categories\CategoryController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -74,6 +76,12 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
     // 카테고리
     Route::apiResource('categories', CategoryController::class)->only('store', 'destroy');
+
+    // 구매
+    Route::apiResource('purchases', PurchaseController::class)->except('create', 'edit', 'update');
+
+    // 문의
+    Route::apiResource('supports', SupportController::class)->except('create', 'edit');
 
     // 사용자
     Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음

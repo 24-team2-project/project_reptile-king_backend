@@ -38,12 +38,14 @@ class PostController extends Controller
     public function selectCategory(Request $request)
     {
         $category = Category::findOrFail($request->category_id);
+
         if ($category['division'] == 'posts') {
             $subPostList = Category::where('parent_id', $request->category_id)->pluck('id');
             $posts = Post::whereIn('category_id', $subPostList)->with('category')->get();
         } else {
             $posts = Post::where('category_id', $request->category_id)->with('category')->orderBy('created_at', 'desc')->get();
         }
+
         $posts = $posts->map(function ($post) {
             return [
                 'id' => $post->id,
@@ -60,6 +62,7 @@ class PostController extends Controller
                 'img_urls' => $post->img_urls,
             ];
         });
+
         return response()->json($posts);
     }
     
@@ -91,7 +94,7 @@ class PostController extends Controller
             $images = new ImageController();
             $imageUrls = $images->uploadImageForController($reqData['images'], 'posts');
             $reqData['img_urls'] = $imageUrls;
-        };
+        }
 
         $post = Post::create($reqData);
 
@@ -102,10 +105,13 @@ class PostController extends Controller
     public function show($id)
     {
         $post = Post::with('comments')->find($id);
+
         if (!$post) {
             return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
         }
+
         $post->increment('views');
+
         return response()->json($post);
     }
 
@@ -139,18 +145,21 @@ class PostController extends Controller
         $updateImgList = $reqData['img_urls'];
         $deleteImgList = array_diff($dbImgList, $updateImgList);
 
-        $images = new ImageController();
-        $deleteResult = $images->deleteImages($deleteImgList);
+        if (!empty($reqData['img_urls'])) {
+            $images = new ImageController();
+            $deleteResult = $images->deleteImages($deleteImgList);
 
-        if(gettype($deleteResult) !== 'boolean'){
-            return response()->json([
-                'msg' => '이미지 삭제 실패',
-                'error' => $deleteResult
-            ], 500);
+            if(gettype($deleteResult) !== 'boolean'){
+                return response()->json([
+                    'msg' => '이미지 삭제 실패',
+                    'error' => $deleteResult
+                ], 500);
+            }
+
+            $imgUrls = $images->uploadImageForController($reqData['img_urls'], 'posts');
+            $uploadImgList = array_merge($updateImgList, $imgUrls);
         }
-
-        $imgUrls = $images->uploadImageForController($reqData['img_urls'], 'posts');
-        $uploadImgList = array_merge($updateImgList, $imgUrls);
+        
         $post->update($reqData);
 
         return response()->json($post->fresh());
@@ -159,11 +168,10 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        $post = Post::find($post->id);
-        if (!$post) {
-            return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
-        }
-
+        // $post = Post::find($post->id);
+        // if (!$post) {
+        //     return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
+        // }
         $post->delete();
 
         return response()->json(['message' => '게시글이 삭제되었습니다.']);
@@ -213,6 +221,7 @@ class PostController extends Controller
     {
         $user = JWTAuth::user();
         $posts = Post::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+
         return response()->json($posts);
     }
 }
