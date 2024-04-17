@@ -15,7 +15,7 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::with('category')->get();
+        $posts = Post::with('category')->paginate(10);
         $posts = $posts->map(function ($post) {
             return [
                 'id' => $post->id,
@@ -41,9 +41,9 @@ class PostController extends Controller
 
         if ($category['division'] == 'posts') {
             $subPostList = Category::where('parent_id', $request->category_id)->pluck('id');
-            $posts = Post::whereIn('category_id', $subPostList)->with('category')->get();
+            $posts = Post::whereIn('category_id', $subPostList)->with('category')->paginate(10);
         } else {
-            $posts = Post::where('category_id', $request->category_id)->with('category')->orderBy('created_at', 'desc')->get();
+            $posts = Post::where('category_id', $request->category_id)->with('category')->orderBy('created_at', 'desc')->paginate(10);
         }
 
         $posts = $posts->map(function ($post) {
@@ -51,6 +51,7 @@ class PostController extends Controller
                 'id' => $post->id,
                 'title' => $post->title,
                 'content' => $post->content,
+                'comments' => $post->comments,
                 'user_id' => $post->user_id,
                 'category_id' => $post->category_id,
                 'parent_id' => $post->parent_id,
