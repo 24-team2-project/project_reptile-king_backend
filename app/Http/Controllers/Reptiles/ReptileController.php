@@ -109,7 +109,7 @@ class ReptileController extends Controller
     }
 
     // 파충류 정보 확인
-    public function show(Reptile $reptile)
+    public function show(String $reptileSerialCode)
     {
         $user = JWTAuth::user();
 
@@ -117,12 +117,15 @@ class ReptileController extends Controller
             $msg = "성공";
             $state = 200;
 
+            $reptile = Reptile::where([
+                ['user_id', $user->id],
+                ['serial_code', $reptileSerialCode],
+                ['expired_at', null]
+            ])->first();
+
             if(empty($reptile)){
                 $msg = '데이터 없음';
                 $state = 404;
-            } else if($reptile->user_id !== $user->id){
-                $msg = '권한 없음';
-                $state = 403;
             } else if($reptile->expired_at !== null){
                 $msg = '만료된 파충류';
                 $state = 400;
