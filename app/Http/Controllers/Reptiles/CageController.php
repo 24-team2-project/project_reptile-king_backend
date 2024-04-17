@@ -300,7 +300,12 @@ class CageController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-
-
     }
+
+    // 설정 온, 습도 하드웨어로 전달
+    public function transmitTempHumData(Cage $cage)
+    {
+        
+    }
+
 }

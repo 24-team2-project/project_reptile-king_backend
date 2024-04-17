@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('size');
             $table->string('serial_code', 20)->unique();
+            $table->string('location')->after('serial_code');
             $table->timestampsTz();
         });
     }
