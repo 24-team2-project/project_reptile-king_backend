@@ -85,7 +85,7 @@ class PostController extends Controller
             'content' => 'required',
             'category_id' => 'required',
             'img_urls' => 'nullable|array',
-            'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'img_urls.*' => 'nullable|string|url',
         ]);
         $reqData = $request->all();
         $reqData['user_id'] = $user->id;
