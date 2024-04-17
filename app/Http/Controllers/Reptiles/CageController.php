@@ -270,20 +270,24 @@ class CageController extends Controller
     }
 
     // 온습도 데이터 전달(프론트에서 사용)
-    public function getTempHumData(Cage $cage)
+    public function getTempHumData(String $serialCode)
     {
         $user = JWTAuth::user();
 
-        if($cage->user_id !== $user->id){
+        $cage = Cage::where([
+            ['serial_code', $serialCode],
+            ['user_id', $user->id],
+            ['expired_at', null]
+        ])->first();
+
+        if(empty($cage)){
             return response()->json([
-                'msg' => '권한 없음'
-            ], 403);
+                'msg' => '사육장을 찾을 수 없음'
+            ], 404);
         }
 
-        $serialCode = $cage->serial_code;
-
         try {
-            $tempHumData = TemperatureHumidity::where('serial_code', $serialCode)->get();
+            $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)->get();
 
             return response()->json([
                 'msg' => '성공',
