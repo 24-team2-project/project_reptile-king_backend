@@ -25,9 +25,19 @@ class CageSerialCodeFactory extends Factory
             $confirmed = CageSerialCode::where('serial_code', $serialCode)->exists();
         }
         
+        $ipBase = '172.21.2.';
+        $ipEnd = $this->faker->unique()->numberBetween(2, 254);
+        $location = $ipBase.$ipEnd;
+
+        $confirmIp = CageSerialCode::where('location', $location)->exists();
+        while($confirmIp){
+            $confirmIp = CageSerialCode::where('location', $location)->exists();
+        }
+
         return [
-            'size' => $this->faker->randomElement(['small', 'medium', 'large']),
-            'serial_code' => $serialCode,
+            'size'          => $this->faker->randomElement(['small', 'medium', 'large']),
+            'serial_code'   => $serialCode,
+            'location'      => $location,
         ];
     }
 }

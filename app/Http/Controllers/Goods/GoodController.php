@@ -58,7 +58,7 @@ class GoodController extends Controller
      */
     public function show(Good $good)
     {
-        $good->load('reviews');
+        $good->load('goodReviews');
         return response()->json($good);
     }
 
