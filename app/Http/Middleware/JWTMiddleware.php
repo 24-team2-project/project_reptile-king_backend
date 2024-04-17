@@ -28,26 +28,32 @@ class JWTMiddleware
             // 401 : 요구되는 인증 정보를 누락하거나 잘못 지정해 요청한 경우, 지정한 리소스에 대한 액세스 권한이 없다.
 
         }catch (TokenExpiredException $e) {
-            try {
-                // 만료된 토큰 갱신 시도
-                $refreshToken = JWTAuth::refresh();
-                JWTAuth::setToken($refreshToken);
-                JWTAuth::authenticate(); // 명시적으로 사용자 인증
+            // try {
+            //     // 만료된 토큰 갱신 시도
+            //     $refreshToken = JWTAuth::refresh();
+            //     JWTAuth::setToken($refreshToken);
+            //     JWTAuth::authenticate(); // 명시적으로 사용자 인증
 
-                // 갱신된 토큰으로 다음 요청 진행
-                $response = $next($request);
+            //     // 갱신된 토큰으로 다음 요청 진행
+            //     $response = $next($request);
 
-                // 응답헤더에 갱신된 토큰 포함
-                $response->headers->set('Refresh-Token', 'Bearer '.$refreshToken);
-                return $response;
+            //     // 응답헤더에 갱신된 토큰 포함
+            //     $response->headers->set('Refresh-Token', 'Bearer '.$refreshToken);
+            //     return $response;
                 
-            } catch (JWTException $e) {
-                // 갱신 실패 
-                return response()->json([
-                    'msg' => '토큰을 재발급 불가. 재발급 기간 만료, 다시 로그인해 보세요.',
-                    'error' => $e->getMessage(),
-                ], 401);
-            }
+            // } catch (JWTException $e) {
+            //     // 갱신 실패 
+            //     return response()->json([
+            //         'msg' => '토큰을 재발급 불가. 재발급 기간 만료, 다시 로그인해 보세요.',
+            //         'error' => $e->getMessage(),
+            //     ], 401);
+            // }
+
+            return response()->json([
+                'msg' => '토큰 만료, 다시 로그인해 보세요',
+                'error' => $e->getMessage(),
+            ], 401);
+
         }  catch(Exception $e) {
                 // 인증 토큰 없음
                 return response()->json(['msg' => '인증 토큰을 찾을 수 없음'], 401);

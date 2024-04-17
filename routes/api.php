@@ -47,7 +47,7 @@ Route::post('/login', [ JWTAuthController::class, 'login' ]);
 // jwt토큰 인증이 필요한 라우터들
 Route::group([ 'middleware' => 'jwt.auth'], function(){
     // 토큰 갱신
-    // Route::post('/refresh-token', [ JWTAuthController::class, 'refresh' ]);
+    Route::post('/refresh-token', [ JWTAuthController::class, 'refresh' ]);
 
     // 로그아웃
     Route::post('/logout', [ JWTAuthController::class, 'logout' ]);
@@ -57,7 +57,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
     // 사육장
     Route::apiResource('cages', CageController::class)->except('create', 'edit');
-    Route::post('/cages/{cage}/temperature-humidity', [CageController::class, 'getTempHumData']);
+    Route::get('/cages/{serialCode}/temperature-humidity', [CageController::class, 'getTempHumData']);
 
     // // 커뮤니티
     Route::apiResource('posts', PostController::class)->except('index', 'show', 'create', 'edit', );
