@@ -99,9 +99,9 @@ class PostController extends Controller
     }
 
 
-    public function show(Post $post)
+    public function show($id)
     {
-        $post = Post::with('comments')->find($post->id);
+        $post = Post::with('comments')->find($id);
         if (!$post) {
             return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
         }
