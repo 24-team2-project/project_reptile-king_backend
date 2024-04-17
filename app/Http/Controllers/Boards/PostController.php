@@ -15,13 +15,14 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::with('category')->paginate(10);
+        $posts = Post::with('category', 'user')->paginate(10);
         $posts = $posts->map(function ($post) {
             return [
                 'id' => $post->id,
                 'title' => $post->title,
                 'content' => $post->content,
                 'user_id' => $post->user_id,
+                'nickname' => $post->user ? $post->user->nickname : '탈퇴한 회원',
                 'category_id' => $post->category_id,
                 'parent_id' => $post->parent_id,
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
@@ -41,9 +42,9 @@ class PostController extends Controller
 
         if ($category['division'] == 'posts') {
             $subPostList = Category::where('parent_id', $request->category_id)->pluck('id');
-            $posts = Post::whereIn('category_id', $subPostList)->with('category')->paginate(10);
+            $posts = Post::whereIn('category_id', $subPostList)->with(['category', 'user'])->paginate(10);
         } else {
-            $posts = Post::where('category_id', $request->category_id)->with('category')->orderBy('created_at', 'desc')->paginate(10);
+            $posts = Post::where('category_id', $request->category_id)->with(['category', 'user'])->orderBy('created_at', 'desc')->paginate(10);
         }
 
         $posts = $posts->map(function ($post) {
@@ -53,8 +54,8 @@ class PostController extends Controller
                 'content' => $post->content,
                 'comments' => $post->comments,
                 'user_id' => $post->user_id,
+                'nickname' => $post->user ? $post->user->nickname : '탈퇴한 회원',
                 'category_id' => $post->category_id,
-                'parent_id' => $post->parent_id,
                 'category_name' => $post->category ? $post->category->name : '카테고리 없음',
                 'created_at' => $post->created_at->toDateTimeString(),
                 'updated_at' => $post->updated_at->toDateTimeString(),
@@ -103,7 +104,7 @@ class PostController extends Controller
 
     public function show($id)
     {
-        $post = Post::with('comments')->find($id);
+        $post = Post::with('comments', 'category', 'user:id,nickname')->find($id);
 
         if (!$post) {
             return response()->json(['message' => '해당 게시글을 찾을 수 없습니다.'], 404);
