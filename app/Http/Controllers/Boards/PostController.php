@@ -93,7 +93,7 @@ class PostController extends Controller
         // 이미지 업로드 처리
         if ($request->has('img_urls')) {
             $images = new ImageController();
-            $imageUrls = $images->uploadImageForController($reqData['images'], 'posts');
+            $imageUrls = $images->uploadImageForController($request->img_urls, 'posts');
             $reqData['img_urls'] = $imageUrls;
         }
 
