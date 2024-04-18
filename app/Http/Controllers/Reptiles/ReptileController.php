@@ -103,24 +103,27 @@ class ReptileController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-
-
     }
 
     // 파충류 정보 확인
-    public function show(Reptile $reptile)
+    public function show(String $reptileSerialCode)
     {
         $user = JWTAuth::user();
 
         try {
-            if($reptile->user_id !== $user->id){
-                return response()->json([
-                    'msg' => '권한 없음'
-                ], 403);
-            } else if(empty($reptile)){
+            $reptile = Reptile::where([
+                ['user_id', $user->id],
+                ['serial_code', $reptileSerialCode]
+            ])->first();
+
+            if(empty($reptile)){
                 return response()->json([
                     'msg' => '데이터 없음'
                 ], 200);
+            } else if($reptile->user_id !== $user->id){
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
             } else if($reptile->expired_at !== null){
                 return response()->json([
                     'msg' => '만료된 데이터'
@@ -157,7 +160,7 @@ class ReptileController extends Controller
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
             'memo'      => [ 'string', 'nullable'],
-            'imgUrls'           => ['nullable'],
+            'imgUrls'   => ['nullable'],
         ];
         if($request->hasFile('images')){
             $validatedList['images'] = ['nullable', 'array'];
