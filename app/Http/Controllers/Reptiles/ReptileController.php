@@ -4,12 +4,10 @@ namespace App\Http\Controllers\Reptiles;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Upload\ImageController;
-use App\Http\Requests\ReptileRequest;
 use App\Models\Reptile;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 class ReptileController extends Controller
@@ -45,6 +43,8 @@ class ReptileController extends Controller
     // 파충류 등록
     public function store(Request $request)
     {
+        $user = JWTAuth::user();
+
         $validatedList = [
             'name'      => ['required', 'string', 'max:255'],
             'species'   => ['required'],
@@ -66,7 +66,6 @@ class ReptileController extends Controller
             ], 400);
         }
 
-        $user = JWTAuth::user();
         $reqData = $validator->safe();
         
         try {
@@ -114,27 +113,26 @@ class ReptileController extends Controller
         $user = JWTAuth::user();
 
         try {
-            $msg = "성공";
-            $state = 200;
 
             $reptile = Reptile::where([
                 ['user_id', $user->id],
-                ['serial_code', $reptileSerialCode],
-                ['expired_at', null]
+                ['serial_code', $reptileSerialCode]
             ])->first();
 
             if(empty($reptile)){
-                $msg = '데이터 없음';
-                $state = 404;
+                return response()->json([
+                    'msg' => '데이터 없음'
+                ], 200);
             } else if($reptile->expired_at !== null){
-                $msg = '만료된 파충류';
-                $state = 400;
+                return response()->json([
+                    'msg' => '만료된 데이터'
+                ], 410);
             }
 
             return response()->json([
-                'msg' => $msg,
+                'msg' => '성공',
                 'reptile' => $reptile
-            ], $state);
+            ], 200);
 
         } catch (Exception $e) {
             return response()->json([
@@ -147,6 +145,14 @@ class ReptileController extends Controller
     // 파충류 정보 수정
     public function update(Request $request, Reptile $reptile)
     {
+        $user = JWTAuth::user();
+
+        if($reptile->user_id !== $user->id){
+            return response()->json([
+                'msg' => '권한 없음'
+            ], 403);
+        }
+
         $validatedList = [
             'name'      => ['required', 'string', 'max:255'],
             'species'   => ['required'],
@@ -194,14 +200,6 @@ class ReptileController extends Controller
             $uploadImgList = array_merge($updateImgList, $imgUrls);
         } else{
             $uploadImgList = $updateImgList;
-        }
-
-        $user = JWTAuth::user();
-
-        if($reptile->user_id !== $user->id){
-            return response()->json([
-                'msg' => '권한 없음'
-            ], 403);
         }
 
         try {
