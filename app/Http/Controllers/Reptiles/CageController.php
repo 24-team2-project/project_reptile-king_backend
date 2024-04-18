@@ -138,24 +138,24 @@ class CageController extends Controller
         $user = JWTAuth::user();
 
         try {
-            $msg = '성공';
-            $state = 200;
-
             if(empty($cage)){
-                $msg = '데이터 없음';
-                $state = 404;
+                return response()->json([
+                    'msg' => '데이터 없음'
+                ], 200);
             } else if($cage->user_id !== $user->id){
-                $msg = '권한 없음';
-                $state = 403;
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
             } else if($cage->expired_at !== null){
-                $msg = '만료된 사육장';
-                $state = 400;
+                return response()->json([
+                    'msg' => '만료된 데이터'
+                ], 410);
             } 
 
             return response()->json([
-                'msg' => $msg,
+                'msg' => '성공',
                 'cage' => $cage
-            ], $state);
+            ], 200);
 
         } catch (Exception $e) {
             return response()->json([
