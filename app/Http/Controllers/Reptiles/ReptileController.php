@@ -239,10 +239,12 @@ class ReptileController extends Controller
 
         try {
 
-            $images = new ImageController();
-            $deleteResult = $images->deleteImages($reptile->img_urls);
-            if(gettype($deleteResult) !== 'boolean'){
-                return $deleteResult;
+            if($reptile->img_urls !== null){
+                $images = new ImageController();
+                $deleteResult = $images->deleteImages($reptile->img_urls);
+                if(gettype($deleteResult) !== 'boolean'){
+                    return $deleteResult;
+                }
             }
 
             $reptile->delete();

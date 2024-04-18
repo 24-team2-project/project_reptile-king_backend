@@ -266,12 +266,15 @@ class CageController extends Controller
 
         try {
 
-            $images = new ImageController();
-            $deleteResult = $images->deleteImages($cage->img_urls);
-            if(gettype($deleteResult) !== 'boolean'){
-                return $deleteResult;
+            if($cage->img_urls !== null){
+                $cage->img_urls = [];
+                $images = new ImageController();
+                $deleteResult = $images->deleteImages($cage->img_urls);
+                if(gettype($deleteResult) !== 'boolean'){
+                    return $deleteResult;
+                }
             }
-
+            
             // $cage->update([
             //     'expired_at' => now()
             // ]);
