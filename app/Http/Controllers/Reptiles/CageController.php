@@ -150,12 +150,12 @@ class CageController extends Controller
                 return response()->json([
                     'msg' => '만료된 데이터'
                 ], 410);
-            } 
-
-            return response()->json([
-                'msg' => '성공',
-                'cage' => $cage
-            ], 200);
+            } else{
+                return response()->json([
+                    'msg' => '성공',
+                    'cage' => $cage
+                ], 200);
+            }
 
         } catch (Exception $e) {
             return response()->json([
@@ -175,82 +175,76 @@ class CageController extends Controller
             return response()->json([
                 'msg' => '권한 없음'
             ], 403);
-        }
-
-        $validatedList = [
-            'name'              => ['required', 'string', 'max:255'],
-            'reptileSerialCode' => ['nullable', 'string'],
-            'memo'              => ['nullable', 'string'],
-            'setTemp'           => ['required'],
-            'setHum'            => ['required'],
-            'serialCode'        => ['required', 'string'],
-            'imgUrls'           => ['nullable'],
-        ];
-        if($request->hasFile('images')){
-            $validatedList['newImages'] = ['nullable', 'array'];
-            $validatedList['newImages.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
-        }
-
-        $validator = Validator::make($request->all(), $validatedList);
-
-        if($validator->fails()){
+        } else if($cage->expired_at !== null){
             return response()->json([
-                'msg'   => '유효성 검사 오류',
-                'error' => $validator->errors()->all(),
-            ], 400);
-        }
-        
-        $reqData = $validator->safe();
-
-        $dbImgList = $cage->img_urls;
-        $updateImgList = json_decode($reqData['imgUrls'], true);
-
-        if($dbImgList === null){
-            $dbImgList = [];
-        }
-        $deleteImgList = array_diff($dbImgList, $updateImgList);
-
-        if(!empty($deleteImgList)){
-            $images = new ImageController();
-            $deleteResult = $images->deleteImages($deleteImgList);
-
-            if(gettype($deleteResult) !== 'boolean'){
-                return $deleteResult;
+                'msg' => '만료된 데이터'
+            ], 410);
+        } else {
+            $validatedList = [
+                'name'              => ['required', 'string', 'max:255'],
+                'reptileSerialCode' => ['nullable', 'string'],
+                'memo'              => ['nullable', 'string'],
+                'serialCode'        => ['required', 'string'],
+                'imgUrls'           => ['nullable'],
+            ];
+            if($request->hasFile('images')){
+                $validatedList['newImages'] = ['nullable', 'array'];
+                $validatedList['newImages.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
             }
-        }
-
-        if($reqData->has('newImages')){
-            $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
-            $uploadImgList = array_merge($updateImgList, $imgUrls);
-        } else{
-            $uploadImgList = $updateImgList;
-        }
-
-        try {
-            
-            $cage->update([
-                'name'                => $reqData['name'],
-                'reptile_serial_code' => $reqData['reptileSerialCode'],
-                'memo'                => $reqData['memo'],
-                'set_temp'            => $reqData['setTemp'],
-                'set_hum'             => $reqData['setHum'],
-                'img_urls'            => $uploadImgList,
-            ]);
-
-            $result = $this->transmitTempHumData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
-            if(gettype($result) !== 'boolean'){
-                return $result;
+    
+            $validator = Validator::make($request->all(), $validatedList);
+    
+            if($validator->fails()){
+                return response()->json([
+                    'msg'   => '유효성 검사 오류',
+                    'error' => $validator->errors()->all(),
+                ], 400);
             }
-
-            return response()->json([
-                'msg' => '수정 완료'
-            ], 200);
             
-        } catch (Exception $e) {
-            return response()->json([
-                'msg' => '서버 오류',
-                'error' => $e->getMessage()
-            ], 500);
+            $reqData = $validator->safe();
+    
+            $dbImgList = $cage->img_urls;
+            $updateImgList = json_decode($reqData['imgUrls'], true);
+    
+            if($dbImgList === null){
+                $dbImgList = [];
+            }
+            $deleteImgList = array_diff($dbImgList, $updateImgList);
+    
+            if(!empty($deleteImgList)){
+                $images = new ImageController();
+                $deleteResult = $images->deleteImages($deleteImgList);
+    
+                if(gettype($deleteResult) !== 'boolean'){
+                    return $deleteResult;
+                }
+            }
+    
+            if($reqData->has('newImages')){
+                $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
+                $uploadImgList = array_merge($updateImgList, $imgUrls);
+            } else{
+                $uploadImgList = $updateImgList;
+            }
+    
+            try {
+                $cage->update([
+                    'name'                => $reqData['name'],
+                    'reptile_serial_code' => $reqData['reptileSerialCode'],
+                    'memo'                => $reqData['memo'],
+                    'img_urls'            => $uploadImgList,
+                ]);
+    
+                return response()->json([
+                    'msg' => '수정 완료'
+                ], 200);
+                
+            } catch (Exception $e) {
+                return response()->json([
+                    'msg' => '서버 오류',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
         }
     }
 
@@ -263,33 +257,37 @@ class CageController extends Controller
             return response()->json([
                 'msg' => '권한 없음'
             ], 403);
-        }
-
-        try {
-            // 이미지 삭제
-            if($cage->img_urls !== null){
-                $images = new ImageController();
-                $deleteResult = $images->deleteImages($cage->img_urls);
-                if(gettype($deleteResult) !== 'boolean'){
-                    return $deleteResult;
+        } else if($cage->expired_at !== null){
+            return response()->json([
+                'msg' => '만료된 데이터'
+            ], 410);
+        } else{
+            try {
+                // 이미지 삭제
+                if($cage->img_urls !== null){
+                    $images = new ImageController();
+                    $deleteResult = $images->deleteImages($cage->img_urls);
+                    if(gettype($deleteResult) !== 'boolean'){
+                        return $deleteResult;
+                    }
                 }
+    
+                // $cage->update([
+                //     'expired_at' => now()
+                // ]);
+    
+                $cage->delete();
+    
+                return response()->json([
+                    'msg' => '삭제 완료'
+                ], 200);
+                
+            } catch (Exception $e) {
+                return response()->json([
+                    'msg' => '서버 오류',
+                    'error' => $e->getMessage()
+                ], 500);
             }
-
-            // $cage->update([
-            //     'expired_at' => now()
-            // ]);
-
-            $cage->delete();
-
-            return response()->json([
-                'msg' => '삭제 완료'
-            ], 200);
-            
-        } catch (Exception $e) {
-            return response()->json([
-                'msg' => '서버 오류',
-                'error' => $e->getMessage()
-            ], 500);
         }
     }
 
@@ -298,19 +296,19 @@ class CageController extends Controller
     {
         $user = JWTAuth::user();
 
-        $cage = Cage::where([
-            ['serial_code', $serialCode],
-            ['user_id', $user->id],
-            ['expired_at', null]
-        ])->first();
-
-        if(empty($cage)){
-            return response()->json([
-                'msg' => '사육장을 찾을 수 없음'
-            ], 404);
-        }
-
         try {
+            $cage = Cage::where([
+                ['serial_code', $serialCode],
+                ['user_id', $user->id],
+                ['expired_at', null]
+            ])->first();
+    
+            if(empty($cage)){
+                return response()->json([
+                    'msg' => '사육장을 찾을 수 없음'
+                ], 404);
+            }
+
             $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)->get();
 
             return response()->json([
@@ -324,6 +322,65 @@ class CageController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    // 온습도 데이터 수정(프론트에서 사용)
+    public function updateTempHumData(Request $request, Cage $cage)
+    {
+        $user = JWTAuth::user();
+
+        if(empty($cage)){
+            return response()->json([
+                'msg' => '사육장을 찾을 수 없음'
+            ], 404);
+        }else if($cage->user_id !== $user->id){
+            return response()->json([
+                'msg' => '권한 없음'
+            ], 403);
+        } else if($cage->expired_at !== null){
+            return response()->json([
+                'msg' => '만료된 데이터'
+            ], 410);
+        } else{
+            $validatedList = [
+                'temperature' => ['required'],
+                'humidity'    => ['required'],
+            ];
+    
+            $validator = Validator::make($request->all(), $validatedList);
+    
+            if($validator->fails()){
+                return response()->json([
+                    'msg'   => '유효성 검사 오류',
+                    'error' => $validator->errors()->all(),
+                ], 400);
+            }
+    
+            $reqData = $validator->safe();
+    
+            try {
+                $cage->update([
+                    'set_temp' => $reqData['setTemp'],
+                    'set_hum'  => $reqData['setHum'],
+                ]);
+    
+                // MQTT 전송
+                $result = $this->transmitTempHumData($cage->serial_code, $reqData['setTemp'], $reqData['setHum']);
+                if(gettype($result) !== 'boolean'){
+                    return $result;
+                }
+    
+                return response()->json([
+                    'msg' => '수정 완료'
+                ], 200);
+    
+            } catch (Exception $e) {
+                return response()->json([
+                    'msg' => '서버 오류',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        } 
     }
 
     // 설정 온, 습도 하드웨어로 전달
