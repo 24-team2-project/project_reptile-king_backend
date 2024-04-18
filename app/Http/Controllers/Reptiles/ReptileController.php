@@ -19,6 +19,7 @@ class ReptileController extends Controller
 
         try {
             $reptiles = $user->reptiles;
+
             if($reptiles->isEmpty()){
                 return response()->json([
                     'msg' => '데이터 없음'
@@ -37,7 +38,6 @@ class ReptileController extends Controller
             ], 500);
         }
 
-        
     }
 
     // 파충류 등록
@@ -108,18 +108,16 @@ class ReptileController extends Controller
     }
 
     // 파충류 정보 확인
-    public function show(String $reptileSerialCode)
+    public function show(Reptile $reptile)
     {
         $user = JWTAuth::user();
 
         try {
-
-            $reptile = Reptile::where([
-                ['user_id', $user->id],
-                ['serial_code', $reptileSerialCode]
-            ])->first();
-
-            if(empty($reptile)){
+            if($reptile->user_id !== $user->id){
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
+            } else if(empty($reptile)){
                 return response()->json([
                     'msg' => '데이터 없음'
                 ], 200);

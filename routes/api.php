@@ -56,7 +56,6 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
     // 펫
     Route::apiResource('reptiles', ReptileController::class)->except('create', 'edit', 'show');
-    Route::get('/reptiles/{reptileSerialCode}', [ReptileController::class, 'show']);
 
     // 사육장
     Route::apiResource('cages', CageController::class)->except('create', 'edit');
