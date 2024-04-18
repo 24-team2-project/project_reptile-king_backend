@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reptiles;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Mqtt\MqttController;
 use App\Http\Controllers\Upload\ImageController;
 use App\Models\Cage;
 use App\Models\CageSerialCode;
@@ -10,6 +11,7 @@ use App\Models\TemperatureHumidity;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use PhpMqtt\Client\MqttClient;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CageController extends Controller
@@ -106,6 +108,13 @@ class CageController extends Controller
                 Cage::create($createList);
 
                 $msg = '등록 완료';
+
+                $mqtt = new MqttController();
+                $result = $mqtt->sendData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
+                if(gettype($result) !== 'boolean'){
+                    return $result;
+                }
+
             }
 
             return response()->json([
@@ -165,7 +174,7 @@ class CageController extends Controller
             'setTemp'           => ['required'],
             'setHum'            => ['required'],
             'serialCode'        => ['required', 'string'],
-            'imgUrls'           => ['nullable', 'array'],
+            'imgUrls'           => ['nullable'],
         ];
         if($request->hasFile('images')){
             $validatedList['newImages'] = ['nullable', 'array'];
@@ -186,14 +195,20 @@ class CageController extends Controller
         $user = JWTAuth::user();
 
         $dbImgList = $cage->img_urls;
-        $updateImgList = $reqData['imgUrls'];
+        $updateImgList = json_decode($reqData['imgUrls'], true);
+
+        if($dbImgList === null){
+            $dbImgList = [];
+        }
         $deleteImgList = array_diff($dbImgList, $updateImgList);
 
-        $images = new ImageController();
-        $deleteResult = $images->deleteImages($deleteImgList);
+        if(!empty($deleteImgList)){
+            $images = new ImageController();
+            $deleteResult = $images->deleteImages($deleteImgList);
 
-        if(gettype($deleteResult) !== 'boolean'){
-            return $deleteResult;
+            if(gettype($deleteResult) !== 'boolean'){
+                return $deleteResult;
+            }
         }
 
         if($reqData->has('newImages')){
@@ -219,6 +234,12 @@ class CageController extends Controller
                 'set_hum'             => $reqData['setHum'],
                 'img_urls'            => $uploadImgList,
             ]);
+
+            $mqtt = new MqttController();
+            $result = $mqtt->sendData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
+            if(gettype($result) !== 'boolean'){
+                return $result;
+            }
 
             return response()->json([
                 'msg' => '수정 완료'
