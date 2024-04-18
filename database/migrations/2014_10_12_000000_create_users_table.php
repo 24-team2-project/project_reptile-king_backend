@@ -15,10 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            // $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+            $table->string('nickname')->unique();
+            $table->string('phone')->nullable(true);
+            $table->json('address')->nullable(true);
+            $table->json('payment_selection')->nullable(true);
+            $table->json('img_urls')->nullable(true);
+            // $table->rememberToken();
+            $table->timestampsTz();
         });
     }
 
