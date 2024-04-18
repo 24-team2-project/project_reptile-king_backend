@@ -16,7 +16,7 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::with('category', 'user')->paginate(10);
-        $posts = $posts->map(function ($post) {
+        $reqData = $posts->getCollection()->map(function ($post) {
             return [
                 'id' => $post->id,
                 'title' => $post->title,
@@ -33,6 +33,9 @@ class PostController extends Controller
                 'img_urls' => $post->img_urls,
             ];
         });
+
+        $posts->setCollection($reqData);
+
         return response()->json($posts);
     }
 
