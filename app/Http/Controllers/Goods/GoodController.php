@@ -8,6 +8,7 @@ use App\Models\GoodReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Upload\ImageController;
 
 class GoodController extends Controller
 {
@@ -31,7 +32,7 @@ class GoodController extends Controller
      */
     public function store(Request $request)
     {   
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required|string|max:50',
             'price' => 'required|numeric',
             'category_id' => 'required',
@@ -39,26 +40,33 @@ class GoodController extends Controller
             'img_urls' => 'nullable|array',
             'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+        
+        $reqData = $request->all();
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+        // 이미지 업로드 처리
+        if ($request->has('img_urls')) {
+            $images = new ImageController();
+            $imageUrls = $images->uploadImageForController($reqData['images'], 'goods');
+            $reqData['img_urls'] = $imageUrls;
         }
 
-        $requestData = $request->all();
-        if(isset($requestData['img_urls'])) {
-            $requestData['img_urls'] = json_encode($requestData['img_urls']);
-        }
+        $good = Good::create($reqData);
 
-        $good = Good::create($requestData);
         return response()->json($good, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Good $good)
-    {
-        $good->load('goodReviews');
+    public function show($id)
+    {   
+        // $good->load('goodReviews');
+        $good = Good::with('goodReviews')->find($id);
+
+        if (!$good) {
+            return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
+        }
+
         return response()->json($good);
     }
 
@@ -86,7 +94,7 @@ class GoodController extends Controller
         'category_id' => 'required',
         'content' => 'required|string|max:255',
         'img_urls' => 'nullable|array',
-        'img_urls.*' => 'string',
+        'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
 
     if ($validator->fails()) {
