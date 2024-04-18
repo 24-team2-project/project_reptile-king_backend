@@ -55,7 +55,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::post('/logout', [ JWTAuthController::class, 'logout' ]);
 
     // 펫
-    Route::apiResource('reptiles', ReptileController::class)->except('create', 'edit', 'show');
+    Route::apiResource('reptiles', ReptileController::class)->except('create', 'edit');
 
     // 사육장
     Route::apiResource('cages', CageController::class)->except('create', 'edit');
