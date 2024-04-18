@@ -14,10 +14,26 @@ class GoodController extends Controller
 {
     public function index()
     {
-        $goods = Good::leftJoin('good_reviews', 'goods.id', '=', 'good_reviews.good_id')
+        $goods = Good::with('category')
+                    ->leftJoin('good_reviews', 'goods.id', '=', 'good_reviews.good_id')
                     ->selectRaw('goods.*, AVG(good_reviews.stars) as starAvg, COUNT(good_reviews.id) as reviewCount')
                     ->groupBy('goods.id')
                     ->get();
+
+        $goods = $goods->map(function ($good) {
+            return [
+                'id' => $good->id,
+                'name' => $good->name,
+                'content' => $good->content,
+                'price' => $good->price,
+                'category_id' => $good->category_id,
+                'category_name' => $good->category ? $good->category->name : '카테고리 없음',
+                'created_at' => $good->created_at->toIso8601String(),
+                'img_urls' => $good->img_urls,
+                'reviewCount' => $good->reviewCount,
+                'starAvg' => $good->starAvg,
+            ];
+        }); 
 
         return response()->json($goods);
     }
@@ -122,7 +138,6 @@ class GoodController extends Controller
 
         $good->delete();
         return response()->json(['message' => '상품 등록이 취소되었습니다.']);
-
     }
 
     public function search(Request $request) {
