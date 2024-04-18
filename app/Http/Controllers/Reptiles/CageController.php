@@ -11,7 +11,6 @@ use App\Models\TemperatureHumidity;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use PhpMqtt\Client\MqttClient;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CageController extends Controller
@@ -24,10 +23,16 @@ class CageController extends Controller
         try {
             $cages = $user->cages;
 
-            return response()->json([
-                'msg'   => '성공',
-                'cages' => $cages->isEmpty() ? '데이터 없음' : $cages,
-            ], 200);
+            if($cages->isEmpty()){
+                return response()->json([
+                    'msg' => '데이터 없음'
+                ], 200);
+            } else{
+                return response()->json([
+                    'msg'   => '성공',
+                    'cages' => $cages
+                ], 200);
+            }
 
         } catch (Exception $e) {
             return response()->json([
@@ -41,6 +46,8 @@ class CageController extends Controller
     // 사육장 등록
     public function store(Request $request)
     {
+        $user = JWTAuth::user();
+
         $validatedList = [
             'name'              => ['required', 'string'],
             'reptileSerialCode' => ['nullable', 'string'],
@@ -66,15 +73,13 @@ class CageController extends Controller
         $reqData = $validator->safe();
 
         try {
-            $msg = '';
-            $state = 201;
-
             // 파충류 등록 유무 확인
             if(!empty($reqData['reptileSerialCode'])){
                 $cageConfirm = Cage::where('reptile_serial_code', $reqData['reptileSerialCode'])->first();
                 if(!empty($cageConfirm) && $cageConfirm->expired_at === null){ 
-                    $msg = '이미 등록된 파충류';
-                    $state = 400;
+                    return response()->json([
+                        'msg' => '이미 등록된 파충류',
+                    ], 400);
                 }
             } else{
                 $reqData['reptileSerialCode'] = null;
@@ -83,11 +88,11 @@ class CageController extends Controller
             $serialCodeConfirm = CageSerialCode::where('serial_code', $reqData['serialCode'])->first();
             // 일련번호 확인
             if(empty($serialCodeConfirm)){
-                $msg = '일련번호를 찾을 수 없음';
-                $state = 400;
-
+                return response()->json([
+                    'msg' => '일련번호를 찾을 수 없음',
+                ], 400);
             } else{
-                $user = JWTAuth::user();
+                
                 $createList = [
                     'user_id'             => $user->id,
                     'name'                => $reqData['name'],
@@ -107,19 +112,16 @@ class CageController extends Controller
 
                 Cage::create($createList);
 
-                $msg = '등록 완료';
-
-                $mqtt = new MqttController();
-                $result = $mqtt->sendData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
+                // MQTT 전송
+                $result = $this->transmitTempHumData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
                 if(gettype($result) !== 'boolean'){
                     return $result;
                 }
 
+                return response()->json([
+                    'msg' => '등록 완료',
+                ], 201);
             }
-
-            return response()->json([
-                'msg' => $msg,
-            ], $state);
 
         } catch (Exception $e) {
             return response()->json([
@@ -167,6 +169,14 @@ class CageController extends Controller
     // 사육장 정보 수정
     public function update(Request $request, Cage $cage)
     {
+        $user = JWTAuth::user();
+
+        if($cage->user_id !== $user->id){
+            return response()->json([
+                'msg' => '권한 없음'
+            ], 403);
+        }
+
         $validatedList = [
             'name'              => ['required', 'string', 'max:255'],
             'reptileSerialCode' => ['nullable', 'string'],
@@ -192,8 +202,6 @@ class CageController extends Controller
         
         $reqData = $validator->safe();
 
-        $user = JWTAuth::user();
-
         $dbImgList = $cage->img_urls;
         $updateImgList = json_decode($reqData['imgUrls'], true);
 
@@ -218,12 +226,6 @@ class CageController extends Controller
             $uploadImgList = $updateImgList;
         }
 
-        if($cage->user_id !== $user->id){
-            return response()->json([
-                'msg' => '권한 없음'
-            ], 403);
-        }
-
         try {
             
             $cage->update([
@@ -235,8 +237,7 @@ class CageController extends Controller
                 'img_urls'            => $uploadImgList,
             ]);
 
-            $mqtt = new MqttController();
-            $result = $mqtt->sendData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
+            $result = $this->transmitTempHumData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
             if(gettype($result) !== 'boolean'){
                 return $result;
             }
@@ -265,16 +266,15 @@ class CageController extends Controller
         }
 
         try {
-
+            // 이미지 삭제
             if($cage->img_urls !== null){
-                $cage->img_urls = [];
                 $images = new ImageController();
                 $deleteResult = $images->deleteImages($cage->img_urls);
                 if(gettype($deleteResult) !== 'boolean'){
                     return $deleteResult;
                 }
             }
-            
+
             // $cage->update([
             //     'expired_at' => now()
             // ]);
@@ -327,9 +327,10 @@ class CageController extends Controller
     }
 
     // 설정 온, 습도 하드웨어로 전달
-    public function transmitTempHumData(Cage $cage)
+    public function transmitTempHumData($serialCode, $setTemp, $setHum)
     {
-        
+        $mqtt = new MqttController();
+        $result = $mqtt->sendData($serialCode, $setTemp, $setHum);
+        return $result;
     }
-
 }
