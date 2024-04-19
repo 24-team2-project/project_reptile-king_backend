@@ -185,11 +185,11 @@ class CageController extends Controller
                 'reptileSerialCode' => ['nullable', 'string'],
                 'memo'              => ['nullable', 'string'],
                 'serialCode'        => ['required', 'string'],
-                'imgUrls'           => ['nullable'],
+                'imgUrls'           => ['nullable', 'array'],
             ];
             if($request->hasFile('images')){
-                $validatedList['newImages'] = ['nullable', 'array'];
-                $validatedList['newImages.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
+                $validatedList['images'] = ['nullable', 'array'];
+                $validatedList['images.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
             }
     
             $validator = Validator::make($request->all(), $validatedList);
@@ -204,24 +204,24 @@ class CageController extends Controller
             $reqData = $validator->safe();
     
             $dbImgList = $cage->img_urls;
-            $updateImgList = json_decode($reqData['imgUrls'], true);
+            // $updateImgList = json_decode($reqData['imgUrls'], true);
+            $updateImgList = $reqData['imgUrls'];
     
             if($dbImgList === null){
                 $dbImgList = [];
             }
             $deleteImgList = array_diff($dbImgList, $updateImgList);
-    
+            
+            $images = new ImageController();
             if(!empty($deleteImgList)){
-                $images = new ImageController();
                 $deleteResult = $images->deleteImages($deleteImgList);
-    
                 if(gettype($deleteResult) !== 'boolean'){
                     return $deleteResult;
                 }
             }
     
-            if($reqData->has('newImages')){
-                $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
+            if($reqData->has('images')){
+                $imgUrls = $images->uploadImageForController($reqData['images'], 'cages');
                 $uploadImgList = array_merge($updateImgList, $imgUrls);
             } else{
                 $uploadImgList = $updateImgList;
