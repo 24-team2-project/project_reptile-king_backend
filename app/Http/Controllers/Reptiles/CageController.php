@@ -250,7 +250,7 @@ class CageController extends Controller
                     'name'                => $reqData['name'],
                     'reptile_serial_code' => $reqData['reptileSerialCode'],
                     'memo'                => $reqData['memo'],
-                    'img_urls'            => $uploadImgList,
+                    'img_urls'            => empty($uploadImgList) ? null : $uploadImgList,
                 ]);
     
                 return response()->json([
