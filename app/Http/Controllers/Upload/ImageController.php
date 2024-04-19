@@ -88,9 +88,10 @@ class ImageController extends Controller
 
             foreach($urls as $url){
                 $key = ltrim(parse_url($url, PHP_URL_PATH), '/');   // url에서 key(이미지 이름) 추출, ltrim(문자열 왼쪽의 공백 제거), parse_url(주소를 구성 요소로 분석)
+                $decodedKey = urldecode($key);                      // key를 디코딩
                 $s3->deleteObject([
                     'Bucket' => config('filesystems.disks.s3.bucket'),
-                    'Key' => $key,
+                    'Key' => $decodedKey,
                 ]);
             }
             return true;
