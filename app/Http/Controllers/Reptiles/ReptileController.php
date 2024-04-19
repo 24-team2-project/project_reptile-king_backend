@@ -210,7 +210,7 @@ class ReptileController extends Controller
                 'gender'    => $reqData['gender'],
                 'birth'     => $reqData['birth'],
                 'memo'      => $reqData['memo'],
-                'img_urls'  => $uploadImgList,
+                'img_urls'  => empty($uploadImgList) ? null : $uploadImgList,
             ]);
 
             return response()->json([

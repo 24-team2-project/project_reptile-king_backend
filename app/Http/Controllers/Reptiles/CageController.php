@@ -213,8 +213,12 @@ class CageController extends Controller
 
             try {
                 if(!empty($reqData['reptileSerialCode'])){
-                    $cageConfirm = Cage::where('reptile_serial_code', $reqData['reptileSerialCode'])->first();
-                    if(!empty($cageConfirm) && $cageConfirm->expired_at === null){ 
+                    $cageConfirm = Cage::where([
+                        ['user_id', '!= ',$user->id],
+                        ['reptile_serial_code', $reqData['reptileSerialCode']],
+                        ['expired_at', null]
+                    ])->get();
+                    if($cageConfirm->isNotEmpty()){ 
                         return response()->json([
                             'msg' => '이미 등록된 파충류',
                         ], 400);
@@ -281,8 +285,12 @@ class CageController extends Controller
             ], 410);
         } else{
             try {
+
+                // dd($cage->img_urls);
+
                 // 이미지 삭제
                 if($cage->img_urls !== null){
+                    // dd($cage->img_urls);
                     $images = new ImageController();
                     $deleteResult = $images->deleteImages($cage->img_urls);
                     if(gettype($deleteResult) !== 'boolean'){
