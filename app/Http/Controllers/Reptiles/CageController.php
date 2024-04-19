@@ -185,11 +185,11 @@ class CageController extends Controller
                 'reptileSerialCode' => ['nullable', 'string'],
                 'memo'              => ['nullable', 'string'],
                 'serialCode'        => ['required', 'string'],
-                'imgUrls'           => ['nullable'],
+                'imgUrls'           => ['nullable', 'array'],
             ];
             if($request->hasFile('images')){
-                $validatedList['newImages'] = ['nullable', 'array'];
-                $validatedList['newImages.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
+                $validatedList['images'] = ['nullable', 'array'];
+                $validatedList['images.*'] = ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
             }
     
             $validator = Validator::make($request->all(), $validatedList);
@@ -202,32 +202,42 @@ class CageController extends Controller
             }
             
             $reqData = $validator->safe();
-    
-            $dbImgList = $cage->img_urls;
-            $updateImgList = json_decode($reqData['imgUrls'], true);
-    
-            if($dbImgList === null){
-                $dbImgList = [];
-            }
-            $deleteImgList = array_diff($dbImgList, $updateImgList);
-    
-            if(!empty($deleteImgList)){
-                $images = new ImageController();
-                $deleteResult = $images->deleteImages($deleteImgList);
-    
-                if(gettype($deleteResult) !== 'boolean'){
-                    return $deleteResult;
-                }
-            }
-    
-            if($reqData->has('newImages')){
-                $imgUrls = $images->uploadImageForController($reqData['newImages'], 'cages');
-                $uploadImgList = array_merge($updateImgList, $imgUrls);
-            } else{
-                $uploadImgList = $updateImgList;
-            }
-    
+
             try {
+                if(!empty($reqData['reptileSerialCode'])){
+                    $cageConfirm = Cage::where('reptile_serial_code', $reqData['reptileSerialCode'])->first();
+                    if(!empty($cageConfirm) && $cageConfirm->expired_at === null){ 
+                        return response()->json([
+                            'msg' => '이미 등록된 파충류',
+                        ], 400);
+                    }
+                } else{
+                    $reqData['reptileSerialCode'] = null;
+                }
+        
+                $dbImgList = $cage->img_urls;
+                $updateImgList = $reqData['imgUrls'];
+        
+                if(empty($dbImgList)){
+                    $dbImgList = [];
+                }
+                $deleteImgList = array_diff($dbImgList, $updateImgList);
+                
+                $images = new ImageController();
+                if(!empty($deleteImgList)){
+                    $deleteResult = $images->deleteImages($deleteImgList);
+                    if(gettype($deleteResult) !== 'boolean'){
+                        return $deleteResult;
+                    }
+                }
+        
+                if($reqData->has('images')){
+                    $imgUrls = $images->uploadImageForController($reqData['images'], 'cages');
+                    $uploadImgList = array_merge($updateImgList, $imgUrls);
+                } else{
+                    $uploadImgList = $updateImgList;
+                }
+
                 $cage->update([
                     'name'                => $reqData['name'],
                     'reptile_serial_code' => $reqData['reptileSerialCode'],
