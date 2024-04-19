@@ -85,6 +85,14 @@ class CageController extends Controller
                 $reqData['reptileSerialCode'] = null;
             }
 
+            // 일련번호 등록 유무 확인
+            $CageDoubleCheck = Cage::where('serial_code', $reqData['serialCode'])->first();
+            if(!empty($CageDoubleCheck)){
+                return response()->json([
+                    'msg' => '이미 등록된 사육장',
+                ], 400);
+            }
+
             $serialCodeConfirm = CageSerialCode::where('serial_code', $reqData['serialCode'])->first();
             // 일련번호 확인
             if(empty($serialCodeConfirm)){
