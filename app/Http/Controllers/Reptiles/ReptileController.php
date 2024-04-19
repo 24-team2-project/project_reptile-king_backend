@@ -179,10 +179,9 @@ class ReptileController extends Controller
         $reqData = $validator->safe();
 
         $dbImgList = $reptile->img_urls;
-        // $updateImgList = json_decode($reqData['imgUrls'], true);
         $updateImgList = $reqData['imgUrls'];
         
-        if($dbImgList === null){
+        if(empty($dbImgList)){
             $dbImgList = [];
         }
 
