@@ -50,7 +50,7 @@ class PostController extends Controller
             $posts = Post::where('category_id', $request->category_id)->with(['category', 'user'])->orderBy('created_at', 'desc')->paginate(10);
         }
 
-        $posts = $posts->map(function ($post) {
+        $reqData = $posts->getCollection()->map(function ($post) {
             return [
                 'id' => $post->id,
                 'title' => $post->title,
@@ -67,6 +67,8 @@ class PostController extends Controller
                 'img_urls' => $post->img_urls,
             ];
         });
+
+        $posts->setCollection($reqData);
 
         return response()->json($posts);
     }
@@ -188,15 +190,16 @@ class PostController extends Controller
             return response()->json(['message' => '검색어를 입력해주세요.'], 400);
         }
 
-        $posts = Post::where('title', 'LIKE', "%{$search}%")
+        $posts = Post::with('category')
+                    ->where('title', 'LIKE', "%{$search}%")
                     ->orWhere('content', 'LIKE', "%{$search}%")
-                    ->get();
+                    ->paginate(10);
 
         if ($posts->isEmpty()) {
             return response()->json(['message' => '검색 결과가 없습니다.'], 404);
         }
 
-        $posts = $posts->map(function ($post) {
+        $reqData = $posts->getCollection()->map(function ($post) {
             return [
                 'id' => $post->id,
                 'title' => $post->title,
@@ -211,6 +214,7 @@ class PostController extends Controller
                 'img_urls' => $post->img_urls,
             ];
         });
+        $posts->setCollection($reqData);
 
         return response()->json($posts);
     }
@@ -223,7 +227,24 @@ class PostController extends Controller
     public function myPost()
     {
         $user = JWTAuth::user();
-        $posts = Post::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        $posts = Post::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(10);
+
+        $reqData = $posts->getCollection()->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'content' => $post->content,
+                'user_id' => $post->user_id,
+                'category_id' => $post->category_id,
+                'category_name' => $post->category ? $post->category->name : '카테고리 없음',
+                'created_at' => $post->created_at,
+                'updated_at' => $post->updated_at,
+                'likes' => $post->likes,
+                'views' => $post->views,
+                'img_urls' => $post->img_urls,
+            ];
+        });
+        $posts->setCollection($reqData);
 
         return response()->json($posts);
     }

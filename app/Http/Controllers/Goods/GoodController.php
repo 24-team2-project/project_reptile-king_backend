@@ -76,14 +76,24 @@ class GoodController extends Controller
      */
     public function show($id)
     {   
-        // $good->load('goodReviews');
-        $good = Good::with('goodReviews')->find($id);
+        $good = Good::where('id', $id)
+        ->leftJoin('good_reviews', 'goods.id', '=', 'good_reviews.good_id')
+        ->selectRaw('goods.*, AVG(good_reviews.stars) as starAvg, COUNT(good_reviews.id) as reviewCount')
+        ->groupBy('goods.id')
+        ->first();
 
         if (!$good) {
             return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
         }
 
         return response()->json($good);
+
+        // $good->load('goodReviews');
+        // $good = Good::with(['goodReviews'])
+        //             ->where('id', $id)
+        //             ->withCount('goodReviews as reviewCount')
+        //             ->withAvg('goodReviews as starAvg', 'stars')
+        //             ->first();
     }
 
     /**
@@ -98,11 +108,7 @@ class GoodController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Good $good)
-    {
-        if (!$good) {
-            return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
-        }
-
+    {    
         $request->validate([
             'name' => 'required|string|max:50',
             'price' => 'required|numeric',
@@ -158,9 +164,27 @@ class GoodController extends Controller
             return response()->json(['message' => '검색어를 입력해주세요.'], 400);
         }
 
-        $goods = Good::where('name', 'LIKE', "%{$search}%")
+        $goods = Good::with('category', 'GoodReviews')
+                    ->where('name', 'LIKE', "%{$search}%")
                     ->orWhere('content', 'LIKE', "%{$search}%")
+                    ->withCount('goodReviews as reviewCount')
+                    ->withAvg('goodReviews as starAvg', 'stars')
                     ->get();
+
+        $goods = $goods->map(function ($good) {
+            return [
+                'id' => $good->id,
+                'name' => $good->name,
+                'content' => $good->content,
+                'price' => $good->price,
+                'category_id' => $good->category_id,
+                'category_name' => $good->category ? $good->category->name : '카테고리 없음',
+                'created_at' => $good->created_at->toIso8601String(),
+                'img_urls' => $good->img_urls,
+                'reviewCount' => $good->reviewCount,
+                'starAvg' => $good->starAvg,
+            ];
+        }); 
 
         return response()->json($goods);
     }
