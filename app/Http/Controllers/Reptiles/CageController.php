@@ -213,11 +213,9 @@ class CageController extends Controller
 
             try {
                 if(!empty($reqData['reptileSerialCode'])){
-                    $cageConfirm = Cage::where([
-                        ['user_id', '!= ',$user->id],
-                        ['reptile_serial_code', $reqData['reptileSerialCode']],
-                        ['expired_at', null]
-                    ])->get();
+                    $cageConfirm = Cage::where('user_id', '!=', $user->id)
+                                    ->where('reptile_serial_code', '=', $reqData['reptileSerialCode'])
+                                    ->whereNull('expired_at')->get();
                     if($cageConfirm->isNotEmpty()){ 
                         return response()->json([
                             'msg' => '이미 등록된 파충류',
