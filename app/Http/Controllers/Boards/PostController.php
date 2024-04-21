@@ -42,12 +42,26 @@ class PostController extends Controller
     public function selectCategory(Request $request)
     {
         $category = Category::findOrFail($request->category_id);
-        if ($category['division'] == 'posts') {
-            $subPostList = Category::where('parent_id', $request->category_id)->pluck('id');
-            $posts = Post::whereIn('category_id', $subPostList)->with(['category', 'user'])->paginate(10);
-        } else {
-            $posts = Post::where('category_id', $request->category_id)->with(['category', 'user'])->orderBy('created_at', 'desc')->paginate(10);
+        $sort = $request->sort ?? 'latest';
+
+        $query = $category['division'] == 'posts' ?
+            Post::whereIn('category_id', Category::where('parent_id', $request->category_id)->pluck('id')) :
+            Post::where('category_id', $request->category_id);
+
+        switch ($sort) {
+            case 'latest':
+                $query = $query->orderBy('created_at', 'desc');
+                break;
+            case 'popular':
+                $query = $query->orderBy('likes', 'desc');
+                break;
+            case 'oldest':
+                $query = $query->orderBy('created_at', 'asc');
+                break;
         }
+
+        $posts = $query->with(['category', 'user'])->paginate(10);
+
         $reqData = $posts->getCollection()->map(function ($post) {
             return [
                 'id' => $post->id,
@@ -65,9 +79,8 @@ class PostController extends Controller
                 'img_urls' => $post->img_urls,
             ];
         })->collect();
-    
+
         $posts->setCollection($reqData);
-    
         return response()->json($posts);
     }
     
