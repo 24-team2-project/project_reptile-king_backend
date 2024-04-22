@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Goods;
 use App\Http\Controllers\Controller;
 use App\Models\Good;
 use App\Models\GoodReview;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,7 @@ class GoodController extends Controller
                 'reviewCount' => $good->reviewCount,
                 'starAvg' => $good->starAvg,
             ];
-        }); 
+        });
 
         return response()->json($goods);
     }
@@ -47,7 +48,7 @@ class GoodController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {   
+    {
         $request->validate([
             'name' => 'required|string|max:50',
             'price' => 'required|numeric',
@@ -56,7 +57,7 @@ class GoodController extends Controller
             'img_urls' => 'nullable|array',
             'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        
+
         $reqData = $request->all();
 
         // 이미지 업로드 처리
@@ -75,7 +76,7 @@ class GoodController extends Controller
      * Display the specified resource.
      */
     public function show($id)
-    {   
+    {
         $good = Good::where('id', $id)
         ->leftJoin('good_reviews', 'goods.id', '=', 'good_reviews.good_id')
         ->selectRaw('goods.*, AVG(good_reviews.stars) as starAvg, COUNT(good_reviews.id) as reviewCount')
@@ -108,7 +109,7 @@ class GoodController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Good $good)
-    {    
+    {
         $request->validate([
             'name' => 'required|string|max:50',
             'price' => 'required|numeric',
@@ -137,7 +138,7 @@ class GoodController extends Controller
             $imgUrls = $images->uploadImageForController($reqData['img_urls'], 'goods');
             $uploadImgList = array_merge($updateImgList, $imgUrls);
         }
-        
+
         $good->update($reqData);
 
         return response()->json($good->fresh());
@@ -184,7 +185,7 @@ class GoodController extends Controller
                 'reviewCount' => $good->reviewCount,
                 'starAvg' => $good->starAvg,
             ];
-        }); 
+        });
 
         return response()->json($goods);
     }
