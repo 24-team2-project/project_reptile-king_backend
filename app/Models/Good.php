@@ -14,7 +14,7 @@ class Good extends Model
     protected $fillable = [
         'name',
         'price',
-        'category',
+        'category_id',
         'content',
         'img_urls',
         'created_at',
@@ -33,5 +33,5 @@ class Good extends Model
     public function purchases(){
         return $this->hasMany(Purchase::class);
     }
-    
+
 }
