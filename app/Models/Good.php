@@ -34,4 +34,7 @@ class Good extends Model
         return $this->hasMany(Purchase::class);
     }
 
+    public function category(){
+        return $this->belongsTo(Category::class);
+    }
 }
