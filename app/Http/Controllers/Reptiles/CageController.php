@@ -369,8 +369,8 @@ class CageController extends Controller
             ], 410);
         } else{
             $validatedList = [
-                'temperature' => ['required'],
-                'humidity'    => ['required'],
+                'setTemp' => ['required'],
+                'setHum'    => ['required'],
             ];
     
             $validator = Validator::make($request->all(), $validatedList);
@@ -453,7 +453,7 @@ class CageController extends Controller
         }
     }
 
-    // 월별 평균 온습도 데이터 전달(프론트에서 사용)
+    // 일별 평균 온습도 데이터 전달(프론트에서 사용)
     public function getDailyTempHumData(Cage $cage)
     {
         $user = JWTAuth::user();
@@ -474,7 +474,13 @@ class CageController extends Controller
             }
 
             $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)
-                            ->selectRaw('year(created_at) as year, month(created_at) as month, day(created_at) as day, avg(temperature) as avgTemp, avg(humidity) as avgHum')
+                            ->selectRaw("
+                                EXTRACT(YEAR FROM created_at) as year,
+                                EXTRACT(MONTH FROM created_at) as month,
+                                EXTRACT(DAY FROM created_at) as day,
+                                AVG(temperature) as avgTemp,
+                                AVG(humidity) as avgHum
+                            ")
                             ->groupBy('year', 'month', 'day')
                             ->get();
 
