@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Sensors;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cage;
-use App\Models\CageSerialCode;
 use App\Models\TemperatureHumidity;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class TemperatureHumidityController extends Controller
 {
