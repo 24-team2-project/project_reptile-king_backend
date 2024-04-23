@@ -36,17 +36,19 @@ class TemperatureHumidityController extends Controller
         $reqData = $validator->validated();
 
         try {
-            $cageConfirm = Cage::where('serial_code', $reqData['serialCode']);
+            $cageConfirm = Cage::where([
+                ['serial_code', $reqData['serialCode']],
+                ['expired_at', null] 
+            ])->first();
 
             if(!empty($cageConfirm)){
                 TemperatureHumidity::create([
                     'serial_code' => $reqData['serialCode'],
                     'temperature' => $reqData['temperature'],
                     'humidity'    => $reqData['humidity'],
-                    'created_at'  => now()
+                    'created_at'  => now()->toDateTimeString()
                 ]);
             } else{
-                
                 Log::error('Serial code not found or already exists', [
                     'errors' => '일련번호를 찾을 수 없거나 이미 존재합니다.',
                     'timestamp' => now()->toDateTimeString()

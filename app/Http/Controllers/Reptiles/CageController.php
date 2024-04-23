@@ -23,16 +23,17 @@ class CageController extends Controller
         try {
             $cages = $user->cages;
 
+            $state = 200;
+            $jsonData = ['msg' => '성공'];
+
             if($cages->isEmpty()){
-                return response()->json([
-                    'msg' => '데이터 없음'
-                ], 200);
+                $jsonData['msg'] = '데이터 없음';
+                $state = 204;
             } else{
-                return response()->json([
-                    'msg'   => '성공',
-                    'cages' => $cages
-                ], 200);
+                $jsonData['cages'] = $cages;
             }
+
+            return response()->json($jsonData, $state);
 
         } catch (Exception $e) {
             return response()->json([
@@ -149,7 +150,7 @@ class CageController extends Controller
             if(empty($cage)){
                 return response()->json([
                     'msg' => '데이터 없음'
-                ], 200);
+                ], 204);
             } else if($cage->user_id !== $user->id){
                 return response()->json([
                     'msg' => '권한 없음'
@@ -284,8 +285,6 @@ class CageController extends Controller
         } else{
             try {
 
-                // dd($cage->img_urls);
-
                 // 이미지 삭제
                 if($cage->img_urls !== null){
                     // dd($cage->img_urls);
@@ -316,22 +315,25 @@ class CageController extends Controller
     }
 
     // 온습도 데이터 전달(프론트에서 사용)
-    public function getTempHumData(String $serialCode)
+    public function getTempHumData(Cage $cage)
     {
         $user = JWTAuth::user();
 
         try {
-            $cage = Cage::where([
-                ['serial_code', $serialCode],
-                ['user_id', $user->id],
-                ['expired_at', null]
-            ])->first();
     
             if(empty($cage)){
                 return response()->json([
                     'msg' => '사육장을 찾을 수 없음'
                 ], 404);
-            }
+            } else if($cage->user_id !== $user->id){
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
+            } else if($cage->expired_at !== null){
+                return response()->json([
+                    'msg' => '만료된 데이터'
+                ], 410);
+            } 
 
             $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)->get();
 
@@ -405,6 +407,96 @@ class CageController extends Controller
                 ], 500);
             }
         } 
+    }
+
+    // 최신 온습도 데이터 전달(프론트에서 사용)
+    public function getLatestTempHumData(Cage $cage)
+    {
+        $user = JWTAuth::user();
+
+        try {
+
+            if(empty($cage)){
+                return response()->json([
+                    'msg' => '사육장을 찾을 수 없음'
+                ], 404);
+            } else if($cage->user_id !== $user->id){
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
+            } else if($cage->expired_at !== null){
+                return response()->json([
+                    'msg' => '만료된 데이터'
+                ], 410);
+            }
+
+            $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)->latest()->first();
+
+            $state = 200;
+
+            $jsonData = ['msg' => '성공'];
+
+            if(empty($tempHumData)){
+                $jsonData['msg'] = '데이터 없음';
+                $state = 204;
+            } else{
+                $jsonData['latestData'] = $tempHumData;
+            }
+
+            return response()->json($jsonData, $state);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // 월별 평균 온습도 데이터 전달(프론트에서 사용)
+    public function getDailyTempHumData(Cage $cage)
+    {
+        $user = JWTAuth::user();
+
+        try {
+            if(empty($cage)){
+                return response()->json([
+                    'msg' => '사육장을 찾을 수 없음'
+                ], 404);
+            } else if($cage->user_id !== $user->id){
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
+            } else if($cage->expired_at !== null){
+                return response()->json([
+                    'msg' => '만료된 데이터'
+                ], 410);
+            }
+
+            $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)
+                            ->selectRaw('year(created_at) as year, month(created_at) as month, day(created_at) as day, avg(temperature) as avgTemp, avg(humidity) as avgHum')
+                            ->groupBy('year', 'month', 'day')
+                            ->get();
+
+            $state = 200;
+
+            $jsonData = ['msg' => '성공'];
+
+            if($tempHumData->isEmpty()){
+                $jsonData['msg'] = '데이터 없음';
+                $state = 204;
+            } else{
+                $jsonData['avgData'] = $tempHumData;
+            }
+
+            return response()->json($jsonData, $state);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // 설정 온, 습도 하드웨어로 전달
