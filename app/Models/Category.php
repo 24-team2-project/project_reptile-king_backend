@@ -27,4 +27,9 @@ class Category extends Model
     {
         return $this->hasMany(Support::class);
     }
+
+    public function goods()
+    {
+        return $this->hasMany(Good::class);
+    }
 }
