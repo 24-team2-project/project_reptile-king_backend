@@ -77,7 +77,7 @@ class GoodController extends Controller
      */
     public function show($id)
     {
-        $good = Good::where('id', $id)
+        $good = Good::where('goods.id', $id)
         ->leftJoin('good_reviews', 'goods.id', '=', 'good_reviews.good_id')
         ->selectRaw('goods.*, AVG(good_reviews.stars) as starAvg, COUNT(good_reviews.id) as reviewCount')
         ->groupBy('goods.id')
