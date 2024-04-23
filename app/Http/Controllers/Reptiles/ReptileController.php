@@ -20,16 +20,17 @@ class ReptileController extends Controller
         try {
             $reptiles = $user->reptiles;
 
+            $state = 200;
+            $jsonData = [ 'msg' => '성공' ];
+
             if($reptiles->isEmpty()){
-                return response()->json([
-                    'msg' => '데이터 없음'
-                ], 200);
+                $state = 204;
+                $jsonData['msg'] = '데이터 없음';
+            } else{
+                $jsonData['reptiles'] = $reptiles;
             }
 
-            return response()->json([
-                'msg'      => '성공',
-                'reptiles' => $reptiles
-            ], 200);
+            return response()->json($jsonData, $state);
 
         } catch (Exception $e) {
             return response()->json([
@@ -119,7 +120,7 @@ class ReptileController extends Controller
             if(empty($reptile)){
                 return response()->json([
                     'msg' => '데이터 없음'
-                ], 200);
+                ], 204);
             } else if($reptile->user_id !== $user->id){
                 return response()->json([
                     'msg' => '권한 없음'
@@ -190,10 +191,9 @@ class ReptileController extends Controller
         $images = new ImageController();
         if(!empty($deleteImgList)){
             $deleteResult = $images->deleteImages($deleteImgList);
-        }
-
-        if(gettype($deleteResult) !== 'boolean'){
-            return $deleteResult;
+            if(gettype($deleteResult) !== 'boolean'){
+                return $deleteResult;
+            }
         }
 
         if($reqData->has('newImages')){
