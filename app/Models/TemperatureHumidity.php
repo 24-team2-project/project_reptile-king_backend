@@ -18,6 +18,12 @@ class TemperatureHumidity extends Model
         'created_at',
     ];
 
+    protected $casts = [
+        'set_temp' => 'float',
+        'set_hum' => 'integer',
+        // 'created_at' => 'datetime:Y-m-d H:i:s',
+    ];
+
     public function cage(){
         return $this->belongsTo(Cage::class);
     }

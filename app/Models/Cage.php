@@ -22,6 +22,8 @@ class Cage extends Model
     ];
 
     protected $casts = [
+        'set_temp' => 'float',
+        'set_hum' => 'integer',
         'img_urls' => 'array',
     ];
 

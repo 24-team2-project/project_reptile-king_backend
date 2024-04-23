@@ -482,6 +482,7 @@ class CageController extends Controller
                                 AVG(humidity) as avgHum
                             ")
                             ->groupBy('year', 'month', 'day')
+                            ->orderByRaw('year ASC, month ASC, day ASC')
                             ->get();
 
             $state = 200;
