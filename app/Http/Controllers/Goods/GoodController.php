@@ -29,7 +29,7 @@ class GoodController extends Controller
                 'price' => $good->price,
                 'category_id' => $good->category_id,
                 'category_name' => $good->category ? $good->category->name : '카테고리 없음',
-                'created_at' => $good->created_at->toIso8601String(),
+                'created_at' => \Carbon\Carbon::parse($good->created_at)->toIso8601String(),
                 'img_urls' => $good->img_urls,
                 'reviewCount' => $good->reviewCount,
                 'starAvg' => $good->starAvg,
