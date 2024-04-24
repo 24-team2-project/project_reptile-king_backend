@@ -197,4 +197,5 @@ class GoodController extends Controller
 
         return response()->json($goods);
     }
+
 }
