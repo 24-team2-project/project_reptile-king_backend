@@ -24,6 +24,7 @@ class PurchaseController extends Controller
     public function index()
     {
         $user = JWTAuth::user();
+
         $purchases = Purchase::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
         return response()->json($purchases);
@@ -32,8 +33,9 @@ class PurchaseController extends Controller
     public function store(Request $request)
     {
         $user = JWTAuth::user();
+
         $request->validate([
-            'good_id' => 'required|exists:goods, id',
+            'good_id' => 'required|exists:goods,id',
             'total_price' => 'required|integer|min:1',
             'quantity' => 'required|integer|min:1',
             'payment_selection' => 'required|string',
