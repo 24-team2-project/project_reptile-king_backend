@@ -83,18 +83,17 @@ class GoodController extends Controller
         ->groupBy('goods.id')
         ->first();
 
+        if (gettype($good->img_urls) == 'string') {
+            $good->img_urls = json_decode($good->img_urls);
+        }
+
         if (!$good) {
             return response()->json(['message' => '해당 상품을 찾을 수 없습니다.'], 404);
         }
 
-        return response()->json($good);
+        // dd(gettype($good->img_urls));
 
-        // $good->load('goodReviews');
-        // $good = Good::with(['goodReviews'])
-        //             ->where('id', $id)
-        //             ->withCount('goodReviews as reviewCount')
-        //             ->withAvg('goodReviews as starAvg', 'stars')
-        //             ->first();
+        return response()->json($good);
     }
 
     /**
