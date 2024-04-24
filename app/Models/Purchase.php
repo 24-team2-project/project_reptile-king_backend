@@ -9,13 +9,15 @@ class Purchase extends Model
 {
     use HasFactory;
 
+    public $timestamps = true;
+    const UPDATED_AT = null;
+
     protected $fillable = [
         'user_id',
         'good_id',
         'total_price',
         'quantity',
         'payment_selection',
-        'created_at',
     ];
 
     public function good(){
