@@ -110,38 +110,47 @@ class GoodController extends Controller
      */
     public function update(Request $request, Good $good)
     {
-        $request->validate([
-            'name' => 'required|string|max:50',
-            'price' => 'required|numeric',
-            'category_id' => 'required',
-            'content' => 'required|string|max:255',
-            'img_urls' => 'nullable|array',
-            'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        // \Log::info($request->all());
 
-        $reqData = $request->all();
-        $dbImgList = $good->img_urls;
-        $updateImgList = $reqData['img_urls'];
-        $deleteImgList = array_diff($dbImgList, $updateImgList);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:50',
+                'price' => 'required|numeric',
+                'category_id' => 'required',
+                'content' => 'required|string|max:255',
+                'img_urls' => 'nullable|array',
+                'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+                // 'img_urls.*' => 'string|url|max:2048',
+            ]);
 
-        if (!empty($reqData['img_urls'])) {
-            $images = new ImageController();
-            $deleteResult = $images->deleteImages($deleteImgList);
+            $reqData = $request->all();
+            $dbImgList = $good->img_urls ?? [];
+            $updateImgList = $reqData['img_urls'] ?? [];
+            $deleteImgList = array_diff($dbImgList, $updateImgList);
 
-            if(gettype($deleteResult) !== 'boolean'){
-                return response()->json([
-                    'msg' => '이미지 삭제 실패',
-                    'error' => $deleteResult
-                ], 500);
+            if (!empty($reqData['img_urls'])) {
+                $images = new ImageController();
+                $deleteResult = $images->deleteImages($deleteImgList);
+
+                if(gettype($deleteResult) !== 'boolean'){
+                    return response()->json([
+                        'msg' => '이미지 삭제 실패',
+                        'error' => $deleteResult
+                    ], 500);
+                }
+
+                $imgUrls = $images->uploadImageForController($reqData['img_urls'], 'goods');
+                $uploadImgList = array_merge($updateImgList, $imgUrls);
+                $reqData['img_urls'] = $uploadImgList;
             }
 
-            $imgUrls = $images->uploadImageForController($reqData['img_urls'], 'goods');
-            $uploadImgList = array_merge($updateImgList, $imgUrls);
+            $good->update($reqData);
+
+            return response()->json($good->fresh());
+        } catch (\Exception $e) {
+            // 예외 발생 시 JSON 응답 반환
+            return response()->json(['message' => '요청 처리 중 오류가 발생했습니다.', 'error' => $e->getMessage()], 500);
         }
-
-        $good->update($reqData);
-
-        return response()->json($good->fresh());
     }
 
     /**
