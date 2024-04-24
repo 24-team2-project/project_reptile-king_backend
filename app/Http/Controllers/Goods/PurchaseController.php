@@ -39,7 +39,7 @@ class PurchaseController extends Controller
             'payment_selection' => 'required|string',
         ]);
 
-        $reqData = $request->only(['good_id', 'total_price', 'quantity', 'payment_selection']);
+        $reqData = $request->all();
         $reqData['user_id'] = $user->id;
         $purchase = Purchase::create($reqData);
 
@@ -74,6 +74,6 @@ class PurchaseController extends Controller
     public function destroy(Purchase $purchase)
     {
         $purchase->delete();
-        return response()->json(['message' => '상품 구매가 취소되었습니다.']);
+        return response()->json(['message' => '목록에서 삭제되었습니다.']);
     }
 }
