@@ -160,9 +160,14 @@ class CageController extends Controller
                     'msg' => '만료된 데이터'
                 ], 410);
             } else{
+
+                $cageInfo = Cage::leftjoin('cage_serial_codes', 'cages.serial_code', '=', 'cage_serial_codes.serial_code')
+                        ->select('cages.*', 'cage_serial_codes.location as location')
+                        ->where('cages.id', $cage->id)->first();
+
                 return response()->json([
                     'msg' => '성공',
-                    'cage' => $cage
+                    'cage' => $cageInfo
                 ], 200);
             }
 
