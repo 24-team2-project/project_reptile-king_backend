@@ -40,11 +40,13 @@ class JWTAuthController extends Controller
                     'msg' => '로그인 정보 불일치'
                 ] , 401);
             }
-
-            $refreshToken = auth()->setTTL(20160)->attempt($credentials); // 14일
-
             $user = JWTAuth::user();
-            $ttl = 60 *60 * 24 * 14; // 14일
+            
+            // $ttl = 60 *60 * 24 * 14; // 14일
+            $ttl = 60 *60 * 24 * 7; // 7일
+
+            $refreshToken = auth()->setTTL($ttl)->attempt($credentials); 
+
             // redis 저장
             Redis::setex('refresh_token_'.$user->id, $ttl, $refreshToken);
 
