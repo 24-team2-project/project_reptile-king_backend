@@ -22,7 +22,7 @@ class Cage extends Model
     ];
 
     protected $attributes = [
-        'img_urls' => [],
+        'img_urls' => '[]',
     ];
 
     protected $casts = [
