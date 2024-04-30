@@ -110,7 +110,7 @@ class CageController extends Controller
                     'set_temp'            => $reqData['setTemp'],
                     'set_hum'             => $reqData['setHum'],
                     'serial_code'         => $reqData['serialCode'],
-                    'img_urls'            => null,
+                    'img_urls'            => [],
                 ];
 
                 if($reqData->has('images')){
@@ -234,9 +234,9 @@ class CageController extends Controller
                 $dbImgList = $cage->img_urls;
                 $updateImgList = $reqData['imgUrls'];
         
-                if(empty($dbImgList)){
-                    $dbImgList = [];
-                }
+                // if(empty($dbImgList)){
+                //     $dbImgList = [];
+                // }
                 $deleteImgList = array_diff($dbImgList, $updateImgList);
                 
                 $images = new ImageController();
@@ -250,6 +250,7 @@ class CageController extends Controller
                 if($reqData->has('images')){
                     $imgUrls = $images->uploadImageForController($reqData['images'], 'cages');
                     $uploadImgList = array_merge($updateImgList, $imgUrls);
+                    $uploadImgList = collect($uploadImgList)->flatten()->all(); // 2차원 배열을 1차원 배열로 변환
                 } else{
                     $uploadImgList = $updateImgList;
                 }
@@ -258,7 +259,7 @@ class CageController extends Controller
                     'name'                => $reqData['name'],
                     'reptile_serial_code' => $reqData['reptileSerialCode'],
                     'memo'                => $reqData['memo'],
-                    'img_urls'            => empty($uploadImgList) ? null : $uploadImgList,
+                    'img_urls'            => empty($uploadImgList) ? [] : $uploadImgList,
                 ]);
     
                 return response()->json([
@@ -291,7 +292,7 @@ class CageController extends Controller
             try {
 
                 // 이미지 삭제
-                if($cage->img_urls !== null){
+                if(!empty($cage->img_urls)){
                     // dd($cage->img_urls);
                     $images = new ImageController();
                     $deleteResult = $images->deleteImages($cage->img_urls);
@@ -458,7 +459,7 @@ class CageController extends Controller
         }
     }
 
-    // 일별 평균 온습도 데이터 전달(프론트에서 사용)
+    // 일별 시간당 평균 온습도 데이터 전달(프론트에서 사용)
     public function getDailyTempHumData(Cage $cage)
     {
         $user = JWTAuth::user();
@@ -483,11 +484,12 @@ class CageController extends Controller
                                 EXTRACT(YEAR FROM created_at) as year,
                                 EXTRACT(MONTH FROM created_at) as month,
                                 EXTRACT(DAY FROM created_at) as day,
+                                EXTRACT(HOUR FROM created_at) as hour,
                                 AVG(temperature) as avgTemp,
                                 AVG(humidity) as avgHum
                             ")
-                            ->groupBy('year', 'month', 'day')
-                            ->orderByRaw('year ASC, month ASC, day ASC')
+                            ->groupBy('year', 'month', 'day', 'hour')
+                            ->orderByRaw('year ASC, month ASC, day ASC, hour ASC')
                             ->get();
 
             $state = 200;
