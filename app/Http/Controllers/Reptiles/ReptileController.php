@@ -83,7 +83,7 @@ class ReptileController extends Controller
                 'gender'        => $reqData['gender'],
                 'birth'         => $reqData['birth'],
                 'memo'          => $reqData['memo'],
-                'img_urls'      => null,
+                'img_urls'      => [],
             ];
 
             if($reqData->has('images')){
@@ -182,9 +182,9 @@ class ReptileController extends Controller
         $dbImgList = $reptile->img_urls;
         $updateImgList = $reqData['imgUrls'];
         
-        if(empty($dbImgList)){
-            $dbImgList = [];
-        }
+        // if(empty($dbImgList)){
+        //     $dbImgList = [];
+        // }
 
         $deleteImgList = array_diff($dbImgList, $updateImgList);
 
@@ -210,7 +210,7 @@ class ReptileController extends Controller
                 'gender'    => $reqData['gender'],
                 'birth'     => $reqData['birth'],
                 'memo'      => $reqData['memo'],
-                'img_urls'  => empty($uploadImgList) ? null : $uploadImgList,
+                'img_urls'  => empty($uploadImgList) ? [] : $uploadImgList,
             ]);
 
             return response()->json([
@@ -238,7 +238,7 @@ class ReptileController extends Controller
 
         try {
 
-            if($reptile->img_urls !== null){
+            if(!empty($reptile->img_urls)){
                 $images = new ImageController();
                 $deleteResult = $images->deleteImages($reptile->img_urls);
                 if(gettype($deleteResult) !== 'boolean'){
