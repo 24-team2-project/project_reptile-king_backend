@@ -102,7 +102,9 @@ class JWTAuthController extends Controller
             JWTAuth::invalidate($redisData);
             Redis::del('refresh_token_'.$user->id);
             return response()->json([
-                'msg' => '토큰 갱신 실패 : 불일치, 재로그인 필요'
+                'msg' => '토큰 갱신 실패 : 불일치, 재로그인 필요',
+                'reqToken' => $token,
+                'redisData' => $redisData,
             ], 401);
         }
 
