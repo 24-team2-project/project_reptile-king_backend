@@ -161,7 +161,7 @@ class ReptileController extends Controller
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
             'memo'      => [ 'string', 'nullable'],
-            'imgUrls'   => ['nullable' , 'array'],
+            'imgUrls'   => ['nullable' , 'string'],
         ];
         if($request->hasFile('images')){
             $validatedList['images'] = ['nullable', 'array'];
@@ -180,12 +180,8 @@ class ReptileController extends Controller
         $reqData = $validator->safe();
 
         $dbImgList = $reptile->img_urls;
-        $updateImgList = $reqData['imgUrls'];
+        $updateImgList = json_decode($reqData['imgUrls']);
         
-        // if(empty($dbImgList)){
-        //     $dbImgList = [];
-        // }
-
         $deleteImgList = array_diff($dbImgList, $updateImgList);
 
         $images = new ImageController();

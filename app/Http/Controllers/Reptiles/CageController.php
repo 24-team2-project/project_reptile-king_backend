@@ -199,7 +199,7 @@ class CageController extends Controller
                 'reptileSerialCode' => ['nullable', 'string'],
                 'memo'              => ['nullable', 'string'],
                 'serialCode'        => ['required', 'string'],
-                'imgUrls'           => ['nullable', 'array'],
+                'imgUrls'           => ['nullable', 'string'],
             ];
             if($request->hasFile('images')){
                 $validatedList['images'] = ['nullable', 'array'];
@@ -232,11 +232,8 @@ class CageController extends Controller
                 }
         
                 $dbImgList = $cage->img_urls;
-                $updateImgList = $reqData['imgUrls'];
-        
-                // if(empty($dbImgList)){
-                //     $dbImgList = [];
-                // }
+                $updateImgList = json_decode($reqData['imgUrls']);
+
                 $deleteImgList = array_diff($dbImgList, $updateImgList);
                 
                 $images = new ImageController();
