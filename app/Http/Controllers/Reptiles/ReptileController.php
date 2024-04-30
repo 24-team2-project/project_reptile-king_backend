@@ -192,8 +192,8 @@ class ReptileController extends Controller
             }
         }
 
-        if($reqData->has('newImages')){
-            $imgUrls = $images->uploadImageForController($reqData['newImages'], 'reptiles');
+        if($reqData->has('images')){
+            $imgUrls = $images->uploadImageForController($reqData['images'], 'reptiles');
             $uploadImgList = array_merge($updateImgList, $imgUrls);
             $uploadImgList = collect($uploadImgList)->flatten()->all();
         } else{
