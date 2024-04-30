@@ -96,6 +96,37 @@ class GoodController extends Controller
         //             ->first();
     }
 
+    public function findByCategory($categoryId)
+    {
+        $goods = Good::with('category')
+                    ->where('category_id', $categoryId)
+                    ->leftJoin('good_reviews', 'goods.id', '=', 'good_reviews.good_id')
+                    ->selectRaw('goods.*, AVG(good_reviews.stars) as starAvg, COUNT(good_reviews.id) as reviewCount')
+                    ->groupBy('goods.id')
+                    ->paginate(10);
+    
+        if($goods->isEmpty()) {
+            return response()->json(['message' => '해당 카테고리에 속하는 상품이 없습니다.'], 404);
+        }
+    
+        $goods->getCollection()->transform(function ($good) {
+            return [
+                'id' => $good->id,
+                'name' => $good->name,
+                'content' => $good->content,
+                'price' => $good->price,
+                'category_id' => $good->category_id,
+                'category_name' => $good->category ? $good->category->name : '카테고리 없음',
+                'created_at' => $good->created_at->toIso8601String(),
+                'img_urls' => $good->img_urls,
+                'reviewCount' => $good->reviewCount,
+                'starAvg' => round($good->starAvg, 2), // 평균 별점을 반올림
+            ];
+        }); 
+    
+        return response()->json($goods);
+    }
+    
     /**
      * Show the form for editing the specified resource.
      */

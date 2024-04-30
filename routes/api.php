@@ -105,6 +105,7 @@ Route::get('/posts/{id}', [PostController::class, 'show']);
 Route::get('/goods/search', [GoodController::class, 'search']);
 Route::get('/goods', [GoodController::class, 'index']);
 Route::get('/goods/{id}', [GoodController::class, 'show']);
+Route::get('/goods/category/{categoryId}', [GoodController::class, 'findByCategory']);
 
 // 온습도 데이터 저장(라즈베리파이에서 데이터 전송)
 Route::post('/tnhs', [TemperatureHumidityController::class, 'store']);
