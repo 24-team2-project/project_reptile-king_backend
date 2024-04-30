@@ -20,16 +20,17 @@ class ReptileController extends Controller
         try {
             $reptiles = $user->reptiles;
 
+            $state = 200;
+            $jsonData = [ 'msg' => '성공' ];
+
             if($reptiles->isEmpty()){
-                return response()->json([
-                    'msg' => '데이터 없음'
-                ], 200);
+                $state = 204;
+                $jsonData['msg'] = '데이터 없음';
+            } else{
+                $jsonData['reptiles'] = $reptiles;
             }
 
-            return response()->json([
-                'msg'      => '성공',
-                'reptiles' => $reptiles
-            ], 200);
+            return response()->json($jsonData, $state);
 
         } catch (Exception $e) {
             return response()->json([
@@ -82,7 +83,7 @@ class ReptileController extends Controller
                 'gender'        => $reqData['gender'],
                 'birth'         => $reqData['birth'],
                 'memo'          => $reqData['memo'],
-                'img_urls'      => null,
+                'img_urls'      => [],
             ];
 
             if($reqData->has('images')){
@@ -119,7 +120,7 @@ class ReptileController extends Controller
             if(empty($reptile)){
                 return response()->json([
                     'msg' => '데이터 없음'
-                ], 200);
+                ], 204);
             } else if($reptile->user_id !== $user->id){
                 return response()->json([
                     'msg' => '권한 없음'
@@ -181,24 +182,24 @@ class ReptileController extends Controller
         $dbImgList = $reptile->img_urls;
         $updateImgList = $reqData['imgUrls'];
         
-        if(empty($dbImgList)){
-            $dbImgList = [];
-        }
+        // if(empty($dbImgList)){
+        //     $dbImgList = [];
+        // }
 
         $deleteImgList = array_diff($dbImgList, $updateImgList);
 
         $images = new ImageController();
         if(!empty($deleteImgList)){
             $deleteResult = $images->deleteImages($deleteImgList);
-        }
-
-        if(gettype($deleteResult) !== 'boolean'){
-            return $deleteResult;
+            if(gettype($deleteResult) !== 'boolean'){
+                return $deleteResult;
+            }
         }
 
         if($reqData->has('newImages')){
             $imgUrls = $images->uploadImageForController($reqData['newImages'], 'reptiles');
             $uploadImgList = array_merge($updateImgList, $imgUrls);
+            $uploadImgList = collect($uploadImgList)->flatten()->all();
         } else{
             $uploadImgList = $updateImgList;
         }
@@ -210,7 +211,7 @@ class ReptileController extends Controller
                 'gender'    => $reqData['gender'],
                 'birth'     => $reqData['birth'],
                 'memo'      => $reqData['memo'],
-                'img_urls'  => empty($uploadImgList) ? null : $uploadImgList,
+                'img_urls'  => empty($uploadImgList) ? [] : $uploadImgList,
             ]);
 
             return response()->json([
@@ -238,7 +239,7 @@ class ReptileController extends Controller
 
         try {
 
-            if($reptile->img_urls !== null){
+            if(!empty($reptile->img_urls)){
                 $images = new ImageController();
                 $deleteResult = $images->deleteImages($reptile->img_urls);
                 if(gettype($deleteResult) !== 'boolean'){

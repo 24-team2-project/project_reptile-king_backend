@@ -39,7 +39,7 @@ class ForgetPasswordController extends Controller
             $authCode = Str::random(7);
             $ttl = 180; // 3분
 
-            Redis::setex('email_verification:'.$user->email, $ttl, $authCode);
+            Redis::setex('email_verification:'.$user->email, $ttl, $authCode); // 인증코드 저장, setex(key, ttl, value) : ttl 시간 후 만료
             SendEmailJob::dispatch($user->email, $authCode);
             
             return response()->json([
@@ -72,7 +72,7 @@ class ForgetPasswordController extends Controller
 
         try {
 
-            $dbData = Redis::get('email_verification:'.$reqData['email']);
+            $dbData = Redis::get('email_verification:'.$reqData['email']); // 인증코드 조회, 만료시 null 반환
 
             $msg = '';
             $status = 200;

@@ -49,10 +49,9 @@ class Kernel extends HttpKernel
         ],
 
         'jwt.auth' => [
-            // \App\Http\Middleware\CorsMiddleware::class,  
             \App\Http\Middleware\JWTMiddleware::class,
-            // \App\Http\Middleware\VerifyCsrfToken::class, // jwt 사용 시, 필수사항 X
         ]
+
     ];
 
     /**

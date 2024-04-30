@@ -59,9 +59,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function getJWTCustomClaims() // payload에 추가로 저장시킬 사항들
     {
-        return [
-            'email' => $this->email,
-        ];
+        return [];
     }
 
     public function posts(){

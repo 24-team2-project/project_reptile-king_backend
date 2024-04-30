@@ -21,6 +21,10 @@ class Reptile extends Model
         'expired_at'
     ];
 
+    protected $attributes = [
+        'img_urls' => [],
+    ];
+
     protected $casts = [
         'img_urls' => 'array',
         'birth' => 'date'

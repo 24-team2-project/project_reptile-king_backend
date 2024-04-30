@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginUserRequest;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\Contracts\Providers\JWT;
 use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class JWTAuthController extends Controller
 {
@@ -37,8 +41,16 @@ class JWTAuthController extends Controller
                 ] , 401);
             }
 
+            $refreshToken = auth()->setTTL(20160)->attempt($credentials); // 14일
+
+            $user = JWTAuth::user();
+            $ttl = 60 *60 * 24 * 14; // 14일
+            // redis 저장
+            Redis::setex('refresh_token_'.$user->id, $ttl, $refreshToken);
+
             $response = response()->json([ 'msg' => '로그인 성공' ], 200);
             $response->headers->set('Authorization', 'Bearer '.$accessToken);
+            $response->headers->set('Refresh-Token', 'Bearer '.$refreshToken);
             return $response;
 
         } catch (Exception $e) {
@@ -51,10 +63,24 @@ class JWTAuthController extends Controller
     }
 
     // 로그아웃
-    public function logout(){
+    public function logout(Request $request){
         try {
         //    Auth::guard('api')->logout(); // 세션 기반 인증일 경우
-            JWTAuth::invalidate(JWTAuth::getToken());
+            $accessToken = JWTAuth::getToken();
+            $refreshToken = $request->header('Refresh-Token');
+            if(strpos($refreshToken, 'Bearer') !== false){
+                $refreshToken = str_replace('Bearer ', '', $refreshToken);
+            }
+
+            $user = JWTAuth::user();
+            Redis::del('refresh_token_'.$user->id);
+            
+            JWTAuth::invalidate($accessToken);
+            JWTAuth::invalidate($refreshToken);
+
+            return response()->json([
+                'msg' => '로그아웃 성공'
+            ], 200);
 
         } catch (Exception $e) {
             return response()->json([
@@ -63,17 +89,27 @@ class JWTAuthController extends Controller
             ], 500);
         }
 
-        return response()->json([
-            'msg' => '로그아웃 성공'
-        ], 200);
+        
     }
 
     // 토큰 재발급
     public function refresh(){
-        $refreshToken = JWTAuth::refresh();
+        $user = JWTAuth::user();
+        
+        $redisData = Redis::get('refresh_token_'.$user->id);
+        $token = JWTAuth::getToken()->get();
+        if($redisData !== $token){
+            Redis::del('refresh_token_'.$user->id);
+            JWTAuth::invalidate($token);
+            return response()->json([
+                'msg' => '토큰 갱신 실패 : 불일치'
+            ], 401);
+        }
+
+        $newToken = auth()->login($user);
 
         $response = response()->json([ 'msg' => '토큰 갱신 성공' ], 200);
-        $response->headers->set('Refresh-Token', 'Bearer '.$refreshToken);
+        $response->headers->set('Authorization', 'Bearer '.$newToken);
 
         return $response;
     }

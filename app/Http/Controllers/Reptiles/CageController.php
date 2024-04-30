@@ -23,16 +23,17 @@ class CageController extends Controller
         try {
             $cages = $user->cages;
 
+            $state = 200;
+            $jsonData = ['msg' => '성공'];
+
             if($cages->isEmpty()){
-                return response()->json([
-                    'msg' => '데이터 없음'
-                ], 200);
+                $jsonData['msg'] = '데이터 없음';
+                $state = 204;
             } else{
-                return response()->json([
-                    'msg'   => '성공',
-                    'cages' => $cages
-                ], 200);
+                $jsonData['cages'] = $cages;
             }
+
+            return response()->json($jsonData, $state);
 
         } catch (Exception $e) {
             return response()->json([
@@ -109,7 +110,7 @@ class CageController extends Controller
                     'set_temp'            => $reqData['setTemp'],
                     'set_hum'             => $reqData['setHum'],
                     'serial_code'         => $reqData['serialCode'],
-                    'img_urls'            => null,
+                    'img_urls'            => [],
                 ];
 
                 if($reqData->has('images')){
@@ -149,7 +150,7 @@ class CageController extends Controller
             if(empty($cage)){
                 return response()->json([
                     'msg' => '데이터 없음'
-                ], 200);
+                ], 204);
             } else if($cage->user_id !== $user->id){
                 return response()->json([
                     'msg' => '권한 없음'
@@ -159,9 +160,14 @@ class CageController extends Controller
                     'msg' => '만료된 데이터'
                 ], 410);
             } else{
+
+                $cageInfo = Cage::leftjoin('cage_serial_codes', 'cages.serial_code', '=', 'cage_serial_codes.serial_code')
+                        ->select('cages.*', 'cage_serial_codes.location as location')
+                        ->where('cages.id', $cage->id)->first();
+
                 return response()->json([
                     'msg' => '성공',
-                    'cage' => $cage
+                    'cage' => $cageInfo
                 ], 200);
             }
 
@@ -228,9 +234,9 @@ class CageController extends Controller
                 $dbImgList = $cage->img_urls;
                 $updateImgList = $reqData['imgUrls'];
         
-                if(empty($dbImgList)){
-                    $dbImgList = [];
-                }
+                // if(empty($dbImgList)){
+                //     $dbImgList = [];
+                // }
                 $deleteImgList = array_diff($dbImgList, $updateImgList);
                 
                 $images = new ImageController();
@@ -244,6 +250,7 @@ class CageController extends Controller
                 if($reqData->has('images')){
                     $imgUrls = $images->uploadImageForController($reqData['images'], 'cages');
                     $uploadImgList = array_merge($updateImgList, $imgUrls);
+                    $uploadImgList = collect($uploadImgList)->flatten()->all(); // 2차원 배열을 1차원 배열로 변환
                 } else{
                     $uploadImgList = $updateImgList;
                 }
@@ -252,7 +259,7 @@ class CageController extends Controller
                     'name'                => $reqData['name'],
                     'reptile_serial_code' => $reqData['reptileSerialCode'],
                     'memo'                => $reqData['memo'],
-                    'img_urls'            => empty($uploadImgList) ? null : $uploadImgList,
+                    'img_urls'            => empty($uploadImgList) ? [] : $uploadImgList,
                 ]);
     
                 return response()->json([
@@ -284,10 +291,8 @@ class CageController extends Controller
         } else{
             try {
 
-                // dd($cage->img_urls);
-
                 // 이미지 삭제
-                if($cage->img_urls !== null){
+                if(!empty($cage->img_urls)){
                     // dd($cage->img_urls);
                     $images = new ImageController();
                     $deleteResult = $images->deleteImages($cage->img_urls);
@@ -316,22 +321,25 @@ class CageController extends Controller
     }
 
     // 온습도 데이터 전달(프론트에서 사용)
-    public function getTempHumData(String $serialCode)
+    public function getTempHumData(Cage $cage)
     {
         $user = JWTAuth::user();
 
         try {
-            $cage = Cage::where([
-                ['serial_code', $serialCode],
-                ['user_id', $user->id],
-                ['expired_at', null]
-            ])->first();
     
             if(empty($cage)){
                 return response()->json([
                     'msg' => '사육장을 찾을 수 없음'
                 ], 404);
-            }
+            } else if($cage->user_id !== $user->id){
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
+            } else if($cage->expired_at !== null){
+                return response()->json([
+                    'msg' => '만료된 데이터'
+                ], 410);
+            } 
 
             $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)->get();
 
@@ -367,8 +375,8 @@ class CageController extends Controller
             ], 410);
         } else{
             $validatedList = [
-                'temperature' => ['required'],
-                'humidity'    => ['required'],
+                'setTemp' => ['required'],
+                'setHum'    => ['required'],
             ];
     
             $validator = Validator::make($request->all(), $validatedList);
@@ -405,6 +413,104 @@ class CageController extends Controller
                 ], 500);
             }
         } 
+    }
+
+    // 최신 온습도 데이터 전달(프론트에서 사용)
+    public function getLatestTempHumData(Cage $cage)
+    {
+        $user = JWTAuth::user();
+
+        try {
+
+            if(empty($cage)){
+                return response()->json([
+                    'msg' => '사육장을 찾을 수 없음'
+                ], 404);
+            } else if($cage->user_id !== $user->id){
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
+            } else if($cage->expired_at !== null){
+                return response()->json([
+                    'msg' => '만료된 데이터'
+                ], 410);
+            }
+
+            $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)->latest()->first();
+
+            $state = 200;
+
+            $jsonData = ['msg' => '성공'];
+
+            if(empty($tempHumData)){
+                $jsonData['msg'] = '데이터 없음';
+                $state = 204;
+            } else{
+                $jsonData['latestData'] = $tempHumData;
+            }
+
+            return response()->json($jsonData, $state);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // 일별 시간당 평균 온습도 데이터 전달(프론트에서 사용)
+    public function getDailyTempHumData(Cage $cage)
+    {
+        $user = JWTAuth::user();
+
+        try {
+            if(empty($cage)){
+                return response()->json([
+                    'msg' => '사육장을 찾을 수 없음'
+                ], 404);
+            } else if($cage->user_id !== $user->id){
+                return response()->json([
+                    'msg' => '권한 없음'
+                ], 403);
+            } else if($cage->expired_at !== null){
+                return response()->json([
+                    'msg' => '만료된 데이터'
+                ], 410);
+            }
+
+            $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)
+                            ->selectRaw("
+                                EXTRACT(YEAR FROM created_at) as year,
+                                EXTRACT(MONTH FROM created_at) as month,
+                                EXTRACT(DAY FROM created_at) as day,
+                                EXTRACT(HOUR FROM created_at) as hour,
+                                AVG(temperature) as avgTemp,
+                                AVG(humidity) as avgHum
+                            ")
+                            ->groupBy('year', 'month', 'day', 'hour')
+                            ->orderByRaw('year ASC, month ASC, day ASC, hour ASC')
+                            ->get();
+
+            $state = 200;
+
+            $jsonData = ['msg' => '성공'];
+
+            if($tempHumData->isEmpty()){
+                $jsonData['msg'] = '데이터 없음';
+                $state = 204;
+            } else{
+                $jsonData['avgData'] = $tempHumData;
+            }
+
+            return response()->json($jsonData, $state);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // 설정 온, 습도 하드웨어로 전달
