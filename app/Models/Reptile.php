@@ -22,7 +22,7 @@ class Reptile extends Model
     ];
 
     protected $attributes = [
-        'img_urls' => [],
+        'img_urls' => '[]',
     ];
 
     protected $casts = [
