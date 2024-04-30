@@ -199,6 +199,7 @@ class ReptileController extends Controller
         if($reqData->has('newImages')){
             $imgUrls = $images->uploadImageForController($reqData['newImages'], 'reptiles');
             $uploadImgList = array_merge($updateImgList, $imgUrls);
+            $uploadImgList = collect($uploadImgList)->flatten()->all();
         } else{
             $uploadImgList = $updateImgList;
         }

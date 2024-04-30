@@ -250,6 +250,7 @@ class CageController extends Controller
                 if($reqData->has('images')){
                     $imgUrls = $images->uploadImageForController($reqData['images'], 'cages');
                     $uploadImgList = array_merge($updateImgList, $imgUrls);
+                    $uploadImgList = collect($uploadImgList)->flatten()->all(); // 2차원 배열을 1차원 배열로 변환
                 } else{
                     $uploadImgList = $updateImgList;
                 }
