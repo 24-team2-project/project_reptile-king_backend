@@ -21,10 +21,6 @@ class Cage extends Model
         'expired_at',
     ];
 
-    protected $attributes = [
-        'img_urls' => '[]',
-    ];
-
     protected $casts = [
         'set_temp' => 'float',
         'set_hum' => 'integer',
