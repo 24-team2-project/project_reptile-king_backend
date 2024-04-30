@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Upload\ImageController;
+use Carbon\Carbon;
 
 class GoodController extends Controller
 {
@@ -29,7 +30,7 @@ class GoodController extends Controller
                 'price' => $good->price,
                 'category_id' => $good->category_id,
                 'category_name' => $good->category ? $good->category->name : '카테고리 없음',
-                'created_at' => \Carbon\Carbon::parse($good->created_at)->toIso8601String(),
+                'created_at' => Carbon::parse($good->created_at)->toIso8601String(),
                 'img_urls' => $good->img_urls,
                 'reviewCount' => $good->reviewCount,
                 'starAvg' => $good->starAvg,
@@ -117,7 +118,7 @@ class GoodController extends Controller
                 'price' => $good->price,
                 'category_id' => $good->category_id,
                 'category_name' => $good->category ? $good->category->name : '카테고리 없음',
-                'created_at' => $good->created_at->toIso8601String(),
+                'created_at' => Carbon::parse($good->created_at)->toIso8601String(),
                 'img_urls' => $good->img_urls,
                 'reviewCount' => $good->reviewCount,
                 'starAvg' => round($good->starAvg, 2), // 평균 별점을 반올림
@@ -219,7 +220,7 @@ class GoodController extends Controller
                 'price' => $good->price,
                 'category_id' => $good->category_id,
                 'category_name' => $good->category ? $good->category->name : '카테고리 없음',
-                'created_at' => $good->created_at->toIso8601String(),
+                'created_at' => Carbon::parse($good->created_at)->toIso8601String(),
                 'img_urls' => $good->img_urls,
                 'reviewCount' => $good->reviewCount,
                 'starAvg' => $good->starAvg,
