@@ -21,9 +21,12 @@ class GoodFactory extends Factory
 
     public function definition(): array
     {
+        $deliveryFeeList = [0, 2500, 4000];
+
         return [
             'name' => $this->faker->name(),
             'price' => $this->faker->numberBetween(100, 9999) * 10,
+            'delivery_fee' => $this->faker->randomElement($deliveryFeeList),
             'category_id' => function(){
                 $goodsCategoryIdList  = Category::where('division', 'goods')->get()->pluck('id')->toArray();
                 return !empty($goodsCategoryIdList) ? $this->faker->randomElement($goodsCategoryIdList) : null;

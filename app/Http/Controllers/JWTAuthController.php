@@ -47,6 +47,11 @@ class JWTAuthController extends Controller
 
             $refreshToken = auth()->setTTL($ttl)->attempt($credentials); 
 
+            $redisConfirm = Redis::get('refresh_token_'.$user->id); // redis에 저장된 refresh token 유무 확인, get()은 키가 없으면 null 반환, 있으면 값 반환
+            if($redisConfirm){
+                Redis::del('refresh_token_'.$user->id);
+            }
+
             // redis 저장
             Redis::setex('refresh_token_'.$user->id, $ttl, $refreshToken);
 
@@ -90,7 +95,6 @@ class JWTAuthController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-
         
     }
 
@@ -105,8 +109,6 @@ class JWTAuthController extends Controller
             Redis::del('refresh_token_'.$user->id);
             return response()->json([
                 'msg' => '토큰 갱신 실패 : 불일치, 재로그인 필요',
-                'reqToken' => $token,
-                'redisData' => $redisData,
             ], 401);
         }
 
