@@ -60,6 +60,7 @@ class GoodController extends Controller
         ]);
 
         $reqData = $request->all();
+        $reqData['created_at'] = now();
 
         // 이미지 업로드 처리
         if ($request->has('img_urls')) {
