@@ -69,7 +69,7 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     // 사육장 최신 온습도 데이터 조회
     Route::get('/cages/{cage}/latest-temperature-humidity', [CageController::class, 'getLatestTempHumData']);
     // 사육장 일별 온습도 데이터 조회
-    Route::get('/cages/{cage}/daily-temperature-humidity', [CageController::class, 'getDailyTempHumData']);
+    Route::get('/cages/{cage}/daily-temperature-humidity/{date}', [CageController::class, 'getDailyTempHumData']);
 
     // // 커뮤니티
     Route::apiResource('posts', PostController::class)->except('index', 'show', 'create', 'edit', );
