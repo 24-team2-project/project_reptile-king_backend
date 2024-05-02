@@ -457,7 +457,7 @@ class CageController extends Controller
     }
 
     // 일별 시간당 평균 온습도 데이터 전달(프론트에서 사용)
-    public function getDailyTempHumData(Cage $cage)
+    public function getDailyTempHumData(Cage $cage, String $date)
     {
         $user = JWTAuth::user();
 
@@ -476,21 +476,19 @@ class CageController extends Controller
                 ], 410);
             }
 
-            $tempHumData = TemperatureHumidity::where('serial_code', $cage->serial_code)
-                            ->selectRaw("
-                                EXTRACT(YEAR FROM created_at) as year,
-                                EXTRACT(MONTH FROM created_at) as month,
-                                EXTRACT(DAY FROM created_at) as day,
+            $tempHumData = TemperatureHumidity::selectRaw("
+                                to_char(created_at, 'YYYY-MM-DD') as date,
                                 EXTRACT(HOUR FROM created_at) as hour,
-                                AVG(temperature) as avgTemp,
-                                AVG(humidity) as avgHum
-                            ")
-                            ->groupBy('year', 'month', 'day', 'hour')
-                            ->orderByRaw('year ASC, month ASC, day ASC, hour ASC')
+                                ROUND( CAST( AVG(temperature) as numeric ), 2 ) as avgTemp, 
+                                ROUND( CAST( AVG(humidity) as numeric ), 2 ) as avgHum
+                            ") // EXTRACT() : 날짜 및 시간에서 특정 필드 추출, CAST() : 데이터 타입 변환, postgresql에서는 CAST로 변환해야 함
+                            ->where('serial_code', $cage->serial_code)
+                            ->whereDate('created_at', $date)
+                            ->groupBy('date', 'hour')
+                            ->orderByRaw('date ASC, hour ASC')
                             ->get();
 
             $state = 200;
-
             $jsonData = ['msg' => '성공'];
 
             if($tempHumData->isEmpty()){
