@@ -51,7 +51,6 @@ class ReptileController extends Controller
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
-            'memo'      => [ 'string', 'nullable'],
         ];
         if($request->hasFile('images')){
             $validatedList['images'] = ['nullable', 'array'];
@@ -82,7 +81,6 @@ class ReptileController extends Controller
                 'species'       => $reqData['species'],
                 'gender'        => $reqData['gender'],
                 'birth'         => $reqData['birth'],
-                'memo'          => $reqData['memo'],
                 'img_urls'      => [],
             ];
 
@@ -160,7 +158,6 @@ class ReptileController extends Controller
             'species'   => ['required'],
             'gender'    => ['required', 'max:1', 'in:M,F'],
             'birth'     => [ 'nullable'],
-            'memo'      => [ 'string', 'nullable'],
             'imgUrls'   => ['nullable' , 'string'],
         ];
         if($request->hasFile('images')){
@@ -206,7 +203,6 @@ class ReptileController extends Controller
                 'species'   => $reqData['species'],
                 'gender'    => $reqData['gender'],
                 'birth'     => $reqData['birth'],
-                'memo'      => $reqData['memo'],
                 'img_urls'  => $uploadImgList,
             ]);
 

@@ -52,7 +52,6 @@ class CageController extends Controller
         $validatedList = [
             'name'              => ['required', 'string'],
             'reptileSerialCode' => ['nullable', 'string'],
-            'memo'              => ['nullable', 'string'],
             'setTemp'           => ['required'],
             'setHum'            => ['required'],
             'serialCode'        => ['required', 'string'],
@@ -106,7 +105,6 @@ class CageController extends Controller
                     'user_id'             => $user->id,
                     'name'                => $reqData['name'],
                     'reptile_serial_code' => $reqData['reptileSerialCode'],
-                    'memo'                => $reqData['memo'],
                     'set_temp'            => $reqData['setTemp'],
                     'set_hum'             => $reqData['setHum'],
                     'serial_code'         => $reqData['serialCode'],
@@ -197,7 +195,6 @@ class CageController extends Controller
             $validatedList = [
                 'name'              => ['required', 'string', 'max:255'],
                 'reptileSerialCode' => ['nullable', 'string'],
-                'memo'              => ['nullable', 'string'],
                 'serialCode'        => ['required', 'string'],
                 'imgUrls'           => ['nullable', 'string'],
             ];
@@ -255,7 +252,6 @@ class CageController extends Controller
                 $cage->update([
                     'name'                => $reqData['name'],
                     'reptile_serial_code' => $reqData['reptileSerialCode'],
-                    'memo'                => $reqData['memo'],
                     'img_urls'            => $uploadImgList,
                 ]);
     
@@ -297,10 +293,6 @@ class CageController extends Controller
                         return $deleteResult;
                     }
                 }
-    
-                // $cage->update([
-                //     'expired_at' => now()
-                // ]);
     
                 $cage->delete();
     
