@@ -13,7 +13,6 @@ class Cage extends Model
         'name',
         'user_id',
         'reptile_serial_code',
-        'memo',
         'set_temp',
         'set_hum',
         'serial_code',

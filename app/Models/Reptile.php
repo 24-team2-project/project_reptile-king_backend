@@ -16,7 +16,6 @@ class Reptile extends Model
         'gender',
         'birth',
         'name',
-        'memo',
         'img_urls',
         'expired_at'
     ];
