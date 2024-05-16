@@ -13,12 +13,12 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class PurchaseController extends Controller
 {
     // 구매 시 유저 정보 전달
-    public function userInfo()
-    {
-        $user = JWTAuth::user();
+    // public function userInfo()
+    // {
+    //     $user = JWTAuth::user();
 
-        return response()->json($user);
-    }
+    //     return response()->json($user);
+    // }
 
     // 구매 목록
     public function index()
