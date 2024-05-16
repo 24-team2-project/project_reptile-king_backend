@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class RegisterUserController extends Controller
 {
-    
+
     public function register(RegisterUserRequest $request){
 
         try {
@@ -36,6 +36,7 @@ class RegisterUserController extends Controller
                 'nickname'  => $validated['nickname'],
                 // 'address'   => $validated['address'],
                 'phone'     => $validated['phone'],
+                'img_urls'  => [],
             ]);
 
             $role = Role::where('role', 'post_create')->first();

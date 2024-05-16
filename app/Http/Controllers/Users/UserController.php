@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
@@ -13,8 +14,19 @@ class UserController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'msg' => '유저 정보들...',
+        $users = User::all();
+
+        return response()->json($users ,[
+            'msg' => '유저 목록',
+        ]);
+    }
+
+    public function userInfo()
+    {
+        $user = JWTAuth::user();
+
+        return response()->json($users ,[
+            'msg' => '유저 개인정보',
         ]);
     }
 
@@ -56,7 +68,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = JWTAuth::user();
-        
+
     }
 
     /**

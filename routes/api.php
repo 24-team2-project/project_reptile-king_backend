@@ -51,7 +51,7 @@ Route::post('/login', [ JWTAuthController::class, 'login' ]);
 Route::group([ 'middleware' => 'jwt.auth'], function(){
     // 토큰 갱신
     Route::post('/refresh-token', [ JWTAuthController::class, 'refresh' ]);
-    
+
     // 로그아웃
     Route::post('/logout', [ JWTAuthController::class, 'logout' ]);
 
@@ -94,7 +94,8 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::apiResource('supports', SupportController::class)->except('create', 'edit');
 
     // 사용자
-    Route::get('/users', [UserController::class, 'index']); // 실험용 기능 없음
+    Route::apiResource('/users', UserController::class)->except('create', 'edit');; // 유저 목록
+
 });
 
 //카테고리
