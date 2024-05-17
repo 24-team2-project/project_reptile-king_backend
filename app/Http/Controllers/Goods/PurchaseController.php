@@ -12,14 +12,6 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PurchaseController extends Controller
 {
-    // 구매 시 유저 정보 전달
-    // public function userInfo()
-    // {
-    //     $user = JWTAuth::user();
-
-    //     return response()->json($user);
-    // }
-
     // 구매 목록
     public function index()
     {
@@ -35,20 +27,23 @@ class PurchaseController extends Controller
         $user = JWTAuth::user();
         $purchases = [];
 
-        $request->validate([
+        $data = json_decode($request->getContent(), true);
+
+        $validatedData = $request->validate([
             '*.good_id' => 'required|exists:goods,id',
             '*.total_price' => 'required|integer|min:1',
             '*.quantity' => 'required|integer|min:1',
             '*.payment_selection' => 'required|string',
         ]);
 
-        foreach ($request->all() as $item) {
+        foreach ($validatedData as $item) {
             $item['user_id'] = $user->id;
             $purchases[] = Purchase::create($item);
         }
 
         return response()->json($purchases, 201);
     }
+
 
     // 구매 상세
     public function show(Purchase $purchase)

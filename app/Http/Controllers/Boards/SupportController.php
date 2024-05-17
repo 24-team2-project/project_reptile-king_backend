@@ -19,9 +19,9 @@ class SupportController extends Controller
         return response()->json($supports);
     }
 
-    public function create()
+    public function show(Support $support)
     {
-        //
+        return response()->json($support);
     }
 
     public function store(Request $request)
@@ -33,30 +33,24 @@ class SupportController extends Controller
             'content' => 'required',
             'category_id' => 'required',
             'img_urls' => 'nullable|array',
-            'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         $reqData = $request->all();
         $reqData['user_id'] = $user->id;
 
         // 이미지 업로드 처리
-        $images = new ImageController();
+        if ($request->has('img_urls')) {
+            $images = new ImageController();
         $imageUrls = $images->uploadImageForController($reqData['img_urls'], 'supports');
         $reqData['img_urls'] = $imageUrls;
+        } else {
+            $reqData['img_urls'] = [];
+        }
 
         $support = Support::create($reqData);
 
         return response()->json($support, 201);
     }
 
-    public function show(Support $support)
-    {
-        return response()->json($support);
-    }
-
-    public function edit(Support $support)
-    {
-        //
-    }
 
     public function update(Request $request, Support $support)
     {
@@ -65,7 +59,6 @@ class SupportController extends Controller
             'content' => 'required',
             'category_id' => 'required',
             'img_urls' => 'nullable|array',
-            'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $reqData = $request->all();
@@ -88,7 +81,7 @@ class SupportController extends Controller
             $imgUrls = $images->uploadImageForController($reqData['img_urls'], 'supports');
             $uploadImgList = array_merge($updateImgList, $imgUrls);
         }
-        
+
         $support->update($reqData);
 
         return response()->json($support->fresh());
@@ -100,6 +93,7 @@ class SupportController extends Controller
         return response()->json(['message' => '문의글이 삭제되었습니다.']);
     }
 
+    // 문의 답변
     public function answer(Request $request, Support $support)
     {
         $request->validate([
@@ -108,7 +102,17 @@ class SupportController extends Controller
 
         $reqData = $request->only('answer', 'answered_at');
         $support->update($reqData);
-        
+
         return response()->json($support->fresh());
+    }
+
+    public function create()
+    {
+        //
+    }
+
+    public function edit(Support $support)
+    {
+        //
     }
 }
