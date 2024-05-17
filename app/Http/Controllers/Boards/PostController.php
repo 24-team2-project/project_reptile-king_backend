@@ -83,8 +83,8 @@ class PostController extends Controller
         $posts->setCollection($reqData);
         return response()->json($posts);
     }
-    
-    
+
+
 
 
     public function create()
@@ -102,14 +102,14 @@ class PostController extends Controller
             'content' => 'required',
             'category_id' => 'required',
             'img_urls' => 'nullable|array',
-            'img_urls.*' => 'nullable|string|url',
         ]);
+
         $reqData = $request->all();
         $reqData['user_id'] = $user->id;
 
         // 이미지 업로드 처리
-        if ($request->has('img_urls')) {
-
+        if ($request->has('img_urls') == false) {
+            $reqData['img_urls'] = [];
         }
 
         $post = Post::create($reqData);
@@ -147,7 +147,6 @@ class PostController extends Controller
             'content' => 'required',
             'category_id' => 'required',
             'img_urls' => 'nullable|array',
-            'img_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($post->user_id !== $user->id) {
@@ -175,7 +174,7 @@ class PostController extends Controller
             $imgUrls = $images->uploadImageForController($reqData['img_urls'], 'posts');
             $uploadImgList = array_merge($updateImgList, $imgUrls);
         }
-        
+
         $post->update($reqData);
 
         return response()->json($post->fresh());
