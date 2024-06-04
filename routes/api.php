@@ -16,7 +16,7 @@ use App\Http\Controllers\Boards\SupportController;
 use App\Http\Controllers\Sensors\TemperatureHumidityController;
 use App\Http\Controllers\Upload\ImageController;
 use App\Http\Controllers\Categories\CategoryController;
-
+use App\Http\Controllers\Sensors\SetLocationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,6 +113,8 @@ Route::get('/goods', [GoodController::class, 'index']);
 Route::get('/goods/{id}', [GoodController::class, 'show']);
 Route::get('/goods/category/{categoryId}', [GoodController::class, 'findByCategory']);
 
+// 케이지 ip 저장
+Route::post('/set-location', [SetLocationController::class, 'setLocation']);
 // 온습도 데이터 저장(라즈베리파이에서 데이터 전송)
 Route::post('/tnhs', [TemperatureHumidityController::class, 'store']);
 

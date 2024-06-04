@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reptiles;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Mqtt\MqttController;
 use App\Http\Controllers\Upload\ImageController;
+use App\Models\Alarm;
 use App\Models\Cage;
 use App\Models\CageSerialCode;
 use App\Models\TemperatureHumidity;
@@ -159,13 +160,13 @@ class CageController extends Controller
                 ], 410);
             } else{
 
-                $cageInfo = Cage::leftjoin('cage_serial_codes', 'cages.serial_code', '=', 'cage_serial_codes.serial_code')
-                        ->select('cages.*', 'cage_serial_codes.location as location')
-                        ->where('cages.id', $cage->id)->first();
+                // $cageInfo = Cage::leftjoin('cage_serial_codes', 'cages.serial_code', '=', 'cage_serial_codes.serial_code')
+                //         ->select('cages.*', 'cage_serial_codes.location as location')
+                //         ->where('cages.id', $cage->id)->first();
 
                 return response()->json([
                     'msg' => '성공',
-                    'cage' => $cageInfo
+                    'cage' => $cage
                 ], 200);
             }
 
@@ -507,4 +508,43 @@ class CageController extends Controller
         $result = $mqtt->sendData($serialCode, $setTemp, $setHum);
         return $result;
     }
+
+    // 사육장 분양
+    public function sellCage(Cage $cage)
+    {
+        $user = JWTAuth::user();
+
+        if($cage->user_id !== $user->id){
+            return response()->json([
+                'msg' => '권한 없음'
+            ], 403);
+        } else if($cage->expired_at !== null){
+            return response()->json([
+                'msg' => '만료된 데이터'
+            ], 410);
+        } else{
+            try {
+                // 분양 알림 생성
+                Alarm::create([
+                    'user_id'   => $user->id,
+                    'category'  => 'reptile_sales_confirm',
+                    'title'     => '케이지 분양',
+                    'content'   => $user->nickname.' 유저가 케이지 분양을 신청하였습니다.',
+                    'readed'    => false,
+                    'img_urls'  => [],
+                ]);
+
+            // 분양 알림 전송
+    
+
+                
+            } catch (Exception $e) {
+                return response()->json([
+                    'msg' => '서버 오류',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
+    }
+
 }

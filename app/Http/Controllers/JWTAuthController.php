@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginUserRequest;
+use App\Models\FcmToken;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -54,6 +55,22 @@ class JWTAuthController extends Controller
 
             // redis 저장
             Redis::setex('refresh_token_'.$user->id, $ttl, $refreshToken);
+
+            $fcmTokensConfirmList = $user->fcmTokens;
+            // 조건 : 저장된 토큰이 없거나, 해당하는 platform의 토큰이 없을 때
+            if($fcmTokensConfirmList->isEmpty() || $fcmTokensConfirmList->firstWhere('platform', $request->platform) === null){
+                FcmToken::create([
+                    'user_id' => $user->id,
+                    'platform' => $request->flatform,
+                    'token' => $request->notificationToken,
+                ]);
+            }else{
+                $tokenData = $fcmTokensConfirmList->firstWhere('platform', $request->platform);
+
+                $tokenData->update([
+                    'token' => $request->notificationToken,
+                ]);
+            }
 
             $response = response()->json([ 'msg' => '로그인 성공' ], 200);
             $response->headers->set('Authorization', 'Bearer '.$accessToken);

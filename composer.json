@@ -10,6 +10,7 @@
         "aws/aws-sdk-php-laravel": "^3.9",
         "darkaonline/l5-swagger": "^8.5",
         "guzzlehttp/guzzle": "^7.2",
+        "kreait/laravel-firebase": "^5.8",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.13",

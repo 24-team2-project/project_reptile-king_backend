@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Reptiles;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Upload\ImageController;
+use App\Http\Controllers\Users\AlarmController;
+use App\Models\Alarm;
 use App\Models\Reptile;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -252,4 +255,62 @@ class ReptileController extends Controller
             ], 500);
         }
     }
+
+    // 파충류 분양
+    public function sellReptile(Request $request)
+    {
+        $user = JWTAuth::user();
+
+        $validatedList = [
+            'receiveNickname' => ['required', 'string', 'max:255'],
+            // 고민중
+        ];
+
+        $validator = Validator::make($request->all(), $validatedList);
+
+        if($validator->fails()){
+            return response()->json([
+                'msg'   => '유효성 검사 오류',
+                'error' => $validator->errors()
+            ], 400);
+        }
+
+        $reqData = $validator->safe();
+
+        try {
+            $receiveUser = User::where('nickname', $reqData['receiveNickname'])->first();
+            if(empty($receiveUser)){
+                return response()->json([
+                    'msg' => '유저 없음'
+                ], 204);
+            }
+
+            $receiveData = [
+                'user_id'   => $receiveUser->id, // 받는 사람의 아이디
+                'category'  => 'reptile_sales_receive',
+                'title'     => '파충류 분양 신청',
+                'content'   => $user->nickname.' 유저가 파충류 분양을 신청하였습니다.',
+                'readed'    => false,
+                'sened_user_id' => $user->id,
+                'img_urls'  => [],
+            ];
+            
+            // 분양 알림 전송
+            $alarm = new AlarmController();
+            $result = $alarm->sendAlarm('user', $receiveData);
+
+            return response()->json([
+                    'msg' => $result['msg']
+                ], $result['status']);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
 }
