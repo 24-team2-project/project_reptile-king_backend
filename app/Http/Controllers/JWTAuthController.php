@@ -68,10 +68,8 @@ class JWTAuthController extends Controller
                     ]);
                 }else{
                     $tokenData = $fcmTokensConfirmList->firstWhere('platform', $request->platform);
-    
-                    $tokenData->update([
-                        'token' => $request->notificationToken,
-                    ]);
+                    $tokenData->token = $request->notificationToken;
+                    $tokenData->save();
                 }
             }
 

@@ -101,12 +101,9 @@ class AlarmController extends Controller
         try{
             Alarm::create($receiveData);
 
-            // $user = User::find($receiveData['send_user_id'])->first(); // send_user_id가 1이면 admin
-            
-            // $sendUserTokens =  $user->fcmTokens; // 보내는 사람의 토큰
-            $receiveUserTokens = $receiveData->user_id->fcmTokens; // 받는 사람의 토큰
+            $receiveUser = User::where('id', $receiveData['user_id'])->first();
+            $receiveUserTokens = $receiveUser->fcmTokens; // 받는 사람의 토큰
 
-            // if($sendUserTokens->isEmpty() || $receiveUserTokens->isEmpty()){
             if($receiveUserTokens->isEmpty()){
                 $result = [
                     'msg' => '토큰 없음',
@@ -117,7 +114,6 @@ class AlarmController extends Controller
                 return $result;
             }
 
-            // $sendToken = $sendUserTokens->fitst()->token;
             $receiveTokens = $receiveUserTokens->pluck('token')->toArray();
 
             $receiveMessage = [
@@ -183,7 +179,6 @@ class AlarmController extends Controller
 
             $receiveData = [
                 'user_id'   => $alarm->send_user_id, // 받는 사람의 아이디
-                'send_user_id' => 1,
                 'category'  => 'reptile_sales',
                 'title'     => '파충류 분양 완료',
                 'content'   => $user->nickname.' 유저에게 파충류 분양을 완료하였습니다.',
@@ -218,7 +213,6 @@ class AlarmController extends Controller
 
             $receiveData = [
                 'user_id'   => $alarm->send_user_id,
-                'send_user_id' => 1, // 1은 admin
                 'category'  => 'reptile_sales',
                 'title'     => '파충류 분양 거절',
                 'content'   => $user->nickname.' 유저가 파충류 분양을 거절하였습니다.',
