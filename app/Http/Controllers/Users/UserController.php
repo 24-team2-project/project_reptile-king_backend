@@ -34,7 +34,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function show()
+    public function show($id)
     {
         $user = JWTAuth::user();
 
