@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Users\AlarmController;
 use App\Http\Requests\LoginUserRequest;
 use App\Models\FcmToken;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
-use Tymon\JWTAuth\Contracts\Providers\JWT;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 
@@ -73,6 +73,25 @@ class JWTAuthController extends Controller
                 }
             }
 
+            $alarm = new AlarmController();
+
+            $receiveData = [
+                'user_id'   => $user->id,
+                'category'  => 'login',
+                'title'     => '로그인 성공',
+                'content'   => '로그인에 성공하였습니다.',
+                'readed'    => false,
+                'img_urls'  => [],
+                'created_at' => now()->toDateTimeString(),
+            ];
+
+            $result = $alarm->sendAlarm($receiveData);
+
+            if($result['flag'] === false){
+                return response()->json([
+                    'msg' => $result['msg']
+                ], $result['status']);
+            }
 
             $response = response()->json([ 'msg' => '로그인 성공' ], 200);
             $response->headers->set('Authorization', 'Bearer '.$accessToken);

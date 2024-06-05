@@ -145,6 +145,23 @@ return [
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
+        
+        'clusters' => [
+            'default' => [
+                [
+                    'host' => env('REDIS_MASTER_HOST', '127.0.0.1'),
+                    'password' => env('REDIS_PASSWORD', null),
+                    'port' => env('REDIS_MASTER_PORT', 6379),
+                    'database' => env('REDIS_DB', 0),
+                ],
+                [
+                    'host' => env('REDIS_SLAVE1_HOST', '127.0.0.2'),
+                    'password' => env('REDIS_PASSWORD', null),
+                    'port' => env('REDIS_SLAVE1_PORT', 6379),
+                    'database' => env('REDIS_DB', 0),
+                ],
+            ],
+        ],
 
     ],
 
