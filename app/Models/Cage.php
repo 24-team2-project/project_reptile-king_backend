@@ -18,6 +18,7 @@ class Cage extends Model
         'serial_code',
         'img_urls',
         'expired_at',
+        'location',
     ];
 
     protected $casts = [

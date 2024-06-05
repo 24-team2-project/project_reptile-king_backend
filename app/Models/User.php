@@ -120,4 +120,8 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Role::class)->withPivot('created_at');
     }
 
+    public function fcmTokens(){
+        return $this->hasMany(FcmToken::class);
+    }
+
 }

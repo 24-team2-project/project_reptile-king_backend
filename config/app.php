@@ -172,6 +172,7 @@ return [
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         Aws\Laravel\AwsServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
+        Kreait\Laravel\Firebase\ServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -190,6 +191,7 @@ return [
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
         'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+        'Firebase' => Kreait\Laravel\Firebase\Facades\Firebase::class,
         // 'AWS' => Aws\Laravel\AwsFacade::class,
     ])->toArray(),
 
