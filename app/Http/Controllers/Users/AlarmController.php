@@ -78,17 +78,36 @@ class AlarmController extends Controller
         //
     }
 
+    // 알림 확인
+    public function checkAlarm(Alarm $alarm){
+        try{
+            $alarm->readed = true;
+            $alarm->save();
+
+            return response()->json([
+                'msg' => '알림 확인 성공'
+            ], 200);
+
+        }catch(Exception $e){
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     // 알림 보내기
     public function sendAlarm($receiveData){
         try{
             Alarm::create($receiveData);
 
-            $user = User::find($receiveData['send_user_id'])->first(); // send_user_id가 1이면 admin
+            // $user = User::find($receiveData['send_user_id'])->first(); // send_user_id가 1이면 admin
             
-            $sendUserTokens =  $user->fcmTokens; // 보내는 사람의 토큰
+            // $sendUserTokens =  $user->fcmTokens; // 보내는 사람의 토큰
             $receiveUserTokens = $receiveData->user_id->fcmTokens; // 받는 사람의 토큰
 
-            if($sendUserTokens->isEmpty() || $receiveUserTokens->isEmpty()){
+            // if($sendUserTokens->isEmpty() || $receiveUserTokens->isEmpty()){
+            if($receiveUserTokens->isEmpty()){
                 $result = [
                     'msg' => '토큰 없음',
                     'flag' => false,
@@ -98,18 +117,17 @@ class AlarmController extends Controller
                 return $result;
             }
 
-            $sendToken = $sendUserTokens->fitst()->token;
+            // $sendToken = $sendUserTokens->fitst()->token;
             $receiveTokens = $receiveUserTokens->pluck('token')->toArray();
 
             $receiveMessage = [
                 'notification' => [
                     'title' => $receiveData['title'],
                     'body' => $receiveData['content'],
-                    'sendnickname' => $user->nickname,
                 ],
-                'data' => [
-                    'sender_token' => $sendToken,
-                ],
+                // 'data' => [
+                //     'sender_token' => $sendToken,
+                // ],
             ];
 
             $this->messaging->sendMulticast($receiveMessage, $receiveTokens);
@@ -131,7 +149,7 @@ class AlarmController extends Controller
         }
     }
 
-    // 분양 알림 수락
+    // 파충류 분양 알림 수락
     public function acceptReptileSale(Alarm $alarm){
         $user = JWTAuth::user();
 
@@ -152,6 +170,7 @@ class AlarmController extends Controller
                 'expired_at' => now()->toDateTimeString(), // toDateTimeString() 메서드는 Carbon 인스턴스를 문자열로 변환합니다.
             ]);
 
+            // 새 사용자의 파충류 등록
             Reptile::create([
                 'user_id' => $user->id,
                 'serial_code' => $sendUserReptile->serial_code,
@@ -165,7 +184,7 @@ class AlarmController extends Controller
             $receiveData = [
                 'user_id'   => $alarm->send_user_id, // 받는 사람의 아이디
                 'send_user_id' => 1,
-                'category'  => 'reptile_sales_accept',
+                'category'  => 'reptile_sales',
                 'title'     => '파충류 분양 완료',
                 'content'   => $user->nickname.' 유저에게 파충류 분양을 완료하였습니다.',
                 'readed'    => false,
@@ -187,7 +206,7 @@ class AlarmController extends Controller
         }
     }
 
-    // 분양 알림 거절
+    //파충류 분양 알림 거절
     public function rejectReptileSale(Alarm $alarm){
         $user = JWTAuth::user();
 
@@ -197,9 +216,9 @@ class AlarmController extends Controller
             $alarm->save();
 
             $receiveData = [
-                'user_id'   => $user->id,
+                'user_id'   => $alarm->send_user_id,
                 'send_user_id' => 1, // 1은 admin
-                'category'  => 'reptile_sales_reject',
+                'category'  => 'reptile_sales',
                 'title'     => '파충류 분양 거절',
                 'content'   => $user->nickname.' 유저가 파충류 분양을 거절하였습니다.',
                 'readed'    => false,
@@ -220,23 +239,7 @@ class AlarmController extends Controller
         }
     }
 
-    // 알림 확인
-    public function checkAlarm(Alarm $alarm){
-        try{
-            $alarm->readed = true;
-            $alarm->save();
-
-            return response()->json([
-                'msg' => '알림 확인 성공'
-            ], 200);
-
-        }catch(Exception $e){
-            return response()->json([
-                'msg' => '서버 오류',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
+    
 
 
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reptiles;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Mqtt\MqttController;
 use App\Http\Controllers\Upload\ImageController;
+use App\Http\Controllers\Users\AlarmController;
 use App\Models\Alarm;
 use App\Models\Cage;
 use App\Models\CageSerialCode;
@@ -125,6 +126,25 @@ class CageController extends Controller
                 if(gettype($result) !== 'boolean'){
                     return $result;
                 }
+
+                $alarm = new AlarmController();
+
+                $receiveData = [
+                    'user_id'   => $user->id,
+                    'category'  => 'cage_store',
+                    'title'     => '사육장 등록',
+                    'content'   => '사육장 등록이 완료되었습니다.',
+                    'readed'    => false,
+                    'img_urls'  => [],
+                ];
+    
+                $result = $alarm->sendAlarm($receiveData);
+    
+                if($result['flag'] === false){
+                    return response()->json([
+                        'msg' => $result['msg']
+                    ], $result['status']);
+                }   
 
                 return response()->json([
                     'msg' => '등록 완료',
@@ -527,7 +547,7 @@ class CageController extends Controller
                 // 분양 알림 생성
                 Alarm::create([
                     'user_id'   => $user->id,
-                    'category'  => 'reptile_sales_confirm',
+                    'category'  => 'cage_sales',
                     'title'     => '케이지 분양',
                     'content'   => $user->nickname.' 유저가 케이지 분양을 신청하였습니다.',
                     'readed'    => false,

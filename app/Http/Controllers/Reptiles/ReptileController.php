@@ -95,6 +95,25 @@ class ReptileController extends Controller
 
             Reptile::create($createList);
 
+            $alarm = new AlarmController();
+
+            $receiveData = [
+                'user_id'   => $user->id,
+                'category'  => 'reptile_store',
+                'title'     => '파충류 등록',
+                'content'   => '파충류 등록이 완료되었습니다.',
+                'readed'    => false,
+                'img_urls'  => [],
+            ];
+
+            $result = $alarm->sendAlarm($receiveData);
+
+            if($result['flag'] === false){
+                return response()->json([
+                    'msg' => $result['msg']
+                ], $result['status']);
+            }   
+
             return response()->json([
                 'msg' => '등록 완료',
             ], 201);
@@ -287,7 +306,7 @@ class ReptileController extends Controller
 
             $receiveData = [
                 'user_id'   => $receiveUser->id, // 받는 사람의 아이디
-                'category'  => 'reptile_sales_receive',
+                'category'  => 'reptile_sales',
                 'title'     => '파충류 분양 신청',
                 'content'   => $user->nickname.' 유저가 파충류 분양을 신청하였습니다.',
                 'readed'    => false,
