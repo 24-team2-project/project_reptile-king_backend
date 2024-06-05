@@ -105,6 +105,7 @@ class ReptileController extends Controller
                     'content'   => '파충류 등록이 완료되었습니다.',
                     'readed'    => false,
                     'img_urls'  => [],
+                    'created_at' => now()->toDateTimeString(),
                 ];
     
                 $result = $alarm->sendAlarm($receiveData);
@@ -315,6 +316,7 @@ class ReptileController extends Controller
                 'readed'    => false,
                 'sened_user_id' => $user->id,
                 'img_urls'  => [],
+                'created_at' => now()->toDateTimeString(),
             ];
             
             // 분양 알림 전송

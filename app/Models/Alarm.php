@@ -23,6 +23,11 @@ class Alarm extends Model
         'created_at',
     ];
 
+    protected $casts = [
+        'img_urls' => 'array',
+    ];
+
+
     public function user(){
         return $this->belongsTo(User::class);
     }

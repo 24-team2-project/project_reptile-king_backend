@@ -63,7 +63,7 @@ class JWTAuthController extends Controller
                 if($fcmTokensConfirmList->isEmpty() || $fcmTokensConfirmList->firstWhere('platform', $request->platform) === null){
                     FcmToken::create([
                         'user_id' => $user->id,
-                        'platform' => $request->flatform,
+                        'platform' => $request->platform,
                         'token' => $request->notificationToken,
                     ]);
                 }else{
