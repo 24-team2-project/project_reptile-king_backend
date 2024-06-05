@@ -127,24 +127,28 @@ class CageController extends Controller
                     return $result;
                 }
 
-                $alarm = new AlarmController();
+                if(!($user->fcmTokens->isEmpty())){
+                    $alarm = new AlarmController();
+    
+                    $receiveData = [
+                        'user_id'   => $user->id,
+                        'category'  => 'cage_store',
+                        'title'     => '사육장 등록',
+                        'content'   => '사육장 등록이 완료되었습니다.',
+                        'readed'    => false,
+                        'img_urls'  => [],
+                    ];
+        
+                    $result = $alarm->sendAlarm($receiveData);
+                    
+                    if($result['flag'] === false){
+                        return response()->json([
+                            'msg' => $result['msg']
+                        ], $result['status']);
+                    }   
 
-                $receiveData = [
-                    'user_id'   => $user->id,
-                    'category'  => 'cage_store',
-                    'title'     => '사육장 등록',
-                    'content'   => '사육장 등록이 완료되었습니다.',
-                    'readed'    => false,
-                    'img_urls'  => [],
-                ];
-    
-                $result = $alarm->sendAlarm($receiveData);
-    
-                if($result['flag'] === false){
-                    return response()->json([
-                        'msg' => $result['msg']
-                    ], $result['status']);
-                }   
+                }
+
 
                 return response()->json([
                     'msg' => '등록 완료',
