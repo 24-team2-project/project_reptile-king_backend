@@ -9,6 +9,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Laravel\Firebase\Facades\Firebase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -116,17 +117,30 @@ class AlarmController extends Controller
 
             $receiveTokens = $receiveUserTokens->pluck('token')->toArray();
 
+            $messages = [];
+
             $receiveMessage = [
-                'notification' => [
                     'title' => $receiveData['title'],
                     'body' => $receiveData['content'],
-                ],
-                // 'data' => [
-                //     'sender_token' => $sendToken,
-                // ],
             ];
 
-            $this->messaging->sendMulticast($receiveMessage, $receiveTokens);
+            foreach ($receiveTokens as $token) {
+                $messages[] = CloudMessage::withTarget('token', $token)
+                    ->withNotification($receiveMessage)
+                    ->withDefaultSounds();
+            }
+
+            $resultCount = $this->messaging->sendAll($messages);
+
+            if($resultCount->successes() === 0){
+                $result = [
+                    'msg' => '알림 전송 실패',
+                    'flag' => false,
+                    'status' => 500,
+                ];
+                return $result;
+            }
+
             $result = [
                 'msg' => '알림 전송 성공',
                 'flag' => true,
