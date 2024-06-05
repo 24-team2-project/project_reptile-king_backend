@@ -137,6 +137,7 @@ class CageController extends Controller
                         'content'   => '사육장 등록이 완료되었습니다.',
                         'readed'    => false,
                         'img_urls'  => [],
+                        'created_at' => now()->toDateTimeString(),
                     ];
         
                     $result = $alarm->sendAlarm($receiveData);
@@ -556,6 +557,7 @@ class CageController extends Controller
                     'content'   => $user->nickname.' 유저가 케이지 분양을 신청하였습니다.',
                     'readed'    => false,
                     'img_urls'  => [],
+                    'created_at' => now()->toDateTimeString(),
                 ]);
 
             // 분양 알림 전송

@@ -11,6 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        Schema::table('cages', function (Blueprint $table) {
+            $table->dropForeign(['reptile_serial_code']);
+        });
+
+
         Schema::table('reptiles', function (Blueprint $table) {
             $table->dropUnique('serial_code');
         });
@@ -23,6 +29,10 @@ return new class extends Migration
     {
         Schema::table('reptiles', function (Blueprint $table) {
             $table->unique('serial_code');
+        });
+
+        Schema::table('cages', function (Blueprint $table) {
+            $table->foreign('reptile_serial_code')->references('serial_code')->on('reptiles')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 };

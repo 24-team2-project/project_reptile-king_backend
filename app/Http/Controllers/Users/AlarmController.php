@@ -189,6 +189,7 @@ class AlarmController extends Controller
                 'content'   => $user->nickname.' 유저에게 파충류 분양을 완료하였습니다.',
                 'readed'    => false,
                 'img_urls'  => [],
+                'created_at' => now()->toDateTimeString(),
             ];
 
             $result = $this->sendAlarm($receiveData);
@@ -223,6 +224,7 @@ class AlarmController extends Controller
                 'content'   => $user->nickname.' 유저가 파충류 분양을 거절하였습니다.',
                 'readed'    => false,
                 'img_urls'  => [],
+                'created_at' => now()->toDateTimeString(),
             ];
 
             $result = $this->sendAlarm($receiveData);
