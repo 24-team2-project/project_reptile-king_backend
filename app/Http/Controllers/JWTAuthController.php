@@ -71,27 +71,27 @@ class JWTAuthController extends Controller
                     $tokenData->token = $request->notificationToken;
                     $tokenData->save();
                 }
+                $alarm = new AlarmController();
+    
+                $receiveData = [
+                    'user_id'   => $user->id,
+                    'category'  => 'login',
+                    'title'     => '로그인 성공',
+                    'content'   => '로그인에 성공하였습니다.',
+                    'readed'    => false,
+                    'img_urls'  => [],
+                    'created_at' => now()->toDateTimeString(),
+                ];
+    
+                $result = $alarm->sendAlarm($receiveData);
+    
+                if($result['flag'] === false){
+                    return response()->json([
+                        'msg' => $result['msg']
+                    ], $result['status']);
+                }
             }
 
-            $alarm = new AlarmController();
-
-            $receiveData = [
-                'user_id'   => $user->id,
-                'category'  => 'login',
-                'title'     => '로그인 성공',
-                'content'   => '로그인에 성공하였습니다.',
-                'readed'    => false,
-                'img_urls'  => [],
-                'created_at' => now()->toDateTimeString(),
-            ];
-
-            $result = $alarm->sendAlarm($receiveData);
-
-            if($result['flag'] === false){
-                return response()->json([
-                    'msg' => $result['msg']
-                ], $result['status']);
-            }
 
             $response = response()->json([ 'msg' => '로그인 성공' ], 200);
             $response->headers->set('Authorization', 'Bearer '.$accessToken);
