@@ -7,6 +7,7 @@ use App\Models\Alarm;
 use App\Models\Reptile;
 use App\Models\User;
 use Exception;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Kreait\Firebase\Messaging\CloudMessage;
@@ -115,30 +116,91 @@ class AlarmController extends Controller
                 return $result;
             }
 
-            $receiveTokens = $receiveUserTokens->pluck('token')->toArray();
+            // $receiveTokens = $receiveUserTokens->pluck('token')->toArray();
 
-            $messages = [];
 
-            $receiveMessage = [
-                    'title' => $receiveData['title'],
-                    'body' => $receiveData['content'],
-            ];
 
-            foreach ($receiveTokens as $token) {
-                $messages[] = CloudMessage::withTarget('token', $token)
-                    ->withNotification($receiveMessage)
-                    ->withDefaultSounds();
+            // $messages = [];
+
+            // $receiveMessage = [
+            //         'title' => $receiveData['title'],
+            //         'body' => $receiveData['content'],
+            // ];
+
+            // foreach ($receiveTokens as $token) {
+            //     $messages[] = CloudMessage::withTarget('token', $token)
+            //         ->withNotification($receiveMessage)
+            //         ->withDefaultSounds();
+            // }
+
+            // $resultCount = $this->messaging->sendAll($messages);
+
+            // if($resultCount->successes() === 0){
+            //     $result = [
+            //         'msg' => '알림 전송 실패',
+            //         'flag' => false,
+            //         'status' => 500,
+            //     ];
+            //     return $result;
+            // }
+
+
+            $expoTokens = [];
+            $fcmTokens = [];
+
+            // Expo Push Token과 일반 FCM 토큰 구분
+            foreach ($receiveUserTokens as $token) {
+                if (strpos($token->token, 'ExponentPushToken') === 0) { // strpos() 함수는 문자열에서 특정 문자열이 처음으로 나타나는 위치를 찾습니다.
+                    $expoTokens[] = $token->token;
+                } else {
+                    $fcmTokens[] = $token->token;
+                }
             }
 
-            $resultCount = $this->messaging->sendAll($messages);
+            // Expo Push Notification API 사용 (Expo Push Token인 경우)
+            if (!empty($expoTokens)) {
+                $client = new Client();
+                foreach ($expoTokens as $expoToken) {
+                    $response = $client->post('https://exp.host/--/api/v2/push/send', [ // GuzzleHttp 라이브러리 사용, post() 메서드는 POST 요청을 보냅니다.
+                        'headers' => [
+                            'Accept' => 'application/json',
+                            'Content-Type' => 'application/json',
+                        ],
+                        'json' => [
+                            'to' => $expoToken,
+                            'sound' => 'default',
+                            'title' => $receiveData['title'],
+                            'body' => $receiveData['content'],
+                            'data' => ['someData' => 'goes here'],
+                        ],
+                    ]);
+                }
+            }
 
-            if($resultCount->successes() === 0){
-                $result = [
-                    'msg' => '알림 전송 실패',
-                    'flag' => false,
-                    'status' => 500,
+            // Firebase Cloud Messaging 사용 (일반 FCM 토큰인 경우)
+            if (!empty($fcmTokens)) {
+                $messages = [];
+
+                $receiveMessage = [
+                    'title' => $receiveData['title'],
+                    'body' => $receiveData['content'],
                 ];
-                return $result;
+
+                foreach ($fcmTokens as $fcmToken) {
+                    $messages[] = CloudMessage::withTarget('token', $fcmToken)
+                        ->withNotification($receiveMessage)
+                        ->withDefaultSounds();
+                }
+
+                $resultCount = $this->messaging->sendAll($messages);
+
+                if ($resultCount->successes() === 0) {
+                    return response()->json([
+                        'msg' => '알림 전송 실패',
+                        'flag' => false,
+                        'status' => 500,
+                    ]);
+                }
             }
 
             $result = [
