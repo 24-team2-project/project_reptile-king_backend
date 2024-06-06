@@ -174,6 +174,14 @@ class AlarmController extends Controller
                             'data' => ['someData' => 'goes here'],
                         ],
                     ]);
+
+                    if ($response->getStatusCode() !== 200) {
+                        return response()->json([
+                            'msg' => '알림 전송 실패',
+                            'flag' => false,
+                            'status' => 500,
+                        ]);
+                    }
                 }
             }
 
