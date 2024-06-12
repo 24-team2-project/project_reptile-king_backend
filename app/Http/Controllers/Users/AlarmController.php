@@ -132,6 +132,11 @@ class AlarmController extends Controller
                 }
             }
 
+            $pushData = [
+                'category' => $receiveData['category'],
+                'category_id' => $receiveData['category_id']
+            ];
+
             // Expo Push Notification API 사용 (Expo Push Token인 경우)
             if (!empty($expoTokens)) {
                 $client = new Client();
@@ -146,7 +151,7 @@ class AlarmController extends Controller
                             'sound' => 'default',
                             'title' => $receiveData['title'],
                             'body' => $receiveData['content'],
-                            'data' => ['someData' => 'goes here'],
+                            'data' => $pushData,
                         ],
                     ]);
 
@@ -169,9 +174,11 @@ class AlarmController extends Controller
                     'body' => $receiveData['content'],
                 ];
 
+
                 foreach ($fcmTokens as $fcmToken) {
                     $messages[] = CloudMessage::withTarget('token', $fcmToken)
                         ->withNotification($receiveMessage)
+                        ->withData($pushData)
                         ->withDefaultSounds();
                 }
 

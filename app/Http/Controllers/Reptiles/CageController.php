@@ -122,6 +122,8 @@ class CageController extends Controller
 
                 Cage::create($createList);
 
+                $cageId = $user->cages()->latest()->first();
+
                 // MQTT 전송
                 $result = $this->transmitTempHumData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
                 if(gettype($result) !== 'boolean'){
@@ -133,7 +135,8 @@ class CageController extends Controller
     
                     $receiveData = [
                         'user_id'   => $user->id,
-                        'category'  => 'cage_store',
+                        'category'  => 'cages',
+                        'category_id' => $cageId,
                         'title'     => '사육장 등록',
                         'content'   => '사육장 등록이 완료되었습니다.',
                         'readed'    => false,
@@ -185,10 +188,6 @@ class CageController extends Controller
                     'msg' => '만료된 데이터'
                 ], 410);
             } else{
-
-                // $cageInfo = Cage::leftjoin('cage_serial_codes', 'cages.serial_code', '=', 'cage_serial_codes.serial_code')
-                //         ->select('cages.*', 'cage_serial_codes.location as location')
-                //         ->where('cages.id', $cage->id)->first();
 
                 return response()->json([
                     'msg' => '성공',

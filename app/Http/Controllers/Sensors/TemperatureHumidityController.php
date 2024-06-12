@@ -23,7 +23,7 @@ class TemperatureHumidityController extends Controller
         $validator = Validator::make($jsonToArray, [
             'serialCode' => ['required', 'string'],
             'temperature' => ['required', 'numeric', 'min:10', 'max:40'],
-            'humidity'    => ['required', 'integer', 'min:0', 'max:90'],
+            'humidity'    => ['required', 'numeric', 'min:0', 'max:90'],
         ]);
 
         if($validator->fails()){
