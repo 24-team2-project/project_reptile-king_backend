@@ -17,6 +17,7 @@ use App\Http\Controllers\Sensors\TemperatureHumidityController;
 use App\Http\Controllers\Upload\ImageController;
 use App\Http\Controllers\Categories\CategoryController;
 use App\Http\Controllers\Sensors\SetLocationController;
+use App\Http\Controllers\Users\AlarmController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,12 +56,31 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     // 로그아웃
     Route::post('/logout', [ JWTAuthController::class, 'logout' ]);
 
-    // 파충류
+    /* -------------- 알림 ----------------------------------------------*/
+    // 알림 확인
+    Route::post('/alarms/check-alarm/{alarm}', [AlarmController::class, 'checkAlarm']);
+    // 알림 전체 확인
+    Route::post('/alarms/check-all-alarms', [AlarmController::class, 'checkAllAlarms']);
+    // 알림 리스트, 삭제
+    Route::apiResource('alarms', AlarmController::class)->only('index', 'destroy');
+    // 파충류 분양 수락 알림
+    Route::post('/alarms/accept-reptile-sale', [AlarmController::class, 'acceptReptileSale']);
+    // 파충류 분양 거절 알림
+    Route::post('/alarms/reject-reptile-sale', [AlarmController::class, 'rejectReptileSale']);
+    // 케이지 분양 수락 알림
+    Route::post('/alarms/accept-cage-sale', [AlarmController::class, 'acceptCageSale']);
+    // 케이지 분양 거절 알림
+    Route::post('/alarms/reject-cage-sale', [AlarmController::class, 'rejectCageSale']);
+
+
+    /* -------------- 파충류 ----------------------------------------------*/
     Route::apiResource('reptiles', ReptileController::class)->except('create', 'edit', 'show');
     // 파충류 상세
     Route::get('/reptiles/{reptileSerialCode}', [ReptileController::class, 'show']);
+    // 파충류 분양
+    Route::post('/reptiles/sell-reptile', [ReptileController::class, 'sellReptile']);
 
-    // 사육장
+    /* -------------- 사육장 ----------------------------------------------*/
     Route::apiResource('cages', CageController::class)->except('create', 'edit');
     // 사육장 온습도 데이터 조회
     Route::get('/cages/{cage}/temperature-humidity', [CageController::class, 'getTempHumData']);
@@ -70,6 +90,8 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::get('/cages/{cage}/latest-temperature-humidity', [CageController::class, 'getLatestTempHumData']);
     // 사육장 일별 온습도 데이터 조회
     Route::get('/cages/{cage}/daily-temperature-humidity/{date}', [CageController::class, 'getDailyTempHumData']);
+    // 사육장 분양
+    Route::post('/cages/sell-cage', [CageController::class, 'sellCage']);
 
     // // 커뮤니티
     Route::apiResource('posts', PostController::class)->except('index', 'show', 'create', 'edit', );

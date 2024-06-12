@@ -10,6 +10,7 @@ use App\Models\Alarm;
 use App\Models\Cage;
 use App\Models\CageSerialCode;
 use App\Models\TemperatureHumidity;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -121,6 +122,8 @@ class CageController extends Controller
 
                 Cage::create($createList);
 
+                $cageId = $user->cages()->latest()->first();
+
                 // MQTT 전송
                 $result = $this->transmitTempHumData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
                 if(gettype($result) !== 'boolean'){
@@ -132,7 +135,8 @@ class CageController extends Controller
     
                     $receiveData = [
                         'user_id'   => $user->id,
-                        'category'  => 'cage_store',
+                        'category'  => 'cages',
+                        'category_id' => $cageId,
                         'title'     => '사육장 등록',
                         'content'   => '사육장 등록이 완료되었습니다.',
                         'readed'    => false,
@@ -184,10 +188,6 @@ class CageController extends Controller
                     'msg' => '만료된 데이터'
                 ], 410);
             } else{
-
-                // $cageInfo = Cage::leftjoin('cage_serial_codes', 'cages.serial_code', '=', 'cage_serial_codes.serial_code')
-                //         ->select('cages.*', 'cage_serial_codes.location as location')
-                //         ->where('cages.id', $cage->id)->first();
 
                 return response()->json([
                     'msg' => '성공',
@@ -535,41 +535,62 @@ class CageController extends Controller
     }
 
     // 사육장 분양
-    public function sellCage(Cage $cage)
+    public function sellCage(Request $request)
     {
         $user = JWTAuth::user();
 
-        if($cage->user_id !== $user->id){
-            return response()->json([
-                'msg' => '권한 없음'
-            ], 403);
-        } else if($cage->expired_at !== null){
-            return response()->json([
-                'msg' => '만료된 데이터'
-            ], 410);
-        } else{
-            try {
-                // 분양 알림 생성
-                Alarm::create([
-                    'user_id'   => $user->id,
-                    'category'  => 'cage_sales',
-                    'title'     => '케이지 분양',
-                    'content'   => $user->nickname.' 유저가 케이지 분양을 신청하였습니다.',
-                    'readed'    => false,
-                    'img_urls'  => [],
-                    'created_at' => now()->toDateTimeString(),
-                ]);
+        $user = JWTAuth::user();
 
+        $validatedList = [
+            'receiveNickname' => ['required', 'string', 'max:255'],
+            // 고민중
+        ];
+
+        $validator = Validator::make($request->all(), $validatedList);
+
+        if($validator->fails()){
+            return response()->json([
+                'msg'   => '유효성 검사 오류',
+                'error' => $validator->errors()
+            ], 400);
+        }
+
+        $reqData = $validator->safe();
+
+        try {
+            $receiveUser = User::where('nickname', $reqData['receiveNickname'])->first();
+            if(empty($receiveUser)){
+                return response()->json([
+                    'msg' => '유저 없음'
+                ], 204);
+            }
+        
+            $receiveData = [
+                'user_id'   => $receiveUser->id, // 받는 사람의 아이디
+                'category'  => 'cage_sales',
+                'title'     => '케이지 분양 신청',
+                'content'   => $user->nickname.' 유저가 케이지 분양을 신청하였습니다.',
+                'readed'    => false,
+                'sened_user_id' => $user->id,
+                'img_urls'  => [],
+                'created_at' => now()->toDateTimeString(),
+            ];
+            
             // 분양 알림 전송
-    
+            $alarm = new AlarmController();
+            $result = $alarm->sendAlarm('user', $receiveData);
+
+            return response()->json([
+                    'msg' => $result['msg']
+                ], $result['status']);
+
 
                 
-            } catch (Exception $e) {
-                return response()->json([
-                    'msg' => '서버 오류',
-                    'error' => $e->getMessage()
-                ], 500);
-            }
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 

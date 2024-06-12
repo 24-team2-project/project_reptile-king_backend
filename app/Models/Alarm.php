@@ -20,6 +20,7 @@ class Alarm extends Model
         'readed',
         'result',
         'img_urls',
+        'category_id',
         'created_at',
     ];
 

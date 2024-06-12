@@ -20,7 +20,7 @@ class TemperatureHumidity extends Model
 
     protected $casts = [
         'temperature' => 'float',
-        'humidity' => 'integer',
+        'humidity' => 'float',
         // 'created_at' => 'datetime:Y-m-d H:i:s',
     ];
 

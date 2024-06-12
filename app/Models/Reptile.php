@@ -22,7 +22,6 @@ class Reptile extends Model
 
     protected $casts = [
         'img_urls' => 'array',
-        'birth' => 'date'
     ];
 
     public function user(){

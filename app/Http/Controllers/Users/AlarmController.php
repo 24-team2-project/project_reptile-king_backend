@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Models\Alarm;
+use App\Models\Cage;
 use App\Models\Reptile;
 use App\Models\User;
 use Exception;
@@ -23,61 +24,64 @@ class AlarmController extends Controller
         $this->messaging = Firebase::messaging();
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+    // 사용자 알림 리스트
     public function index()
     {
-        //
+        $user = JWTAuth::user();
+
+        try{
+            $alarms = $user->alarms()->orderBy('created_at', 'desc')->get();
+
+            return response()->json([
+                'msg' => '알림 리스트 조회 성공',
+                'alarms' => $alarms,
+            ], 200);
+
+        }catch(Exception $e){
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store()
-    {
-
-        
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Alarm $alarm)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Alarm $alarm)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Alarm $alarm)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
+    // 알림 삭제
     public function destroy(Alarm $alarm)
     {
-        //
+        try{
+            $alarm->delete();
+
+            return response()->json([
+                'msg' => '알림 삭제 성공'
+            ], 200);
+
+        }catch(Exception $e){
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // 알림 모두 확인
+    public function checkAllAlarms(){
+        $user = JWTAuth::user();
+
+        try{
+            $user->alarms()->update([
+                'readed' => true
+            ]);
+
+            return response()->json([
+                'msg' => '모든 알림 확인 성공'
+            ], 200);
+
+        }catch(Exception $e){
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     // 알림 확인
@@ -116,37 +120,8 @@ class AlarmController extends Controller
                 return $result;
             }
 
-            // $receiveTokens = $receiveUserTokens->pluck('token')->toArray();
-
-
-
-            // $messages = [];
-
-            // $receiveMessage = [
-            //         'title' => $receiveData['title'],
-            //         'body' => $receiveData['content'],
-            // ];
-
-            // foreach ($receiveTokens as $token) {
-            //     $messages[] = CloudMessage::withTarget('token', $token)
-            //         ->withNotification($receiveMessage)
-            //         ->withDefaultSounds();
-            // }
-
-            // $resultCount = $this->messaging->sendAll($messages);
-
-            // if($resultCount->successes() === 0){
-            //     $result = [
-            //         'msg' => '알림 전송 실패',
-            //         'flag' => false,
-            //         'status' => 500,
-            //     ];
-            //     return $result;
-            // }
-
-
-            $expoTokens = [];
-            $fcmTokens = [];
+            $expoTokens = [];   //  Expo Push Token
+            $fcmTokens = [];    //  Firebase Cloud Messaging Token
 
             // Expo Push Token과 일반 FCM 토큰 구분
             foreach ($receiveUserTokens as $token) {
@@ -156,6 +131,11 @@ class AlarmController extends Controller
                     $fcmTokens[] = $token->token;
                 }
             }
+
+            $pushData = [
+                'category' => $receiveData['category'],
+                'category_id' => $receiveData['category_id']
+            ];
 
             // Expo Push Notification API 사용 (Expo Push Token인 경우)
             if (!empty($expoTokens)) {
@@ -171,7 +151,7 @@ class AlarmController extends Controller
                             'sound' => 'default',
                             'title' => $receiveData['title'],
                             'body' => $receiveData['content'],
-                            'data' => ['someData' => 'goes here'],
+                            'data' => $pushData,
                         ],
                     ]);
 
@@ -194,9 +174,11 @@ class AlarmController extends Controller
                     'body' => $receiveData['content'],
                 ];
 
+
                 foreach ($fcmTokens as $fcmToken) {
                     $messages[] = CloudMessage::withTarget('token', $fcmToken)
                         ->withNotification($receiveMessage)
+                        ->withData($pushData)
                         ->withDefaultSounds();
                 }
 
@@ -240,7 +222,7 @@ class AlarmController extends Controller
 
             $sendUserReptile = Reptile::where('user_id', $alarm->send_user_id)->first();
     
-            if(empty($sendUserReptile)){
+            if(empty($sendUserReptile) || $sendUserReptile->expired_at != null){
                 return response()->json([
                     'msg' => '분양자 파충류 없음',
                 ], 204);
@@ -319,8 +301,96 @@ class AlarmController extends Controller
         }
     }
 
-    
+    // 케이지 분양 알림 수락
+    public function acceptCageSale($alarm){
+        $user = JWTAuth::user();
 
+        try{
+            $alarm->readed = true;
+            $alarm->result = 'accept'; // 'accept' or 'reject
+            $alarm->save();
+
+            $sendUserCage = Cage::where('user_id', $alarm->send_user_id)->first();
+    
+            if(empty($sendUserCage) || $sendUserCage->expired_at != null){
+                return response()->json([
+                    'msg' => '분양자 케이지 없음',
+                ], 204);
+            }
+
+            $sendUserCage->update([
+                'expired_at' => now()->toDateTimeString(), // toDateTimeString() 메서드는 Carbon 인스턴스를 문자열로 변환합니다.
+            ]);
+
+            // 새 사용자의 파충류 등록
+            Cage::create([
+                'user_id' => $user->id,
+                'serial_code' => $sendUserCage->serial_code,
+                'species' => $sendUserCage->species,
+                'name'     => $sendUserCage->name,
+                'set_temp' => $sendUserCage->set_temp,
+                'set_hum'  => $sendUserCage->set_hum,
+                'img_urls' => $sendUserCage->img_urls,
+            ]);
+
+
+            $receiveData = [
+                'user_id'   => $alarm->send_user_id, // 받는 사람의 아이디
+                'category'  => 'cage_sales',
+                'title'     => '사육장 분양 완료',
+                'content'   => $user->nickname.' 유저에게 사육장 분양을 완료하였습니다.',
+                'readed'    => false,
+                'img_urls'  => [],
+                'created_at' => now()->toDateTimeString(),
+            ];
+
+            $result = $this->sendAlarm($receiveData);
+
+            return response()->json([
+                'msg' => $result['msg']
+            ], $result['status']);
+
+
+        }catch(Exception $e){
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // 케이지 분양 알림 거절
+    public function rejectCageSale($alarm){
+        $user = JWTAuth::user();
+
+        try{
+            $alarm->readed = true;
+            $alarm->result = 'reject';
+            $alarm->save();
+
+            $receiveData = [
+                'user_id'   => $alarm->send_user_id,
+                'category'  => 'cage_sales',
+                'title'     => '케이지 분양 거절',
+                'content'   => $user->nickname.' 유저가 케이지 분양을 거절하였습니다.',
+                'readed'    => false,
+                'img_urls'  => [],
+                'created_at' => now()->toDateTimeString(),
+            ];
+
+            $result = $this->sendAlarm($receiveData);
+
+            return response()->json([
+                'msg' => $result['msg']
+            ], $result['status']);
+
+        }catch(Exception $e){
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
 
 }
