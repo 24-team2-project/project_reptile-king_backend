@@ -122,7 +122,7 @@ class CageController extends Controller
 
                 Cage::create($createList);
 
-                $cageId = $user->cages()->latest()->first();
+                $latestCage = $user->cages()->latest()->first();
 
                 // MQTT 전송
                 $result = $this->transmitTempHumData($reqData['serialCode'], $reqData['setTemp'], $reqData['setHum']);
@@ -136,7 +136,7 @@ class CageController extends Controller
                     $receiveData = [
                         'user_id'   => $user->id,
                         'category'  => 'cages',
-                        'category_id' => $cageId,
+                        'category_id' => $latestCage->id,
                         'title'     => '사육장 등록',
                         'content'   => '사육장 등록이 완료되었습니다.',
                         'readed'    => false,

@@ -95,7 +95,7 @@ class ReptileController extends Controller
 
             Reptile::create($createList);
             
-            $reptileId = $user->reptiles()->latest()->first();
+            $latestReptile = $user->reptiles()->latest()->first();
 
             if(!($user->fcmTokens->isEmpty())){
                 $alarm = new AlarmController();
@@ -103,7 +103,7 @@ class ReptileController extends Controller
                 $receiveData = [
                     'user_id'   => $user->id,
                     'category'  => 'reptiles',
-                    'category_id' => $reptileId,
+                    'category_id' => $latestReptile->id,
                     'title'     => '파충류 등록',
                     'content'   => '파충류 등록이 완료되었습니다.',
                     'readed'    => false,
