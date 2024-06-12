@@ -136,7 +136,7 @@ class AlarmController extends Controller
                 'category' => $receiveData['category'],
             ];
 
-            if($receiveData->has('category_id')){
+            if(isset($receiveData['category_id'])){  // 카테고리 아이디가 있을 경우
                 $pushData['category_id'] = $receiveData['category_id'];
             }
 
