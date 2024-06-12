@@ -142,19 +142,19 @@ class AlarmController extends Controller
 
             // Expo Push Notification API 사용 (Expo Push Token인 경우)
             if (!empty($expoTokens)) {
-                $client = new Client();
+                $client = new Client(); //  GuzzleHttp 클라이언트 생성
                 foreach ($expoTokens as $expoToken) {
                     $response = $client->post('https://exp.host/--/api/v2/push/send', [ // GuzzleHttp 라이브러리 사용, post() 메서드는 POST 요청을 보냅니다.
-                        'headers' => [
-                            'Accept' => 'application/json',
-                            'Content-Type' => 'application/json',
+                        'headers' => [  //  헤더 설정
+                            'Accept' => 'application/json', //  Accept 헤더는 클라이언트가 이해할 수 있는 콘텐츠 유형을 서버에 알려줍니다.
+                            'Content-Type' => 'application/json', //    Content-Type 헤더는 요청 본문의 미디어 유형을 서버에 알려줍니다.
                         ],
-                        'json' => [
-                            'to' => $expoToken,
-                            'sound' => 'default',
-                            'title' => $receiveData['title'],
-                            'body' => $receiveData['content'],
-                            'data' => $pushData,
+                        'json' => [ //  
+                            'to' => $expoToken, // Expo Push Token
+                            'sound' => 'default', // 기본 알림음
+                            'title' => $receiveData['title'], //    제목
+                            'body' => $receiveData['content'], //   내용
+                            'data' => $pushData, // 추가 데이터
                         ],
                     ]);
 
@@ -179,10 +179,10 @@ class AlarmController extends Controller
 
 
                 foreach ($fcmTokens as $fcmToken) {
-                    $messages[] = CloudMessage::withTarget('token', $fcmToken)
-                        ->withNotification($receiveMessage)
-                        ->withData($pushData)
-                        ->withDefaultSounds();
+                    $messages[] = CloudMessage::withTarget('token', $fcmToken) // CloudMessage::withTarget() 메서드는 메시지를 보낼 대상을 설정합니다.
+                        ->withNotification($receiveMessage) // withNotification() 메서드는 알림 메시지를 설정합니다.
+                        ->withData($pushData) // withData() 메서드는 추가 데이터를 설정합니다.
+                        ->withDefaultSounds(); // withDefaultSounds() 메서드는 기본 알림음을 설정합니다.
                 }
 
                 $resultCount = $this->messaging->sendAll($messages);

@@ -46,7 +46,7 @@ class JWTAuthController extends Controller
             // $ttl = 60 *60 * 24 * 14; // 14일
             $ttl = 60 *60 * 24 * 7; // 7일
 
-            $refreshToken = auth()->setTTL($ttl)->attempt($credentials); 
+            $refreshToken = auth()->setTTL($ttl)->attempt($credentials);  // setTTL은 IDE에서 빨간줄이 뜨지만, 정상작동함
 
             $redisConfirm = Redis::get('refresh_token_'.$user->id.'_'.$request->platform); // redis에 저장된 refresh token 유무 확인, get()은 키가 없으면 null 반환, 있으면 값 반환
             if($redisConfirm){
