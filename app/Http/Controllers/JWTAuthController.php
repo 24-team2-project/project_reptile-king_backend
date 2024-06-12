@@ -48,13 +48,13 @@ class JWTAuthController extends Controller
 
             $refreshToken = auth()->setTTL($ttl)->attempt($credentials); 
 
-            $redisConfirm = Redis::get('refresh_token_'.$user->id); // redis에 저장된 refresh token 유무 확인, get()은 키가 없으면 null 반환, 있으면 값 반환
+            $redisConfirm = Redis::get('refresh_token_'.$user->id.'_'.$request->platform); // redis에 저장된 refresh token 유무 확인, get()은 키가 없으면 null 반환, 있으면 값 반환
             if($redisConfirm){
                 Redis::del('refresh_token_'.$user->id);
             }
 
             // redis 저장
-            Redis::setex('refresh_token_'.$user->id, $ttl, $refreshToken);
+            Redis::setex('refresh_token_'.$user->id.'_'.$request->platform, $ttl, $refreshToken);
 
             if($request->has('notificationToken')){
 

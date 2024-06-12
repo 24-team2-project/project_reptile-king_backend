@@ -134,8 +134,11 @@ class AlarmController extends Controller
 
             $pushData = [
                 'category' => $receiveData['category'],
-                'category_id' => $receiveData['category_id']
             ];
+
+            if($receiveData->has('category_id')){
+                $pushData['category_id'] = $receiveData['category_id'];
+            }
 
             // Expo Push Notification API 사용 (Expo Push Token인 경우)
             if (!empty($expoTokens)) {

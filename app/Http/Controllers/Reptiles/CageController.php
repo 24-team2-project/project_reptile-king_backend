@@ -539,8 +539,6 @@ class CageController extends Controller
     {
         $user = JWTAuth::user();
 
-        $user = JWTAuth::user();
-
         $validatedList = [
             'receiveNickname' => ['required', 'string', 'max:255'],
             // 고민중
