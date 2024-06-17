@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Users\AlarmController;
 use App\Http\Requests\LoginUserRequest;
 use App\Models\FcmToken;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
-use Tymon\JWTAuth\Contracts\Providers\JWT;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 
@@ -46,15 +46,15 @@ class JWTAuthController extends Controller
             // $ttl = 60 *60 * 24 * 14; // 14일
             $ttl = 60 *60 * 24 * 7; // 7일
 
-            $refreshToken = auth()->setTTL($ttl)->attempt($credentials); 
+            $refreshToken = auth()->setTTL($ttl)->attempt($credentials);  // setTTL은 IDE에서 빨간줄이 뜨지만, 정상작동함
 
-            $redisConfirm = Redis::get('refresh_token_'.$user->id); // redis에 저장된 refresh token 유무 확인, get()은 키가 없으면 null 반환, 있으면 값 반환
+            $redisConfirm = Redis::get('refresh_token_'.$user->id.'_'.$request->platform); // redis에 저장된 refresh token 유무 확인, get()은 키가 없으면 null 반환, 있으면 값 반환
             if($redisConfirm){
                 Redis::del('refresh_token_'.$user->id);
             }
 
             // redis 저장
-            Redis::setex('refresh_token_'.$user->id, $ttl, $refreshToken);
+            Redis::setex('refresh_token_'.$user->id.'_'.$request->platform, $ttl, $refreshToken);
 
             if($request->has('notificationToken')){
 
@@ -68,10 +68,27 @@ class JWTAuthController extends Controller
                     ]);
                 }else{
                     $tokenData = $fcmTokensConfirmList->firstWhere('platform', $request->platform);
+                    $tokenData->token = $request->notificationToken;
+                    $tokenData->save();
+                }
+                $alarm = new AlarmController();
     
-                    $tokenData->update([
-                        'token' => $request->notificationToken,
-                    ]);
+                $receiveData = [
+                    'user_id'   => $user->id,
+                    'category'  => 'login',
+                    'title'     => '로그인 성공',
+                    'content'   => '로그인에 성공하였습니다.',
+                    'readed'    => false,
+                    'img_urls'  => [],
+                    'created_at' => now()->toDateTimeString(),
+                ];
+    
+                $result = $alarm->sendAlarm($receiveData);
+    
+                if($result['flag'] === false){
+                    return response()->json([
+                        'msg' => $result['msg']
+                    ], $result['status']);
                 }
             }
 

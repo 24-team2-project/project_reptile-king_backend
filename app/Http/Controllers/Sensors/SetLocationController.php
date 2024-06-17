@@ -13,9 +13,14 @@ class SetLocationController extends Controller
 {
     public function setLocation(Request $request){
         $data = $request->json()->all();
-        $jsonToArray = json_decode($data['data'], true);
+        //$jsonToArray = json_decode($data['data'], true);
 
-        $validator = Validator::make($jsonToArray, [
+        Log::info('ip주소 확인용', [
+            'data' => $data,
+            'timestamp' => now()->toDateTimeString()
+        ]);
+
+        $validator = Validator::make($data, [
             'serialCode' => ['required', 'string'],
             'location'    => ['required', 'string']
         ]);
