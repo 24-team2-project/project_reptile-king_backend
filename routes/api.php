@@ -94,8 +94,8 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::apiResource('supports', SupportController::class)->except('create', 'edit');
 
     // 사용자
-    Route::apiResource('/users', UserController::class)->except('create', 'edit');; // 유저 목록
-
+    Route::apiResource('/users', UserController::class)->except('create', 'edit');  // 유저 목록
+    Route::get('/users/{nickname}/info', [UserController::class, 'userFinder']);  // 유저 목록
 });
 
 //카테고리
