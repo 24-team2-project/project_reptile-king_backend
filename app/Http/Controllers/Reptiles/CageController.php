@@ -541,7 +541,7 @@ class CageController extends Controller
 
         $validatedList = [
             'receiveNickname' => ['required', 'string', 'max:255'],
-            'cageId'          => ['required', 'integer'],
+            'cageId'          => ['required', 'numeric'],
         ];
 
         $validator = Validator::make($request->all(), $validatedList);
@@ -577,7 +577,7 @@ class CageController extends Controller
             
             // 분양 알림 전송
             $alarm = new AlarmController();
-            $result = $alarm->sendAlarm('user', $receiveData);
+            $result = $alarm->sendAlarm($receiveData);
 
             return response()->json([
                     'msg' => $result['msg']
