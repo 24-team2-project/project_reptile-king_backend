@@ -293,10 +293,6 @@ class ReptileController extends Controller
             'reptileId'       => ['required', 'numeric'],
         ];
 
-//         보낸 사람 닉네임 - receiveNickname string
-// 공개 여부 - publicStatus boolean
-// 파충류 id - reptileId number
-
         $validator = Validator::make($request->all(), $validatedList);
 
         if($validator->fails()){
@@ -330,7 +326,7 @@ class ReptileController extends Controller
             
             // 분양 알림 전송
             $alarm = new AlarmController();
-            $result = $alarm->sendAlarm('user', $receiveData);
+            $result = $alarm->sendAlarm($receiveData);
 
             return response()->json([
                     'msg' => $result['msg']
