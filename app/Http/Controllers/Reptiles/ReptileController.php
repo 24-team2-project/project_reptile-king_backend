@@ -289,8 +289,13 @@ class ReptileController extends Controller
 
         $validatedList = [
             'receiveNickname' => ['required', 'string', 'max:255'],
-            // 고민중
+            'publicStatus'    => ['required', 'boolean'],
+            'reptileId'       => ['required', 'numeric'],
         ];
+
+//         보낸 사람 닉네임 - receiveNickname string
+// 공개 여부 - publicStatus boolean
+// 파충류 id - reptileId number
 
         $validator = Validator::make($request->all(), $validatedList);
 
@@ -314,6 +319,7 @@ class ReptileController extends Controller
             $receiveData = [
                 'user_id'   => $receiveUser->id, // 받는 사람의 아이디
                 'category'  => 'reptile_sales',
+                'category_id' => $reqData['reptileId'], // 파충류 아이디
                 'title'     => '파충류 분양 신청',
                 'content'   => $user->nickname.' 유저가 파충류 분양을 신청하였습니다.',
                 'readed'    => false,

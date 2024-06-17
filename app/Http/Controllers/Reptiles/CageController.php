@@ -541,7 +541,7 @@ class CageController extends Controller
 
         $validatedList = [
             'receiveNickname' => ['required', 'string', 'max:255'],
-            // 고민중
+            'cageId'          => ['required', 'integer'],
         ];
 
         $validator = Validator::make($request->all(), $validatedList);
@@ -566,6 +566,7 @@ class CageController extends Controller
             $receiveData = [
                 'user_id'   => $receiveUser->id, // 받는 사람의 아이디
                 'category'  => 'cage_sales',
+                'cagtegory_id' => $reqData['cageId'], // 사육장 아이디
                 'title'     => '케이지 분양 신청',
                 'content'   => $user->nickname.' 유저가 케이지 분양을 신청하였습니다.',
                 'readed'    => false,
