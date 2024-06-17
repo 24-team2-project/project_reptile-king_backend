@@ -16,6 +16,20 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::with('category', 'user')->paginate(10);
+        $sort = $request->sort ?? 'latest';
+
+        switch ($sort) {
+            case 'latest':
+                $query = $query->orderBy('created_at', 'desc');
+                break;
+            case 'popular':
+                $query = $query->orderBy('likes', 'desc');
+                break;
+            case 'oldest':
+                $query = $query->orderBy('created_at', 'asc');
+                break;
+        }
+
         $reqData = $posts->getCollection()->map(function ($post) {
             return [
                 'id' => $post->id,
@@ -32,7 +46,7 @@ class PostController extends Controller
                 'views' => $post->views,
                 'img_urls' => $post->img_urls,
             ];
-        });
+        })->collect();
 
         $posts->setCollection($reqData);
 
