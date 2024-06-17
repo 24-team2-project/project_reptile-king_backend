@@ -223,7 +223,7 @@ class AlarmController extends Controller
             $alarm->result = 'accept'; // 'accept' or 'reject
             $alarm->save();
 
-            $sendUserReptile = Reptile::where('user_id', $alarm->send_user_id)->first();
+            $sendUserReptile = Reptile::where('id', $alarm->category_id)->where('user_id', $alarm->send_user_id)->first();
     
             if(empty($sendUserReptile) || $sendUserReptile->expired_at != null){
                 return response()->json([
@@ -313,7 +313,7 @@ class AlarmController extends Controller
             $alarm->result = 'accept'; // 'accept' or 'reject
             $alarm->save();
 
-            $sendUserCage = Cage::where('user_id', $alarm->send_user_id)->first();
+            $sendUserCage = Cage::where('id', $alarm->category_id)->where('user_id', $alarm->send_user_id)->first();
     
             if(empty($sendUserCage) || $sendUserCage->expired_at != null){
                 return response()->json([
