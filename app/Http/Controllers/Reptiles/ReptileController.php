@@ -319,7 +319,7 @@ class ReptileController extends Controller
                 'title'     => '파충류 분양 신청',
                 'content'   => $user->nickname.' 유저가 파충류 분양을 신청하였습니다.',
                 'readed'    => false,
-                'sened_user_id' => $user->id,
+                'send_user_id' => $user->id,
                 'img_urls'  => [],
                 'created_at' => now()->toDateTimeString(),
             ];
