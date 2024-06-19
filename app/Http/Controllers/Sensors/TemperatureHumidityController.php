@@ -36,20 +36,17 @@ class TemperatureHumidityController extends Controller
         $reqData = $validator->validated();
 
         try {
-            $cageConfirm = Cage::where([
-                ['serial_code', $reqData['serialCode']],
-                ['expired_at', null] 
-            ])->first();
+            $cageConfirm = Cage::where('serial_code', $reqData['serialCode'])->whereNull('expired_at')->first();
 
-            $tempHigher = $reqData['temperature'] > $cageConfirm->set_temp;
-            $tempLower = $reqData['temperature'] < $cageConfirm->set_temp;
+            $tempHigher = $reqData['temperature'] > $cageConfirm->set_temp; // 현재온도가 설정온도보다 높을 경우
+            $tempLower = $reqData['temperature'] < $cageConfirm->set_temp; //   현재온도가 설정온도보다 낮을 경우
 
-            $humidHigher = $reqData['humidity'] > $cageConfirm->set_humid;
-            $humidLower = $reqData['humidity'] < $cageConfirm->set_humid;
+            $humidHigher = $reqData['humidity'] > $cageConfirm->set_humid; // 현재습도가 설정습도보다 높을 경우
+            $humidLower = $reqData['humidity'] < $cageConfirm->set_humid; // 현재습도가 설정습도보다 낮을 경우
 
 
 
-            // 온도가 설정 온도보다 높거나, 습도가 설정 습도보다 높을 경우 쿨러 동작 알림 발생
+            // 현재온도가 설정 온도보다 높거나, 현재습도가 설정 습도보다 높을 경우 쿨러 동작 알림 발생
             if($tempHigher || $humidHigher){
                 
                 $title = $tempHigher ? '온도가 설정 온도보다 높습니다.' : '습도가 설정 습도보다 높습니다.';

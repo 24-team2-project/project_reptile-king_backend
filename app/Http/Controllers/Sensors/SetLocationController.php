@@ -35,17 +35,12 @@ class SetLocationController extends Controller
         $reqData = $validator->validated();
 
         try {
-            $cageConfirm = Cage::where([
-                ['serial_code', $reqData['serialCode']],
-                ['expired_at', null] 
-            ])->first();
+            $cageConfirm = Cage::where('serial_code', $reqData['serialCode'])
+                            ->whereNull('expired_at')->first();
 
             if(!empty($cageConfirm)){
-                if($cageConfirm->location === null){
-                    $cageConfirm->location = $reqData['location'];
-                    $cageConfirm->save();
-                }
-
+                $cageConfirm->location = $reqData['location'];
+                $cageConfirm->save();
             } else{
                 Log::error('Serial code not found or already exists', [
                     'errors' => '일련번호를 찾을 수 없거나 이미 존재합니다.',
