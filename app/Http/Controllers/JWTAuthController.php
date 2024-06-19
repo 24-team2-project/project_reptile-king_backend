@@ -50,7 +50,7 @@ class JWTAuthController extends Controller
 
             $redisConfirm = Redis::get('refresh_token_'.$user->id.'_'.$request->platform); // redis에 저장된 refresh token 유무 확인, get()은 키가 없으면 null 반환, 있으면 값 반환
             if($redisConfirm){
-                Redis::del('refresh_token_'.$user->id);
+                Redis::del('refresh_token_'.$user->id.'_'.$request->platform);
             }
 
             // redis 저장
@@ -118,7 +118,7 @@ class JWTAuthController extends Controller
             }
 
             $user = JWTAuth::user();
-            Redis::del('refresh_token_'.$user->id);
+            Redis::del('refresh_token_'.$user->id.'_'.$request->platform);
             
             JWTAuth::invalidate($accessToken);
             JWTAuth::invalidate($refreshToken);
@@ -137,14 +137,14 @@ class JWTAuthController extends Controller
     }
 
     // 토큰 재발급
-    public function refresh(){
+    public function refresh(Request $request){
         $user = JWTAuth::user();
         
-        $redisData = Redis::get('refresh_token_'.$user->id);
+        $redisData = Redis::get('refresh_token_'.$user->id.'_'.$request->platform);
         $token = JWTAuth::getToken()->get();
         if($redisData !== $token){
             JWTAuth::invalidate($redisData);
-            Redis::del('refresh_token_'.$user->id);
+            Redis::del('refresh_token_'.$user->id.'_'.$request->platform);
             return response()->json([
                 'msg' => '토큰 갱신 실패 : 불일치, 재로그인 필요',
             ], 401);
