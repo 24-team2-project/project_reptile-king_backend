@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Mqtt;
 
 use App\Http\Controllers\Controller;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use PhpMqtt\Client\MqttClient;
 
 class MqttController extends Controller
@@ -25,8 +27,13 @@ class MqttController extends Controller
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // 예외 처리 로직
+            Log::error('MQTT 전송 에러', [
+                'error' => $e->getMessage(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

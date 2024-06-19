@@ -41,70 +41,62 @@ class TemperatureHumidityController extends Controller
                 ['expired_at', null] 
             ])->first();
 
-            if($reqData['temperature'] > $cageConfirm->set_temp){
+            $tempHigher = $reqData['temperature'] > $cageConfirm->set_temp;
+            $tempLower = $reqData['temperature'] < $cageConfirm->set_temp;
+
+            $humidHigher = $reqData['humidity'] > $cageConfirm->set_humid;
+            $humidLower = $reqData['humidity'] < $cageConfirm->set_humid;
+
+
+
+            // 온도가 설정 온도보다 높거나, 습도가 설정 습도보다 높을 경우 쿨러 동작 알림 발생
+            if($tempHigher || $humidHigher){
+                
+                $title = $tempHigher ? '온도가 설정 온도보다 높습니다.' : '습도가 설정 습도보다 높습니다.';
+                if($tempHigher && $humidHigher){
+                    $title = '온도와 습도가 설정 온도와 습도보다 높습니다.';
+                }
+
                 Log::info('Temperature is higher than set temperature', [
-                    'info' => '온도가 설정 온도보다 높습니다.',
+                    'info' => $title,
                     'timestamp' => now()->toDateTimeString()
                 ]);
 
-                // 온도가 설정 온도보다 높을 경우 알람 발생
-                $alarm = new AlarmController();
-                $receiveData = [
-                    'user_id'   => $cageConfirm->user_id, // 받는 사람의 아이디
-                    'category'  => 'temp_abnormality',
-                    'title'     => '온도가 설정 온도보다 높습니다.',
-                    'content'   => '온도: '.$reqData['temperature'].'℃, 쿨러를 작동합니다.',
-                    'readed'    => false,
-                    'img_urls'  => [],
-                    'created_at' => now()->toDateTimeString(),
-                ];  
-
-                $result = $alarm->sendAlarm($receiveData);
-
-                if($result['flag']){
-                    Log::info('Alarm sent successfully', [
-                        'info' => '알람이 성공적으로 전송되었습니다.',
-                        'timestamp' => now()->toDateTimeString()
-                    ]);
-                } else{
-                    Log::error('Failed to send alarm', [
-                        'errors' => '알람 전송에 실패했습니다.',
-                        'timestamp' => now()->toDateTimeString()
-                    ]);
-                }
+                $content = '온도 : '.$reqData['temperature'].'℃ 습도 : '. $reqData['humidity'].'%, 쿨러를 작동합니다.';
+                $this->operateModuleAlarm($cageConfirm, 'operating_cooler', $title, $content);
             }
 
-            // 습도가 설정 습도보다 낮을 경우 알람 발생
-            if($reqData['humidity'] < $cageConfirm->set_humid){
+            // 온도가 설정 온도보다 낮거나, 습도가 설정 습도보다 높을 경우 램프 동작 알림 발생
+            if($tempLower || $humidHigher){
+                $title = $tempLower ? '온도가 설정 온도보다 낮습니다.' : '습도가 설정 습도보다 높습니다.';
+                if($tempLower && $humidHigher){
+                    $title = '온도가 설정 온도보다 낮고, 습도가 설정 습도보다 높습니다.';
+                }
+
                 Log::info('Humidity is higher than set humidity', [
-                    'info' => '습도가 설정 습도보다 낮습니다.',
+                    'info' => $title,
                     'timestamp' => now()->toDateTimeString()
                 ]);
 
-                $alarm = new AlarmController();
-                $receiveData = [
-                    'user_id'   => $cageConfirm->user_id, // 받는 사람의 아이디
-                    'category'  => 'humid_abnormality',
-                    'title'     => '습도가 설정 습도보다 낮습니다.',
-                    'content'   => '습도: '.$reqData['humidity'].'%, 가습기를 작동합니다.',
-                    'readed'    => false,
-                    'img_urls'  => [],
-                    'created_at' => now()->toDateTimeString(),
-                ];  
+                $content = '온도 : '.$reqData['temperature'].'℃ 습도 : '. $reqData['humidity'].'%, 램프를 작동합니다.';
+                $this->operateModuleAlarm($cageConfirm, 'operating_lamp', $title, $content);
 
-                $result = $alarm->sendAlarm($receiveData);
+            }
 
-                if($result['flag']){
-                    Log::info('Alarm sent successfully', [
-                        'info' => '알람이 성공적으로 전송되었습니다.',
-                        'timestamp' => now()->toDateTimeString()
-                    ]);
-                } else{
-                    Log::error('Failed to send alarm', [
-                        'errors' => '알람 전송에 실패했습니다.',
-                        'timestamp' => now()->toDateTimeString()
-                    ]);
+            // 온도가 설정 온도보다 높거나, 습도가 설정 습도보다 낮을 경우 가습기 동작 알림 발생
+            if($tempHigher || $humidLower){
+                $title = $tempHigher ? '온도가 설정 온도보다 높습니다.' : '습도가 설정 습도보다 낮습니다.';
+                if($tempHigher && $humidLower){
+                    $title = '온도가 설정 온도보다 높고, 습도가 설정 습도보다 낮습니다.';
                 }
+
+                Log::info('Humidity is lower than set humidity', [
+                    'info' => $title,
+                    'timestamp' => now()->toDateTimeString()
+                ]);
+
+                $content = '온도 : '.$reqData['temperature'].'℃ 습도 : '. $reqData['humidity'].'%, 가습기를 작동합니다.';
+                $this->operateModuleAlarm($cageConfirm, 'operating_humidifier', $title, $content);
             }
 
             if(!empty($cageConfirm)){
@@ -130,6 +122,36 @@ class TemperatureHumidityController extends Controller
 
     }
 
+    // 모둘 동작 알림 발송
+    public function operateModuleAlarm($cage, $category, $title, $content){
+
+        $alarm = new AlarmController();
+
+        $receiveData = [
+            'user_id'   => $cage->user_id, // 받는 사람의 아이디
+            'category'  => $category,
+            'title'     => $title,
+            'content'   => $content,
+            'readed'    => false,
+            'img_urls'  => [],
+            'created_at' => now()->toDateTimeString(),
+        ];  
+
+        $result = $alarm->sendAlarm($receiveData);
+
+        if($result['flag']){
+            Log::info('Alarm sent successfully', [
+                'info' => '알람이 성공적으로 전송되었습니다.',
+                'timestamp' => now()->toDateTimeString()
+            ]);
+        } else{
+            Log::error('Failed to send alarm', [
+                'errors' => '알람 전송에 실패했습니다.',
+                'timestamp' => now()->toDateTimeString()
+            ]);
+        }
+
+    }
     
 
 }
