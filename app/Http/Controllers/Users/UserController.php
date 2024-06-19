@@ -37,7 +37,11 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = JWTAuth::user();
+        try {
+            $user = JWTAuth::user();
+        } catch (\Exception $e) {
+            return response()->json(['msg' => '인증되지 않은 사용자입니다.'], 401);
+        }
 
         $userData = [
             'name' => $user->name,
@@ -46,10 +50,12 @@ class UserController extends Controller
             'address' => $user->address,
         ];
 
-        return response()->json($userData ,[
+        return response()->json([
             'msg' => '유저 개인정보',
-        ]);
+            'data' => $userData
+        ], 200);
     }
+
 
     public function update(Request $request)
     {
