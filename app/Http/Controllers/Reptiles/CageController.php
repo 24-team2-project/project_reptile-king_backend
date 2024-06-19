@@ -24,7 +24,10 @@ class CageController extends Controller
         $user = JWTAuth::user();
 
         try {
-            $cages = $user->cages;
+            $cages = Cage::where('user_id', $user->id)
+                            ->whereNull('expired_at')
+                            ->orderByDesc('created_at')
+                            ->get();
 
             $state = 200;
             $jsonData = ['msg' => '성공'];
