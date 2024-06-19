@@ -105,7 +105,7 @@ class AlarmController extends Controller
     // 알림 보내기
     public function sendAlarm($receiveData){
         try{
-            Alarm::create($receiveData);
+            $alarm = Alarm::create($receiveData);
 
             $receiveUser = User::where('id', $receiveData['user_id'])->first();
             $receiveUserTokens = $receiveUser->fcmTokens; // 받는 사람의 토큰
@@ -133,6 +133,7 @@ class AlarmController extends Controller
             }
 
             $pushData = [
+                'created_at' => $alarm->created_at,
                 'category' => $receiveData['category'],
             ];
 
