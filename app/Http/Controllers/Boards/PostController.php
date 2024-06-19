@@ -13,10 +13,10 @@ use App\Http\Controllers\Upload\ImageController;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::with('category', 'user')->paginate(10);
         $sort = $request->sort ?? 'latest';
+        $query = Post::with('category', 'user');
 
         switch ($sort) {
             case 'latest':
@@ -29,6 +29,8 @@ class PostController extends Controller
                 $query = $query->orderBy('created_at', 'asc');
                 break;
         }
+
+        $posts = $query->paginate(10);
 
         $reqData = $posts->getCollection()->map(function ($post) {
             return [
@@ -46,12 +48,12 @@ class PostController extends Controller
                 'views' => $post->views,
                 'img_urls' => $post->img_urls,
             ];
-        })->collect();
+        });
 
         $posts->setCollection($reqData);
-
         return response()->json($posts);
     }
+
 
     public function selectCategory(Request $request)
     {
@@ -215,9 +217,11 @@ class PostController extends Controller
         }
 
         $posts = Post::with('category')
-                    ->where('title', 'LIKE', "%{$search}%")
-                    ->orWhere('content', 'LIKE', "%{$search}%")
-                    ->paginate(10);
+        ->where(function ($query) use ($search) {
+            $query->where('title', 'LIKE', "%{$search}%")
+                  ->orWhere('content', 'LIKE', "%{$search}%");
+        })->paginate(10);
+
 
         if ($posts->isEmpty()) {
             return response()->json(['message' => '검색 결과가 없습니다.'], 404);
