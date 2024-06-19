@@ -21,14 +21,16 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
+
         
         CageSerialCode::factory(50)->create();
         $this->call(RoleSeeder::class);     // 역할 생성
         $this->call(CategorySeeder::class); // 카테고리 생성
         $this->call(UserSeeder::class);     // 관리자 계정 생성
+
         foreach (range(1, 100) as $index) { // 상품 생성
-            Good::factory()->create([
-                'name' => '상품' . $index,
+            Good::factory()->withIndex($index)->create([
                 'content' => null,
             ]);
         }
