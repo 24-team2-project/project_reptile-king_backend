@@ -64,13 +64,13 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     // 알림 리스트, 삭제
     Route::apiResource('alarms', AlarmController::class)->only('index', 'destroy');
     // 파충류 분양 수락 알림
-    Route::post('/alarms/accept-reptile-sale', [AlarmController::class, 'acceptReptileSale']);
+    Route::post('/alarms/accept-reptile-sale/{alarm}', [AlarmController::class, 'acceptReptileSale']);
     // 파충류 분양 거절 알림
-    Route::post('/alarms/reject-reptile-sale', [AlarmController::class, 'rejectReptileSale']);
+    Route::post('/alarms/reject-reptile-sale/{alarm}', [AlarmController::class, 'rejectReptileSale']);
     // 케이지 분양 수락 알림
-    Route::post('/alarms/accept-cage-sale', [AlarmController::class, 'acceptCageSale']);
+    Route::post('/alarms/accept-cage-sale/{alarm}', [AlarmController::class, 'acceptCageSale']);
     // 케이지 분양 거절 알림
-    Route::post('/alarms/reject-cage-sale', [AlarmController::class, 'rejectCageSale']);
+    Route::post('/alarms/reject-cage-sale/{alarm}', [AlarmController::class, 'rejectCageSale']);
 
 
     /* -------------- 파충류 ----------------------------------------------*/
