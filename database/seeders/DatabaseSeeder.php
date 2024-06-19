@@ -24,10 +24,10 @@ class DatabaseSeeder extends Seeder
 
 
         
-        CageSerialCode::factory(50)->create();
-        $this->call(RoleSeeder::class);     // 역할 생성
-        $this->call(CategorySeeder::class); // 카테고리 생성
-        $this->call(UserSeeder::class);     // 관리자 계정 생성
+        // CageSerialCode::factory(50)->create();   // 케이지 시리얼 코드 생성
+        // $this->call(RoleSeeder::class);          // 역할 생성
+        // $this->call(CategorySeeder::class);      // 카테고리 생성
+        // $this->call(UserSeeder::class);          // 관리자 계정 생성
 
         foreach (range(1, 100) as $index) { // 상품 생성
             Good::factory()->withIndex($index)->create([
