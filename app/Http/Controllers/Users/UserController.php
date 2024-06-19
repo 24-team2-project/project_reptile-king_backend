@@ -11,10 +11,10 @@ class UserController extends Controller
 {
     public function userFinder($nickname)
     {
-        $user = User::findOrFail($nickname, ['nickname']);
+        $users = User::where('nickname', 'like', '%' . $nickname . '%')->get();
 
-        if ($user) {
-            return response()->json($user, [
+        if ($users->isNotEmpty()) {
+            return response()->json($users, [
                 'msg' => '유저 검색 결과'
             ]);
         }
@@ -23,6 +23,7 @@ class UserController extends Controller
             'msg' => '검색 결과가 없습니다.'
         ], 404);
     }
+
 
 
     public function index()
