@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Mqtt\MqttController;
 use App\Http\Controllers\Upload\ImageController;
 use App\Http\Controllers\Users\AlarmController;
-use App\Models\Alarm;
 use App\Models\Cage;
 use App\Models\CageSerialCode;
 use App\Models\TemperatureHumidity;
@@ -140,8 +139,8 @@ class CageController extends Controller
                         'user_id'   => $user->id,
                         'category'  => 'cages',
                         'category_id' => $latestCage->id,
-                        'title'     => '사육장 등록',
-                        'content'   => '사육장 등록이 완료되었습니다.',
+                        'title'     => '飼育ケージの登録 ',
+                        'content'   => '飼育ケージの登録が完了しました。',
                         'readed'    => false,
                         'img_urls'  => [],
                         'created_at' => now()->toDateTimeString(),
@@ -419,6 +418,31 @@ class CageController extends Controller
                 if(gettype($result) !== 'boolean'){
                     return $result;
                 }
+
+                if(!($user->fcmTokens->isEmpty())){
+                    $alarm = new AlarmController();
+    
+                    $receiveData = [
+                        'user_id'   => $user->id,
+                        'category'  => 'cages',
+                        'category_id' => $cage->id,
+                        'title'     => '温度・湿度変更',
+                        'content'   => '温度・湿度が変更されました。',
+                        'readed'    => false,
+                        'img_urls'  => [],
+                        'created_at' => now()->toDateTimeString(),
+                    ];
+        
+                    $result = $alarm->sendAlarm($receiveData);
+                    
+                    if($result['flag'] === false){
+                        return response()->json([
+                            'msg' => $result['msg']
+                        ], $result['status']);
+                    }   
+
+                }
+
     
                 return response()->json([
                     'msg' => '수정 완료'
@@ -570,8 +594,8 @@ class CageController extends Controller
                 'user_id'   => $receiveUser->id, // 받는 사람의 아이디
                 'category'  => 'cage_sales',
                 'cagtegory_id' => $reqData['cageId'], // 사육장 아이디
-                'title'     => '케이지 분양 신청',
-                'content'   => $user->nickname.' 유저가 케이지 분양을 신청하였습니다.',
+                'title'     => '飼育ケージの譲渡依頼 ',
+                'content'   => $user->nickname.'様より、飼育ケージの譲渡依頼が届きました。',
                 'readed'    => false,
                 'send_user_id' => $user->id,
                 'img_urls'  => [],
