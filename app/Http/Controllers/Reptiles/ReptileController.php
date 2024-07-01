@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Reptiles;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Upload\ImageController;
 use App\Http\Controllers\Users\AlarmController;
-use App\Models\Alarm;
 use App\Models\Reptile;
 use App\Models\User;
 use Exception;
@@ -23,6 +22,37 @@ class ReptileController extends Controller
         try {
             $reptiles = Reptile::where('user_id', $user->id)
                                 ->whereNull('expired_at')
+                                ->orderByDesc('created_at')
+                                ->get();
+
+            $state = 200;
+            $jsonData = [ 'msg' => '성공' ];
+
+            if($reptiles->isEmpty()){
+                $state = 204;
+                $jsonData['msg'] = '데이터 없음';
+            } else{
+                $jsonData['reptiles'] = $reptiles;
+            }
+
+            return response()->json($jsonData, $state);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'msg'   => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+    }
+           // 파충류 목록
+    public function indexOnlyExpired()
+    {
+        $user = JWTAuth::user();
+        
+        try {
+            $reptiles = Reptile::where('user_id', $user->id)
+                                ->whereNotNull('expired_at')
                                 ->orderByDesc('created_at')
                                 ->get();
 
@@ -107,8 +137,8 @@ class ReptileController extends Controller
                     'user_id'   => $user->id,
                     'category'  => 'reptiles',
                     'category_id' => $latestReptile->id,
-                    'title'     => '파충류 등록',
-                    'content'   => '파충류 등록이 완료되었습니다.',
+                    'title'     => '爬虫類の登録',
+                    'content'   => '爬虫類の登録が完了しました。',
                     'readed'    => false,
                     'img_urls'  => [],
                     'created_at' => now()->toDateTimeString(),
@@ -319,8 +349,8 @@ class ReptileController extends Controller
                 'user_id'   => $receiveUser->id, // 받는 사람의 아이디
                 'category'  => 'reptile_sales',
                 'category_id' => $reqData['reptileId'], // 파충류 아이디
-                'title'     => '파충류 분양 신청',
-                'content'   => $user->nickname.' 유저가 파충류 분양을 신청하였습니다.',
+                'title'     => '爬虫類の譲渡依頼',
+                'content'   => $user->nickname.'様より、爬虫類の譲渡依頼が届きました。',
                 'readed'    => false,
                 'send_user_id' => $user->id,
                 'img_urls'  => [],

@@ -9,8 +9,7 @@ use App\Models\Reptile;
 use App\Models\User;
 use Exception;
 use GuzzleHttp\Client;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Laravel\Firebase\Facades\Firebase;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -106,7 +105,10 @@ class AlarmController extends Controller
     public function sendAlarm($receiveData){
         try{
             $alarm = Alarm::create($receiveData);
-
+            Log::info('알림 정보', [
+                'data' => $alarm,
+                'timestamp' => now()->toDateTimeString()
+            ]);
             $receiveUser = User::where('id', $receiveData['user_id'])->first();
             $receiveUserTokens = $receiveUser->fcmTokens; // 받는 사람의 토큰
 
@@ -150,7 +152,7 @@ class AlarmController extends Controller
                             'Accept' => 'application/json', //  Accept 헤더는 클라이언트가 이해할 수 있는 콘텐츠 유형을 서버에 알려줍니다.
                             'Content-Type' => 'application/json', //    Content-Type 헤더는 요청 본문의 미디어 유형을 서버에 알려줍니다.
                         ],
-                        'json' => [ //  
+                        'json' => [ //
                             'to' => $expoToken, // Expo Push Token
                             'sound' => 'default', // 기본 알림음
                             'title' => $receiveData['title'], //    제목
@@ -202,9 +204,9 @@ class AlarmController extends Controller
                 'flag' => true,
                 'status' => 200,
             ];
-            
+
             return $result;
-        
+
         }catch(Exception $e){
             $result = [
                 'msg' => '서버 오류'.$e->getMessage(),
@@ -225,7 +227,7 @@ class AlarmController extends Controller
             $alarm->save();
 
             $sendUserReptile = Reptile::where('id', $alarm->category_id)->where('user_id', $alarm->send_user_id)->first();
-    
+
             if(empty($sendUserReptile) || $sendUserReptile->expired_at != null){
                 return response()->json([
                     'msg' => '분양자 파충류 없음',
@@ -233,7 +235,13 @@ class AlarmController extends Controller
             }
 
             $sendUserReptile->update([
-                'expired_at' => now()->toDateTimeString(), // toDateTimeString() 메서드는 Carbon 인스턴스를 문자열로 변환합니다.
+                'expired_at' => now()->toDateTimeString(), // toDateTimeString() 메서드는 Carbon 인스턴스를 문자열 로 변환합니다.
+            ]);
+
+            $sendUserCage = Cage::where('user_id', $alarm->send_user_id)->where('reptile_serial_code', $sendUserReptile->serial_code)->first();
+
+            $sendUserCage->update([
+                'reptile_serial_code' => null,
             ]);
 
             // 새 사용자의 파충류 등록
@@ -250,8 +258,8 @@ class AlarmController extends Controller
             $receiveData = [
                 'user_id'   => $alarm->send_user_id, // 받는 사람의 아이디
                 'category'  => 'reptile_sales',
-                'title'     => '파충류 분양 완료',
-                'content'   => $user->nickname.' 유저에게 파충류 분양을 완료하였습니다.',
+                'title'     => '爬虫類の譲渡完了',
+                'content'   => $user->nickname.'様に爬虫類の譲渡を完了しました。',
                 'readed'    => false,
                 'img_urls'  => [],
                 'created_at' => now()->toDateTimeString(),
@@ -284,8 +292,8 @@ class AlarmController extends Controller
             $receiveData = [
                 'user_id'   => $alarm->send_user_id,
                 'category'  => 'reptile_sales',
-                'title'     => '파충류 분양 거절',
-                'content'   => $user->nickname.' 유저가 파충류 분양을 거절하였습니다.',
+                'title'     => '爬虫類の譲渡拒絶',
+                'content'   => $user->nickname.'様が爬虫類の譲渡をお断りしました。',
                 'readed'    => false,
                 'img_urls'  => [],
                 'created_at' => now()->toDateTimeString(),
@@ -315,7 +323,7 @@ class AlarmController extends Controller
             $alarm->save();
 
             $sendUserCage = Cage::where('id', $alarm->category_id)->where('user_id', $alarm->send_user_id)->first();
-    
+
             if(empty($sendUserCage) || $sendUserCage->expired_at != null){
                 return response()->json([
                     'msg' => '분양자 케이지 없음',
@@ -323,7 +331,7 @@ class AlarmController extends Controller
             }
 
             $sendUserCage->update([
-                'expired_at' => now()->toDateTimeString(), // toDateTimeString() 메서드는 Carbon 인스턴스를 문자열로 변환합니다.
+                'expired_at' => now()->toDateTimeString(), // toDateTimeString() 메서드는 Carbon 인스턴스를 문자열 로 변환합니다.
             ]);
 
             // 새 사용자의 파충류 등록
@@ -341,8 +349,8 @@ class AlarmController extends Controller
             $receiveData = [
                 'user_id'   => $alarm->send_user_id, // 받는 사람의 아이디
                 'category'  => 'cage_sales',
-                'title'     => '사육장 분양 완료',
-                'content'   => $user->nickname.' 유저에게 사육장 분양을 완료하였습니다.',
+                'title'     => '飼育ケージの譲渡完了',
+                'content'   => $user->nickname.'様に飼育ケージの譲渡を完了しました。',
                 'readed'    => false,
                 'img_urls'  => [],
                 'created_at' => now()->toDateTimeString(),
@@ -375,8 +383,8 @@ class AlarmController extends Controller
             $receiveData = [
                 'user_id'   => $alarm->send_user_id,
                 'category'  => 'cage_sales',
-                'title'     => '케이지 분양 거절',
-                'content'   => $user->nickname.' 유저가 케이지 분양을 거절하였습니다.',
+                'title'     => '飼育ケージの譲渡拒絶',
+                'content'   => $user->nickname.'様が飼育ケージの譲渡をお断りしました。',
                 'readed'    => false,
                 'img_urls'  => [],
                 'created_at' => now()->toDateTimeString(),
@@ -395,6 +403,5 @@ class AlarmController extends Controller
             ], 500);
         }
     }
-
 
 }

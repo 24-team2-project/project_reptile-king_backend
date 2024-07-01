@@ -75,6 +75,8 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
 
     /* -------------- 파충류 ----------------------------------------------*/
     Route::apiResource('reptiles', ReptileController::class)->except('create', 'edit', 'show');
+    // 만료된 파충류 목록
+    Route::get('/reptiles/expired', [ReptileController::class, 'indexOnlyExpired']);
     // 파충류 상세
     Route::get('/reptiles/{reptileSerialCode}', [ReptileController::class, 'show']);
     // 파충류 분양

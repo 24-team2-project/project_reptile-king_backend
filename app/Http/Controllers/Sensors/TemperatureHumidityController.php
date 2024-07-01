@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sensors;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Users\AlarmController;
+use App\Models\Alarm;
 use App\Models\Cage;
 use App\Models\TemperatureHumidity;
 use Exception;
@@ -48,10 +49,10 @@ class TemperatureHumidityController extends Controller
 
             // 현재온도가 설정 온도보다 높거나, 현재습도가 설정 습도보다 높을 경우 쿨러 동작 알림 발생
             if($tempHigher || $humidHigher){
-                
-                $title = $tempHigher ? '온도가 설정 온도보다 높습니다.' : '습도가 설정 습도보다 높습니다.';
+
+                $title = $tempHigher ? '温度が設定より高くなっています。' : '湿度が設定より高くなっています。';
                 if($tempHigher && $humidHigher){
-                    $title = '온도와 습도가 설정 온도와 습도보다 높습니다.';
+                    $title = '温度と湿度が設定より高くなっています。';
                 }
 
                 Log::info('Temperature is higher than set temperature', [
@@ -59,15 +60,15 @@ class TemperatureHumidityController extends Controller
                     'timestamp' => now()->toDateTimeString()
                 ]);
 
-                $content = '온도 : '.$reqData['temperature'].'℃ 습도 : '. $reqData['humidity'].'%, 쿨러를 작동합니다.';
+                $content = '温度 : '.$reqData['temperature'].'℃ 湿度 : '. $reqData['humidity'].'%, クーラーを作動させます。';
                 $this->operateModuleAlarm($cageConfirm, 'operating_cooler', $title, $content);
             }
 
             // 온도가 설정 온도보다 낮거나, 습도가 설정 습도보다 높을 경우 램프 동작 알림 발생
             if($tempLower || $humidHigher){
-                $title = $tempLower ? '온도가 설정 온도보다 낮습니다.' : '습도가 설정 습도보다 높습니다.';
+                $title = $tempLower ? '温度が設定より低くなっています。' : '湿度が設定より高くなっています。';
                 if($tempLower && $humidHigher){
-                    $title = '온도가 설정 온도보다 낮고, 습도가 설정 습도보다 높습니다.';
+                    $title = '温度が設定より低く、湿度が設定より高くなっています。';
                 }
 
                 Log::info('Humidity is higher than set humidity', [
@@ -75,16 +76,16 @@ class TemperatureHumidityController extends Controller
                     'timestamp' => now()->toDateTimeString()
                 ]);
 
-                $content = '온도 : '.$reqData['temperature'].'℃ 습도 : '. $reqData['humidity'].'%, 램프를 작동합니다.';
+                $content = '温度 : '.$reqData['temperature'].'℃ 湿度 : '. $reqData['humidity'].'%, ランプを作動させます。';
                 $this->operateModuleAlarm($cageConfirm, 'operating_lamp', $title, $content);
 
             }
 
             // 온도가 설정 온도보다 높거나, 습도가 설정 습도보다 낮을 경우 가습기 동작 알림 발생
             if($tempHigher || $humidLower){
-                $title = $tempHigher ? '온도가 설정 온도보다 높습니다.' : '습도가 설정 습도보다 낮습니다.';
+                $title = $tempHigher ? '温度が設定より高くなっています。' : '湿度が設定より低くなっています。';
                 if($tempHigher && $humidLower){
-                    $title = '온도가 설정 온도보다 높고, 습도가 설정 습도보다 낮습니다.';
+                    $title = '温度が設定より高く、湿度が設定より低くなっています。';
                 }
 
                 Log::info('Humidity is lower than set humidity', [
@@ -92,7 +93,7 @@ class TemperatureHumidityController extends Controller
                     'timestamp' => now()->toDateTimeString()
                 ]);
 
-                $content = '온도 : '.$reqData['temperature'].'℃ 습도 : '. $reqData['humidity'].'%, 가습기를 작동합니다.';
+                $content = '温度 : '.$reqData['temperature'].'℃ 湿度 : '. $reqData['humidity'].'%, 加湿器を作動させます。';
                 $this->operateModuleAlarm($cageConfirm, 'operating_humidifier', $title, $content);
             }
 
@@ -124,6 +125,25 @@ class TemperatureHumidityController extends Controller
 
         $alarm = new AlarmController();
 
+    // 현재 시간과 비교할 시간 설정 (1시간 전)
+    $oneHourAgo = now()->subMinutes(10);
+
+    // 동일한 카테고리와 사용자 ID로 최근에 생성된 알림 찾기
+    $recentAlarm = Alarm::where('user_id', $cage->user_id)
+        ->where('category', $category)
+        ->where('created_at', '>', $oneHourAgo)
+        ->first();
+
+    // 최근 알림이 1시간 이내에 생성된 경우, 알림을 보내지 않음
+    if ($recentAlarm) {
+        Log::info('Alarm not sent. Similar alarm was sent within the last hour.', [
+            'info' => '1시간 이내에 유사한 알림이 전송되었습니다.',
+            'timestamp' => now()->toDateTimeString()
+        ]);
+        return;
+    }
+
+
         $receiveData = [
             'user_id'   => $cage->user_id, // 받는 사람의 아이디
             'category'  => $category,
@@ -132,7 +152,7 @@ class TemperatureHumidityController extends Controller
             'readed'    => false,
             'img_urls'  => [],
             'created_at' => now()->toDateTimeString(),
-        ];  
+        ];
 
         $result = $alarm->sendAlarm($receiveData);
 
@@ -149,6 +169,6 @@ class TemperatureHumidityController extends Controller
         }
 
     }
-    
+
 
 }
