@@ -24,7 +24,7 @@ class CategorySeeder extends Seeder
             [
                 'division' => 'posts',
                 'names' => [
-                    'ホーム', '雑談&コツ', '譲渡'
+                    'HOME', '雑談&コツ', '里親探し'
                 ],
             ],
         ];
@@ -51,7 +51,7 @@ class CategorySeeder extends Seeder
 
         $subPostCategories = [
             [   
-                'parentName' => 'ホーム',
+                'parentName' => 'HOME',
                 'names' => ['home', 'rules'],
             ],
             [   
@@ -59,8 +59,8 @@ class CategorySeeder extends Seeder
                 'names' => ['飼育', 'お買い得', '注意点', '自由'],
             ],
             [   
-                'parentName' => '譲渡',
-                'names' =>  ['譲渡'],
+                'parentName' => '里親探し',
+                'names' =>  ['里親探し'],
             ],
         ];
 
