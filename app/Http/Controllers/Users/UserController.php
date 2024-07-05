@@ -12,7 +12,11 @@ class UserController extends Controller
 {
     public function userFinder($nickname)
     {
-        $users = User::where('nickname', 'like', '%' . $nickname . '%')->pluck('nickname');
+        $user = JWTAuth::user();
+
+        $users = User::where('nickname', 'like', '%' . $nickname . '%')
+                    ->whereNotIn('nickname', [$user->nickname, 'administrator'])
+                    ->pluck('nickname');
 
         if ($users->isNotEmpty()) {
             // return response()->json($users, [
