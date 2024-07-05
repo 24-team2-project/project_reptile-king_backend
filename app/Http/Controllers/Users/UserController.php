@@ -5,18 +5,23 @@ namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
     public function userFinder($nickname)
     {
-        $users = User::where('nickname', 'like', '%' . $nickname . '%')->get();
+        $users = User::where('nickname', 'like', '%' . $nickname . '%')->pluck('nickname');
 
         if ($users->isNotEmpty()) {
-            return response()->json($users, [
+            // return response()->json($users, [
+            //     'msg' => '유저 검색 결과'
+            // ]);
+            return response()->json([
+                'users' => $users,
                 'msg' => '유저 검색 결과'
-            ]);
+            ], 200);
         }
 
         return response()->json([
