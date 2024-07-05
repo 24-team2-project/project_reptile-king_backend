@@ -125,7 +125,7 @@ class TemperatureHumidityController extends Controller
 
         $alarm = new AlarmController();
 
-    // 현재 시간과 비교할 시간 설정 (1시간 전)
+    // 현재 시간과 비교할 시간 설정 (10분 전)
     $oneHourAgo = now()->subMinutes(10);
 
     // 동일한 카테고리와 사용자 ID로 최근에 생성된 알림 찾기
@@ -134,10 +134,10 @@ class TemperatureHumidityController extends Controller
         ->where('created_at', '>', $oneHourAgo)
         ->first();
 
-    // 최근 알림이 1시간 이내에 생성된 경우, 알림을 보내지 않음
+    // 최근 알림이 10분 이내에 생성된 경우, 알림을 보내지 않음
     if ($recentAlarm) {
         Log::info('Alarm not sent. Similar alarm was sent within the last hour.', [
-            'info' => '1시간 이내에 유사한 알림이 전송되었습니다.',
+            'info' => '10분 이내에 유사한 알림이 전송되었습니다.',
             'timestamp' => now()->toDateTimeString()
         ]);
         return;
