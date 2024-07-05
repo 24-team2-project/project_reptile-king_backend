@@ -240,9 +240,11 @@ class AlarmController extends Controller
 
             $sendUserCage = Cage::where('user_id', $alarm->send_user_id)->where('reptile_serial_code', $sendUserReptile->serial_code)->first();
 
-            $sendUserCage->update([
-                'reptile_serial_code' => null,
-            ]);
+            if($sendUserCage !== null){
+                $sendUserCage->update([
+                    'reptile_serial_code' => null,
+                ]);
+            }
 
             // 새 사용자의 파충류 등록
             Reptile::create([
