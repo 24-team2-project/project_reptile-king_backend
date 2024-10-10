@@ -40,6 +40,9 @@ class RegisterUserRequest extends FormRequest
             'nickname' => ['required', 'string', 'max:255', 'unique:users,nickname'],
             // 'address' => ['string', 'nullable'],
             'phone' => ['string', 'nullable'],
+
+            'image'    => [ 'string', 'nullable'],
+            'image.*'  => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
         ];
     }
 

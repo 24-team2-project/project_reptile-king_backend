@@ -36,7 +36,8 @@ class RegisterUserController extends Controller
                 'nickname'  => $validated['nickname'],
                 // 'address'   => $validated['address'],
                 'phone'     => $validated['phone'],
-                'img_urls'  => [],
+                // 'img_urls'  => [],
+                'image'     => 'nullable',
             ]);
 
             $role = Role::where('role', 'post_create')->first();
@@ -56,7 +57,8 @@ class RegisterUserController extends Controller
 
     public function checkedEmail(Request $request){
         $validator = Validator::make( $request->all(), [
-            'email' => 'unique:users,email',
+            // 'email' => 'unique:users,email',
+            'email' => ['unique:users,email'],
         ]);
 
         return response()->json([
@@ -66,7 +68,8 @@ class RegisterUserController extends Controller
 
     public function checkedNickname(Request $request){
         $validator = Validator::make( $request->all(), [
-            'nickname' => 'unique:users,nickname',
+            // 'nickname' => 'unique:users,nickname',
+            'nickname' => ['unique:users,nickname'],
         ]);
 
         return response()->json([

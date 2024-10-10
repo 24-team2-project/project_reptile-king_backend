@@ -24,10 +24,11 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'nickname',
-        'address',
+        // 'address',
         'phone',
-        'payment_selection',
-        'img_urls',
+        // 'payment_selection',
+        // 'img_urls',
+        'image',
     ];
 
     /**
@@ -48,9 +49,9 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         // 'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'address' => 'array',
-        'payment_selection' => 'json',
-        'img_urls' => 'array',
+        // 'address' => 'array',
+        // 'payment_selection' => 'json',
+        // 'img_urls' => 'array',
 
     ];
 
@@ -122,6 +123,14 @@ class User extends Authenticatable implements JWTSubject
 
     public function fcmTokens(){
         return $this->hasMany(FcmToken::class);
+    }
+
+    public function pyments(){
+        return $this->hasMany(Payment::class);
+    }
+
+    public function addresses(){
+        return $this->hasMany(Address::class);
     }
 
 }

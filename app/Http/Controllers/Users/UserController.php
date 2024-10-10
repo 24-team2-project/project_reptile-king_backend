@@ -35,7 +35,7 @@ class UserController extends Controller
 
 
 
-    public function index()
+    public function index() // 안됨
     {
         $users = User::all();
 
@@ -72,9 +72,14 @@ class UserController extends Controller
 
         // 요청 데이터 유효성 검사
         $validatedData = $request->validate([
-            'email' => 'nullable|email|unique:users,email,'.$user->id,
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|json'
+            // 'email' => 'nullable|email|unique:users,email,'.$user->id,
+            // 'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20'],
+            // 'nickname' => 'nullable|string|max:20|unique:users,nickname,'.$user->id,
+            'nickname' => ['nullable', 'string', 'max:20', 'unique:users,nickname,'.$user->id], 
+            
+            
+            // 'address' => 'nullable|json'
         ]);
 
         // 유저 정보 업데이트
