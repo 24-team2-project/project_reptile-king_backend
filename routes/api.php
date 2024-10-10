@@ -17,7 +17,9 @@ use App\Http\Controllers\Sensors\TemperatureHumidityController;
 use App\Http\Controllers\Upload\ImageController;
 use App\Http\Controllers\Categories\CategoryController;
 use App\Http\Controllers\Sensors\SetLocationController;
+use App\Http\Controllers\Users\AddressController;
 use App\Http\Controllers\Users\AlarmController;
+use App\Http\Controllers\Users\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -120,6 +122,13 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     // 사용자
     Route::apiResource('/users', UserController::class)->except('create', 'edit');  // 유저 목록
     Route::get('/users/{nickname}/info', [UserController::class, 'userFinder']);  // 유저 목록
+
+    // 사용자 주소
+    Route::apiResource('/users/addresses', AddressController::class)->except('create', 'show', 'edit');
+
+    // 사용자 결제 정보
+    Route::apiResource('/users/payments', PaymentController::class)->except('create', 'show', 'edit');
+
 });
 
 //카테고리
