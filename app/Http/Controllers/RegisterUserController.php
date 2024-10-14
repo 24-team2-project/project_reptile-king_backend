@@ -37,7 +37,7 @@ class RegisterUserController extends Controller
                 // 'address'   => $validated['address'],
                 'phone'     => $validated['phone'],
                 // 'img_urls'  => [],
-                'image'     => 'nullable',
+                // 'image'     => 'nullable',
             ]);
 
             $role = Role::where('role', 'post_create')->first();

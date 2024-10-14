@@ -41,8 +41,10 @@ class RegisterUserRequest extends FormRequest
             // 'address' => ['string', 'nullable'],
             'phone' => ['string', 'nullable'],
 
-            'image'    => [ 'string', 'nullable'],
-            'image.*'  => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
+            // 'images'    => [ 'array', 'nullable'],
+            // 'images.*'  => ['image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
+
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
         ];
     }
 
