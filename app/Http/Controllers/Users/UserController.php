@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Upload\ImageController;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class UserController extends Controller
 {
@@ -14,102 +17,174 @@ class UserController extends Controller
     {
         $user = JWTAuth::user();
 
-        $users = User::where('nickname', 'like', '%' . $nickname . '%')
-                    ->whereNotIn('nickname', [$user->nickname, 'administrator'])
-                    ->pluck('nickname');
+        try{
+            $users = User::where('nickname', 'like', '%' . $nickname . '%')
+            ->whereNotIn('nickname', [$user->nickname, 'administrator'])
+            ->pluck('nickname');
 
-        if ($users->isNotEmpty()) {
-            // return response()->json($users, [
-            //     'msg' => '유저 검색 결과'
-            // ]);
+            if ($users->isNotEmpty()) {
+                return response()->json([
+                    'users' => $users,
+                    'msg' => '유저 검색 결과'
+                ], 200);
+            }
+
             return response()->json([
-                'users' => $users,
-                'msg' => '유저 검색 결과'
+                'msg' => '검색 결과가 없습니다.'
+            ], 404);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류'
+            ], 500);
+        }
+        
+    }
+
+
+
+    public function index()
+    {
+        try{
+            $users = User::all();
+
+            return response()->json([
+                'msg' => '유저 목록',
+                'users' => $users
             ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류'
+            ], 500);
         }
 
-        return response()->json([
-            'msg' => '검색 결과가 없습니다.'
-        ], 404);
     }
 
-
-
-    public function index() // 안됨
+    public function showInfo()
     {
-        $users = User::all();
-
-        return response()->json($users ,[
-            'msg' => '유저 목록',
-        ]);
-    }
-
-    public function show($id)
-    {
+        $user = JWTAuth::user();
         try {
-            $user = JWTAuth::user();
-        } catch (\Exception $e) {
-            return response()->json(['msg' => '인증되지 않은 사용자입니다.'], 401);
+    
+            return response()->json([
+                'msg' => '유저 개인정보',
+                'user' => $user
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage()
+            ], 500);
         }
 
-        $userData = [
-            'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'address' => $user->address,
-        ];
-
-        return response()->json([
-            'msg' => '유저 개인정보',
-            'data' => $userData
-        ], 200);
     }
-
 
     public function update(Request $request)
     {
         $user = JWTAuth::user();
 
-        // 요청 데이터 유효성 검사
-        $validatedData = $request->validate([
-            // 'email' => 'nullable|email|unique:users,email,'.$user->id,
-            // 'phone' => 'nullable|string|max:20',
-            'phone' => ['nullable', 'string', 'max:20'],
-            // 'nickname' => 'nullable|string|max:20|unique:users,nickname,'.$user->id,
-            'nickname' => ['nullable', 'string', 'max:20', 'unique:users,nickname,'.$user->id], 
-            
-            
-            // 'address' => 'nullable|json'
-        ]);
+        try{
+            // 요청 데이터 유효성 검사
+            $validatedData = $request->validate([
+                'phone' => ['nullable', 'string', 'max:20'],
+                'nickname' => ['nullable', 'string', 'max:20', 'unique:users,nickname,'.$user->id],
+            ]);
 
-        // 유저 정보 업데이트
-        $user->update($validatedData);
+            DB::transaction(function () use ($user, $validatedData) {
+                // 유저 정보 업데이트
+                $user->update($validatedData);
+            });
 
-        return response()->json([
-            'message' => '유저 정보가 성공적으로 업데이트되었습니다.'
-        ]);
+            return response()->json([
+                'message' => '유저 정보 업데이트 완료'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+
+        
     }
 
+    public function updateImage(Request $request){
+        $user = JWTAuth::user();
 
-    public function destroy(Request $request)
+        try{
+
+            $rules = [
+                'beforeImgUrl' => ['required', 'string'],
+            ];
+
+            $checkNewImage = false;
+
+            if($request->hasFile('newImage')){
+                $rules['newImage'] = ['required', 'image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
+                $checkNewImage = true;
+            }
+
+            // 요청 데이터 유효성 검사
+            $validatedData = request()->validate([
+                'beforeImgUrl' => ['required', 'string'],
+                'newImage' => ['required', 'image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
+            ]);
+            
+            $images = new ImageController();
+
+            // 이전 이미지 삭제
+            if(is_null($validatedData['beforeImgUrl'])){
+                $deleteList = [$validatedData['beforeImage']];
+                $images->deleteImages($deleteList);
+            }
+
+            if($checkNewImage){
+                // 새 이미지 업로드
+                $user->image = $images->getImageUrl($validatedData['newImage'], 'users');
+            } else{
+                $user->image = null;
+            }
+
+            DB::transaction(function () use ($user) {
+                $user->save();
+            });
+
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function destroyUser()
     {
         $user = JWTAuth::user();
 
-        if (!$user) {
-            return response()->json(['error' => '인증 오류'], 401);
-        }
+        // try {
+        //     DB::beginTransaction();
+        //     // 사용자 데이터 삭제
+        //     $user->delete();
 
-        try {
-            DB::beginTransaction();
-            // 사용자 데이터 삭제
-            $user->delete();
+        //     DB::commit();
 
-            DB::commit();
+        //     return response()->json(['message' => '회원 탈퇴 성공']);
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     return response()->json(['error' => '회원 탈퇴 실패: ' . $e->getMessage()], 500);
+        // }
 
-            return response()->json(['message' => '회원 탈퇴 성공']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => '회원 탈퇴 실패: ' . $e->getMessage()], 500);
+        try{
+            DB::transaction(function () use ($user) {
+                // 사용자 데이터 삭제
+                $user->delete();
+            });
+
+        } catch (Exception $e) {
+            return response()->json([
+                'msg' => '서버 오류, 탈퇴 실패',
+                'error' => $e->getMessage(),
+            ], 500);
         }
 
         // try {
@@ -160,18 +235,4 @@ class UserController extends Controller
         }
     }
 
-    public function create()
-    {
-        //
-    }
-
-    public function store(Request $request)
-    {
-        //
-    }
-
-    public function edit(string $id)
-    {
-        //
-    }
 }
