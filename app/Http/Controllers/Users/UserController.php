@@ -10,7 +10,6 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-use function PHPUnit\Framework\isNull;
 
 class UserController extends Controller
 {
@@ -80,7 +79,6 @@ class UserController extends Controller
 
     }
 
-
     public function update(Request $request)
     {
         $user = JWTAuth::user();
@@ -92,8 +90,10 @@ class UserController extends Controller
                 'nickname' => ['nullable', 'string', 'max:20', 'unique:users,nickname,'.$user->id],
             ]);
 
-            // 유저 정보 업데이트
-            $user->update($validatedData);
+            DB::transaction(function () use ($user, $validatedData) {
+                // 유저 정보 업데이트
+                $user->update($validatedData);
+            });
 
             return response()->json([
                 'message' => '유저 정보 업데이트 완료'
@@ -133,7 +133,7 @@ class UserController extends Controller
             $images = new ImageController();
 
             // 이전 이미지 삭제
-            if(!isNull($validatedData['beforeImage'])){
+            if(is_null($validatedData['beforeImgUrl'])){
                 $deleteList = [$validatedData['beforeImage']];
                 $images->deleteImages($deleteList);
             }
@@ -145,7 +145,9 @@ class UserController extends Controller
                 $user->image = null;
             }
 
-            $user->save();
+            DB::transaction(function () use ($user) {
+                $user->save();
+            });
 
         } catch (Exception $e) {
             return response()->json([
