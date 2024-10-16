@@ -114,7 +114,7 @@ class UserController extends Controller
 
         try{
             $rules = [
-                'beforeImgUrl' => ['required', 'string', 'nullable'],
+                'beforeImgUrl' => ['string', 'nullable'],
             ];
 
             $checkNewImage = false;
