@@ -96,8 +96,9 @@ class UserController extends Controller
             });
 
             return response()->json([
-                'message' => '유저 정보 업데이트 완료'
-            ]);
+                'msg' => '유저 정보 업데이트 완료',
+            ], 200);
+
         } catch (Exception $e) {
             return response()->json([
                 'msg' => '서버 오류',
@@ -112,7 +113,6 @@ class UserController extends Controller
         $user = JWTAuth::user();
 
         try{
-
             $rules = [
                 'beforeImgUrl' => ['required', 'string'],
             ];
@@ -145,6 +145,10 @@ class UserController extends Controller
             DB::transaction(function () use ($user) {
                 $user->save();
             });
+
+            return response()->json([
+                'msg' => '이미지 업데이트 완료',
+            ], 200);
 
         } catch (Exception $e) {
             return response()->json([
