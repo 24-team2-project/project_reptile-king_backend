@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 
@@ -125,19 +126,28 @@ class UserController extends Controller
             }
 
             // 요청 데이터 유효성 검사
-            $validatedData = request()->validate($rules);
+            $validated = Validator::make($request->all(), $rules);
+
+            if($validated->fails()){
+                return response()->json([
+                    'msg' => 'validation error',
+                    'errors' => $validated->errors(),
+                ], 400);
+            }
             
+            $reqData = $validated->validated();
+
             $images = new ImageController();
 
             // 이전 이미지 삭제
-            if(!is_null($validatedData['beforeImgUrl'])){
-                $deleteList = [$validatedData['beforeImgUrl']];
+            if(!array_key_exists('beforeImgUrl', $reqData) && !is_null($reqData['beforeImgUrl'])){
+                $deleteList = [$reqData['beforeImgUrl']];
                 $images->deleteImages($deleteList);
             }
 
             if($checkNewImage){
                 // 새 이미지 업로드
-                $user->image = $images->getImageUrl($validatedData['newImage'], 'users');
+                $user->image = $images->getImageUrl($reqData['newImage'], 'users');
             } else{
                 $user->image = null;
             }
