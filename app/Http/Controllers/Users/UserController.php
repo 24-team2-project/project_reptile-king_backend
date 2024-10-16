@@ -125,16 +125,13 @@ class UserController extends Controller
             }
 
             // 요청 데이터 유효성 검사
-            $validatedData = request()->validate([
-                'beforeImgUrl' => ['required', 'string'],
-                'newImage' => ['required', 'image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'],
-            ]);
+            $validatedData = request()->validate($rules);
             
             $images = new ImageController();
 
             // 이전 이미지 삭제
-            if(is_null($validatedData['beforeImgUrl'])){
-                $deleteList = [$validatedData['beforeImage']];
+            if(!is_null($validatedData['beforeImgUrl'])){
+                $deleteList = [$validatedData['beforeImgUrl']];
                 $images->deleteImages($deleteList);
             }
 
