@@ -140,7 +140,7 @@ class UserController extends Controller
             $images = new ImageController();
 
             // 이전 이미지 삭제
-            if(!array_key_exists('beforeImgUrl', $reqData) && !is_null($reqData['beforeImgUrl'])){
+            if(array_key_exists('beforeImgUrl', $reqData) && !is_null($reqData['beforeImgUrl'])){
                 $deleteList = [$reqData['beforeImgUrl']];
                 $images->deleteImages($deleteList);
             }
