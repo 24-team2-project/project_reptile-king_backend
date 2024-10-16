@@ -120,11 +120,11 @@ Route::group([ 'middleware' => 'jwt.auth'], function(){
     Route::apiResource('supports', SupportController::class)->except('create', 'edit');
 
     // 사용자
-    Route::apiResource('/users', UserController::class)->only('index', 'update'); 
     Route::get('/users/{nickname}/find', [UserController::class, 'userFinder']); 
     Route::get('/users/show-info', [UserController::class, 'showInfo']);
-    Route::delete('/users', [UserController::class, 'destroyUser']);
     Route::patch('/users/update-image', [UserController::class, 'updateImage']);
+    Route::delete('/users', [UserController::class, 'destroyUser']);
+    Route::apiResource('/users', UserController::class)->only('index', 'update'); 
     
     // 사용자 주소
     Route::apiResource('/users/addresses', AddressController::class)->except('create', 'show', 'edit');
