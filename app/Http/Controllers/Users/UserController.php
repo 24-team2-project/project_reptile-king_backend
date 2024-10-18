@@ -144,7 +144,7 @@ class UserController extends Controller
 
             if(isset($reqData['newImage'])){
                 // 새 이미지 업로드
-                $imageUrls = $images->uploadImage([$reqData['newImage']], 'profile');
+                $imageUrls = $images->uploadImageForController([$reqData['newImage']], 'users');
                 $user->image = $imageUrls[0];
             } else{
                 $user->image = null;
