@@ -118,24 +118,21 @@ class UserController extends Controller
                 'beforeImgUrl' => ['string', 'nullable'],
             ];
 
-            $checkNewImage = false;
-
             if($request->hasFile('newImage')){
                 $rules['newImage'] = ['required', 'image', 'mimes:jpg,jpeg,png,bmp,gif,svg,webp', 'max:2048'];
-                $checkNewImage = true;
             }
 
             // 요청 데이터 유효성 검사
-            $validated = Validator::make($request->all(), $rules);
+            $validator = Validator::make($request->all(), $rules);
 
-            if($validated->fails()){
+            if($validator->fails()){
                 return response()->json([
                     'msg' => 'validation error',
-                    'errors' => $validated->errors(),
+                    'errors' => $validator->errors(),
                 ], 400);
             }
             
-            $reqData = $validated->validated();
+            $reqData = $validator->validated();
 
             $images = new ImageController();
 
@@ -145,9 +142,10 @@ class UserController extends Controller
                 $images->deleteImages($deleteList);
             }
 
-            if($checkNewImage){
+            if(isset($reqData['newImage'])){
                 // 새 이미지 업로드
-                $user->image = $images->getImageUrl($reqData['newImage'], 'users');
+                $imageUrls = $images->uploadImage([$reqData['newImage']], 'profile');
+                $user->image = $imageUrls[0];
             } else{
                 $user->image = null;
             }

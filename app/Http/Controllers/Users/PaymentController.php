@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PaymentController extends Controller
@@ -26,6 +27,7 @@ class PaymentController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'msg' => '서버 오류',
+                'error' => $e->getMessage(),
             ], 500);
         }
 
@@ -57,7 +59,7 @@ class PaymentController extends Controller
             else {
 
                 $storeList = [
-                    'user_id' => $user->id,
+                    // 'user_id' => $user->id,
                     'name' => $request->name,
                     'number' => $request->number,
                     'month' => $request->month,
@@ -68,7 +70,9 @@ class PaymentController extends Controller
                     $storeList['is_default'] = true;
                 }
 
-                $user->payments()->create($storeList);
+                DB::transaction(function () use ($user, $storeList) {
+                    $user->payments()->create($storeList);   
+                });
 
                 return response()->json([
                     'msg' => '등록 완료',
@@ -79,6 +83,7 @@ class PaymentController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'msg' => '서버 오류',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -141,6 +146,7 @@ class PaymentController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'msg' => '서버 오류',
+                'error' => $e->getMessage(),
             ], 500);
         }
 
@@ -179,6 +185,7 @@ class PaymentController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'msg' => '서버 오류',
+                'error' => $e->getMessage(),
             ], 500);
         }   
     }
