@@ -125,7 +125,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(FcmToken::class);
     }
 
-    public function pyments(){
+    public function payments(){
         return $this->hasMany(Payment::class);
     }
 
